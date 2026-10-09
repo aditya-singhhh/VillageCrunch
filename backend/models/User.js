@@ -71,6 +71,7 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpire: Date,
     resetPasswordOTP: String,
     resetPasswordOTPExpire: Date,
+    resetPasswordOTPAttempts: { type: Number, default: 0 },
     orders: [
       {
         type: mongoose.Schema.Types.ObjectId,

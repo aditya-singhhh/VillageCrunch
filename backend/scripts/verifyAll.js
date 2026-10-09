@@ -7,7 +7,7 @@ const Order = require('../models/Order');
 const verifyAllData = async () => {
   try {
     // Connect to MongoDB
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://sauravsinghking9876_db_user:Saurav867882@villagecluster.d9ah8fv.mongodb.net/', {
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

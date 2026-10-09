@@ -3,32 +3,24 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const CustomerSupport = require('../models/CustomerSupport');
-const { protect } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/auth');
 
 // Configure multer for image uploads
+const { dirs, imageFileFilter, safeExtension } = require('../config/uploads');
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/support-images/');
+    cb(null, dirs.support);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'support-' + uniqueSuffix + path.extname(file.originalname));
+    const uniqueSuffix = Date.now() + '-' + require('crypto').randomBytes(6).toString('hex');
+    cb(null, 'support-' + uniqueSuffix + safeExtension(file));
   }
 });
 
 const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: function (req, file, cb) {
-    const filetypes = /jpeg|jpg|png|gif|webp/;
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb(new Error('Only image files are allowed!'));
-  }
+  fileFilter: imageFileFilter,
 });
 
 // Create new support ticket
@@ -183,7 +175,7 @@ router.get('/:ticketId', protect, async (req, res) => {
 });
 
 // Admin: Get all tickets
-router.get('/admin/all', protect, async (req, res) => {
+router.get('/admin/all', protect, admin, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
       return res.status(403).json({
@@ -218,7 +210,7 @@ router.get('/admin/all', protect, async (req, res) => {
 });
 
 // Admin: Reply to ticket
-router.post('/admin/:ticketId/reply', protect, upload.single('image'), async (req, res) => {
+router.post('/admin/:ticketId/reply', protect, admin, upload.single('image'), async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
       return res.status(403).json({
@@ -278,7 +270,7 @@ router.post('/admin/:ticketId/reply', protect, upload.single('image'), async (re
 });
 
 // Admin: Close ticket
-router.put('/admin/:ticketId/close', protect, async (req, res) => {
+router.put('/admin/:ticketId/close', protect, admin, async (req, res) => {
   try {
     if (req.user.role !== 'admin') {
       return res.status(403).json({

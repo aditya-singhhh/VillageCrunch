@@ -145,8 +145,12 @@ export const getOrderStats = async () => {
 };
 
 // ✅ Payments
-export const createPaymentOrder = async (amount) => {
-  const { data } = await axios.post(`${API_URL}/payment/create-order`, { amount });
+// The server computes the amount from the cart; only items + promocode are sent.
+export const createPaymentOrder = async (cartItems, promocode = null) => {
+  const { data } = await axios.post(`${API_URL}/payment/create-order`, {
+    cartItems: cartItems.map((i) => ({ productId: i._id || i.productId || i.product, quantity: i.quantity })),
+    promocode: promocode?.code || null,
+  });
   return data;
 };
 
@@ -387,11 +391,12 @@ export const updatePricingSettings = async (pricingData) => {
   return data;
 };
 
-export const calculateOrderTotal = async (items, shippingMethod = 'standard', promocode = null) => {
+export const calculateOrderTotal = async (items, shippingMethod = 'standard', promocode = null, paymentMethod = null) => {
   const { data } = await axios.post(`${API_URL}/settings/calculate-order-total`, {
     items,
     shippingMethod,
-    promocode,
+    promocode: promocode?.code || null,
+    paymentMethod,
   });
   return data;
 };

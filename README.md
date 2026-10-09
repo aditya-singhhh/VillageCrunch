@@ -44,6 +44,10 @@ A full-stack e-commerce platform for selling premium Indian dry fruits, makhana,
 - Helmet (Security)
 - Express Rate Limit
 
+## Hosting
+
+Internal/self-hosted deployment with Docker: see [docs/INTERNAL_HOSTING.md](docs/INTERNAL_HOSTING.md). Planned improvements: [docs/ROADMAP.md](docs/ROADMAP.md). Create admins with `node scripts/createAdmin.js` (sign-up can no longer create admins).
+
 ## Installation
 
 ### Prerequisites

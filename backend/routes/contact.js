@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Contact = require('../models/Contact');
-const { protect } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/auth');
 
 // POST /api/contact - Submit contact form
 router.post('/', async (req, res) => {
@@ -58,7 +58,7 @@ router.post('/', async (req, res) => {
 });
 
 // GET /api/contact - Get all contact messages (Admin only)
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, admin, async (req, res) => {
   try {
     // Check if user is admin
     if (req.user.role !== 'admin') {
@@ -104,7 +104,7 @@ router.get('/', protect, async (req, res) => {
 });
 
 // PUT /api/contact/:id/status - Update contact status (Admin only)
-router.put('/:id/status', protect, async (req, res) => {
+router.put('/:id/status', protect, admin, async (req, res) => {
   try {
     // Check if user is admin
     if (req.user.role !== 'admin') {

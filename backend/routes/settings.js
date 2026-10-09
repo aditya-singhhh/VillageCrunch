@@ -1,4 +1,5 @@
 const express = require('express');
+const { priceCart, PricingError } = require('../services/pricing');
 const router = express.Router();
 const Settings = require('../models/Settings');
 const Product = require('../models/Product');
@@ -108,92 +109,58 @@ router.put('/business', protect, admin, async (req, res) => {
 });
 
 // @route   POST /api/settings/calculate-order-total
-// @desc    Calculate order total with current settings
+// @desc    Calculate order total. Prices come from the database and the promocode
+//          is validated server-side - the same engine that charges the customer.
 // @access  Public
 router.post('/calculate-order-total', async (req, res) => {
   try {
-    const { items, shippingMethod = 'standard', promocode } = req.body;
-    const settings = await Settings.getSettings();
+    const { items, shippingMethod = 'standard', promocode, paymentMethod } = req.body;
+    const promocodeCode = typeof promocode === 'string' ? promocode : promocode?.code;
 
-    const productIds = items
-      .map((item) => item.productId || item.product || item._id)
-      .filter(Boolean);
-
-    if (productIds.length > 0) {
-      const restrictedProducts = await Product.find({
-        _id: { $in: productIds },
-        category: { $regex: /^masala$/i }
-      }).select('_id');
-
-      if (restrictedProducts.length > 0) {
-        return res.status(400).json({ message: MASALA_BLOCKED_MESSAGE });
-      }
-    }
-    
-    // Calculate subtotal
-    let subtotal = 0;
-    const processedItems = items.map(item => {
-      const itemTotal = item.price * item.quantity;
-      subtotal += itemTotal;
-      return {
-        ...item,
-        total: itemTotal
-      };
+    const pricing = await priceCart({
+      items,
+      shippingMethod,
+      paymentMethod,
+      promocodeCode,
+      checkStock: false, // stock is enforced when the order is placed
     });
-
-    // Calculate shipping using simplified structure
-    let shippingCost = 0;
-    const shippingConfig = settings.pricing.shippingCharges[shippingMethod] || settings.pricing.shippingCharges.standard;
-    
-    if (subtotal < shippingConfig.freeShippingThreshold) {
-      shippingCost = shippingConfig.rate;
-    }
-
-    // Calculate tax on subtotal + shipping
-    const taxableAmount = subtotal + shippingCost;
-    const taxAmount = (taxableAmount * settings.pricing.taxRate) / 100;
-
-    // Calculate total before discount
-    const totalBeforeDiscount = subtotal + shippingCost + taxAmount;
-
-    // Apply promocode discount (if provided)
-    let discount = 0;
-    let discountDetails = null;
-    if (promocode) {
-      discountDetails = {
-        code: promocode.code,
-        type: promocode.type,
-        amount: promocode.discount || 0
-      };
-      discount = promocode.discount || 0;
-    }
-
-    const finalTotal = Math.max(0, totalBeforeDiscount - discount);
 
     res.json({
-      items: processedItems,
-      subtotal: Math.round(subtotal),
+      items: pricing.lines.map((l) => ({
+        productId: l.product,
+        name: l.name,
+        price: l.price,
+        quantity: l.quantity,
+        total: l.lineTotal,
+      })),
+      subtotal: pricing.subtotal,
       shipping: {
         method: shippingMethod,
-        cost: Math.round(shippingCost),
-        freeShippingThreshold: shippingConfig.freeShippingThreshold,
-        qualifiesForFreeShipping: subtotal >= shippingConfig.freeShippingThreshold
+        cost: pricing.shipping,
+        freeShippingThreshold: pricing.shippingConfig.freeShippingThreshold,
+        qualifiesForFreeShipping: pricing.shipping === 0,
       },
       tax: {
-        rate: settings.pricing.taxRate,
-        amount: Math.round(taxAmount)
+        rate: pricing.taxRate,
+        amount: pricing.tax,
       },
+      codCharge: pricing.codCharge,
       discount: {
-        applied: !!promocode,
-        amount: Math.round(discount),
-        details: discountDetails
+        applied: pricing.discount > 0 || !!pricing.promo,
+        amount: pricing.discount,
+        details: pricing.promo
+          ? { code: pricing.promo.code, type: pricing.promo.type, amount: pricing.discount }
+          : null,
       },
-      total: Math.round(finalTotal),
-      currency: settings.pricing.currency
+      total: pricing.total,
+      currency: pricing.currency,
     });
-
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error instanceof PricingError) {
+      return res.status(error.status).json({ message: error.message, code: error.code });
+    }
+    console.error('Calculate order total error:', error.message);
+    res.status(500).json({ message: 'Could not calculate order total' });
   }
 });
 

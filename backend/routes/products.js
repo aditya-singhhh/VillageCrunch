@@ -6,45 +6,23 @@ const router = express.Router();
 const Product = require('../models/Product');
 const { protect, admin } = require('../middleware/auth');
 
-// ✅ Configure multer for image upload
+// ✅ Configure multer for image upload (files live under UPLOAD_DIR, see config/uploads.js)
+const { dirs, imageFileFilter, safeExtension, managedImagePath } = require('../config/uploads');
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Determine upload path based on route
-    let uploadPath;
-    if (req.path.includes('/reviews/upload-images')) {
-      uploadPath = path.join(__dirname, '../../frontend/public/Review_Images');
-    } else {
-      uploadPath = path.join(__dirname, '../../frontend/public/Product_Images');
-    }
-    
-    // Create directory if it doesn't exist
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    
-    cb(null, uploadPath);
+    cb(null, req.path.includes('/reviews/upload-images') ? dirs.reviews : dirs.products);
   },
   filename: function (req, file, cb) {
-    // Generate unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const extension = path.extname(file.originalname);
+    const uniqueSuffix = Date.now() + '-' + require('crypto').randomBytes(6).toString('hex');
     const prefix = req.path.includes('/reviews/upload-images') ? 'review' : 'product';
-    cb(null, prefix + '-' + uniqueSuffix + extension);
+    cb(null, prefix + '-' + uniqueSuffix + safeExtension(file));
   }
 });
 
-const fileFilter = (req, file, cb) => {
-  // Check file type
-  if (file.mimetype.startsWith('image/')) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files are allowed!'), false);
-  }
-};
-
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
+  fileFilter: imageFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
   }
@@ -167,27 +145,14 @@ router.put('/:id', protect, admin, async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Helper function to delete old image file
+    // Helper function to delete old image file (only files we manage, never external URLs)
     const deleteOldImageFile = (imagePath) => {
-      if (!imagePath) return;
-      
-      let filePath;
-      // Handle different image path formats
-      if (imagePath.startsWith('/Product_Images/')) {
-        filePath = path.join(__dirname, '../../frontend/public', imagePath);
-      } else if (imagePath.includes('/Product_Images/')) {
-        const filename = imagePath.split('/Product_Images/').pop();
-        filePath = path.join(__dirname, '../../frontend/public/Product_Images', filename);
-      } else {
-        filePath = path.join(__dirname, '../../frontend/public/Product_Images', imagePath);
-      }
-
-      if (fs.existsSync(filePath)) {
+      const filePath = managedImagePath(imagePath, 'Product_Images', dirs.products);
+      if (filePath && fs.existsSync(filePath)) {
         try {
           fs.unlinkSync(filePath);
-          console.log(`Deleted old image file: ${filePath}`);
         } catch (err) {
-          console.error(`Error deleting old image file ${filePath}:`, err);
+          console.error(`Error deleting old image file ${filePath}:`, err.message);
         }
       }
     };
@@ -235,31 +200,14 @@ router.delete('/:id', protect, admin, async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    // Helper function to delete image file
+    // Helper function to delete image file (only files we manage, never external URLs)
     const deleteImageFile = (imagePath) => {
-      if (!imagePath) return;
-      
-      let filePath;
-      // Handle different image path formats
-      if (imagePath.startsWith('/Product_Images/')) {
-        // Relative path from public folder
-        filePath = path.join(__dirname, '../../frontend/public', imagePath);
-      } else if (imagePath.includes('/Product_Images/')) {
-        // Full URL or path containing Product_Images
-        const filename = imagePath.split('/Product_Images/').pop();
-        filePath = path.join(__dirname, '../../frontend/public/Product_Images', filename);
-      } else {
-        // Assume it's just a filename
-        filePath = path.join(__dirname, '../../frontend/public/Product_Images', imagePath);
-      }
-
-      // Check if file exists and delete it
-      if (fs.existsSync(filePath)) {
+      const filePath = managedImagePath(imagePath, 'Product_Images', dirs.products);
+      if (filePath && fs.existsSync(filePath)) {
         try {
           fs.unlinkSync(filePath);
-          console.log(`Deleted image file: ${filePath}`);
         } catch (err) {
-          console.error(`Error deleting image file ${filePath}:`, err);
+          console.error(`Error deleting image file ${filePath}:`, err.message);
         }
       }
     };
@@ -490,7 +438,7 @@ router.get('/:id/reviews', async (req, res) => {
 // @access  Private/Admin
 router.delete('/cleanup/orphaned-images', protect, admin, async (req, res) => {
   try {
-    const imageDirPath = path.join(__dirname, '../../frontend/public/Product_Images');
+    const imageDirPath = dirs.products;
     
     // Get all products and their image references
     const products = await Product.find({}, 'image images');

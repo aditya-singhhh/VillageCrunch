@@ -47,3 +47,14 @@ pids
 *.swo
 .DS_Store
 Thumbs.db
+
+# Frontend build output (built in CI / Docker, never committed)
+backend/frontend/dist/
+
+# Uploaded files
+backend/uploads/
+/data/
+
+# Keep the example env file tracked
+!.env.example
+!backend/.env.example

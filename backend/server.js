@@ -2,6 +2,9 @@ require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const mongoose = require('mongoose');
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
 const path = require('path');
 const connectDB = require('./config/db');
 const DEFAULT_PUBLIC_SITE_URL = 'https://villagecrunch.me';
@@ -29,50 +32,115 @@ const getPublicSiteUrl = () => {
     return DEFAULT_PUBLIC_SITE_URL;
   }
 };
+const { UPLOAD_ROOT, dirs: uploadDirs } = require('./config/uploads');
+const { apiRateLimit, authRateLimit, publicFormRateLimit } = require('./middleware/security');
+
+const isProd = process.env.NODE_ENV === 'production';
+
+// --- Fail fast on unsafe configuration -------------------------------------------
+if (!process.env.MONGODB_URI) {
+  console.error('❌ MONGODB_URI is not set. Refusing to start.');
+  process.exit(1);
+}
+if (!process.env.JWT_SECRET || (isProd && process.env.JWT_SECRET.length < 32)) {
+  console.error('❌ JWT_SECRET must be set (and at least 32 characters in production). Refusing to start.');
+  process.exit(1);
+}
 
 // Initialize app
 const app = express();
+
+// Behind Nginx/Caddy/load balancer: needed so rate limiting sees the real client IP
+app.set('trust proxy', parseInt(process.env.TRUST_PROXY || '1', 10));
+app.disable('x-powered-by');
 
 // Connect to MongoDB
 connectDB();
 
 // --- Middleware ---
-// Use helmet but customize Content Security Policy to allow Razorpay script
+// Use helmet but customize Content Security Policy to allow Razorpay script.
+// Analytics (GA4 / Facebook Pixel) is blocked by default; set CSP_ALLOW_ANALYTICS=true on the
+// public production site to allow them. Their bootstrap snippets are injected inline, which
+// is why 'unsafe-inline' is required for scripts in that mode - keep it off for internal hosting.
+const allowAnalytics = process.env.CSP_ALLOW_ANALYTICS === 'true';
+const analyticsScripts = allowAnalytics
+  ? ["'unsafe-inline'", 'https://www.googletagmanager.com', 'https://connect.facebook.net']
+  : [];
+const analyticsConnect = allowAnalytics
+  ? [
+      'https://www.google-analytics.com',
+      'https://*.google-analytics.com',
+      'https://*.analytics.google.com',
+      'https://www.googletagmanager.com',
+      'https://www.facebook.com',
+      'https://connect.facebook.net',
+    ]
+  : [];
+
 app.use(
   helmet({
     // Keep default protections, but override CSP
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "https://checkout.razorpay.com"],
-        scriptSrcElem: ["'self'", "https://checkout.razorpay.com"],
-        connectSrc: ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com'],
+        scriptSrc: ["'self'", 'https://checkout.razorpay.com', ...analyticsScripts],
+        scriptSrcElem: ["'self'", 'https://checkout.razorpay.com', ...analyticsScripts],
+        connectSrc: ["'self'", 'https://api.razorpay.com', 'https://lumberjack.razorpay.com', ...analyticsConnect],
         frameSrc: ["'self'", 'https://checkout.razorpay.com', 'https://api.razorpay.com'],
         imgSrc: ["'self'", 'data:', 'https://*'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
       }
-    }
+    },
+    crossOriginResourcePolicy: { policy: 'cross-origin' }, // product images are embedded cross-origin
   })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+// Block NoSQL operator injection ({"$gt": ""}) and HTTP parameter pollution
+app.use(mongoSanitize());
+app.use(hpp());
 
 // --- CORS Configuration ---
+// Origins come from the environment; localhost is only allowed outside production.
+const allowedOrigins = [
+  ...(process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim()),
+  process.env.FRONTEND_URL,
+  ...(isProd ? [] : ['http://localhost:5173', 'http://localhost:8080']),
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',       // local dev
-      'http://192.168.1.2:5173',     // network access
-      'https://villagecrunch.me',    // production
-      process.env.FRONTEND_URL
-    ].filter(Boolean),
+    origin: (origin, cb) => {
+      // Same-origin / server-to-server requests have no Origin header
+      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      cb(null, false);
+    },
     credentials: true
   })
 );
 
-// --- Serve Static Files (for image uploads) ---
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// --- Serve uploaded files (persistent volume, see config/uploads.js) ---
+app.use('/uploads', express.static(UPLOAD_ROOT, { maxAge: '7d' }));
+app.use('/Product_Images', express.static(uploadDirs.products, { maxAge: '7d', fallthrough: true }));
+app.use('/Review_Images', express.static(uploadDirs.reviews, { maxAge: '7d', fallthrough: true }));
+
+// --- Rate limiting ---
+app.use('/api', apiRateLimit);
+app.use(
+  [
+    '/api/auth/login',
+    '/api/auth/admin/login',
+    '/api/auth/register',
+    '/api/auth/forgot-password',
+    '/api/auth/verify-otp',
+    '/api/auth/reset-password',
+  ],
+  authRateLimit
+);
+app.use(['/api/contact', '/api/promocodes/validate'], (req, res, next) =>
+  req.method === 'POST' ? publicFormRateLimit(req, res, next) : next()
+);
 
 // --- API Routes ---
 app.use('/api/auth', require('./routes/auth'));
@@ -92,7 +160,12 @@ app.use('/api/support', require('./routes/support'));
 
 // --- Health Check ---
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  const dbUp = mongoose.connection.readyState === 1;
+  res.status(dbUp ? 200 : 503).json({
+    status: dbUp ? 'OK' : 'DEGRADED',
+    database: dbUp ? 'connected' : 'disconnected',
+    uptime: Math.round(process.uptime()),
+  });
 });
 
 // --- SEO Routes (at root level for better crawling) ---
@@ -201,9 +274,9 @@ Crawl-delay: 1`;
   res.send(robotsTxt);
 });
 
-// --- Serve React Frontend (dist inside backend/frontend) ---
-const __dirnameFull = path.resolve();
-app.use(express.static(path.join(__dirnameFull, 'frontend/dist')));
+// --- Serve React Frontend (build output lives in backend/frontend/dist) ---
+const distDir = path.join(__dirname, 'frontend', 'dist');
+app.use(express.static(distDir));
 
 // Catch-all handler: send back React's index.html file (but exclude API and SEO routes)
 app.get('*', (req, res) => {
@@ -211,24 +284,38 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/') || req.path === '/sitemap.xml' || req.path === '/robots.txt') {
     return res.status(404).json({ error: 'Route not found' });
   }
-  res.sendFile(path.join(__dirnameFull, 'frontend/dist/index.html'));
+  res.sendFile(path.join(distDir, 'index.html'));
 });
 
 // --- Error Handling Middleware ---
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({
+  // Upload validation problems (file type/size) are the client's fault
+  if (err.name === 'MulterError' || /Only (image|JPEG)/.test(err.message || '')) {
+    return res.status(400).json({ message: err.message });
+  }
+  res.status(err.status || 500).json({
     message: 'Something went wrong!',
     error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
 // --- Start Server ---
-const PORT = process.env.PORT || 8080; // DO App Platform exposes 8080
-app.listen(PORT, '0.0.0.0', (err) => {
-  if (err) {
-    console.error('❌ Server failed to start:', err);
-    process.exit(1);
-  }
-  console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+const PORT = process.env.PORT || 8080;
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });
+server.on('error', (err) => {
+  console.error('❌ Server failed to start:', err);
+  process.exit(1);
+});
+
+// Graceful shutdown (docker stop / systemd restart)
+const shutdown = (signal) => {
+  console.log(`${signal} received, shutting down gracefully`);
+  server.close(() => mongoose.connection.close(false).then(() => process.exit(0)));
+  setTimeout(() => process.exit(1), 10000).unref();
+};
+['SIGTERM', 'SIGINT'].forEach((sig) => process.on(sig, () => shutdown(sig)));
+
+module.exports = app;

@@ -5,16 +5,36 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const { protect, admin } = require('../middleware/auth');
 const { sendPasswordResetEmail } = require('../config/email');
+const { sendSMS } = require('../config/sms');
 
 // Generate JWT
-const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 
-// 🧩 REGISTER (Admin or User)
+// Fields that must never be sent to clients
+const SENSITIVE_FIELDS = '-password -resetPasswordToken -resetPasswordExpire -resetPasswordOTP -resetPasswordOTPExpire -resetPasswordOTPAttempts';
+
+const hashValue = (value) => crypto.createHash('sha256').update(String(value)).digest('hex');
+
+// Cryptographically secure 6-digit OTP
+const generateOTP = () => crypto.randomInt(100000, 1000000).toString();
+
+const isValidEmail = (e) => typeof e === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+const isValidPhone = (p) => typeof p === 'string' && /^[0-9+\-\s]{10,15}$/.test(p);
+
+// 🧩 REGISTER (customers only)
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, phone, role } = req.body;
+    const { name, email, password, phone } = req.body;
 
-    const emailExists = await User.findOne({ email });
+    if (!name || !isValidEmail(email) || !isValidPhone(phone)) {
+      return res.status(400).json({ message: 'Valid name, email and phone are required' });
+    }
+    if (typeof password !== 'string' || password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
+    const emailExists = await User.findOne({ email: email.toLowerCase() });
     if (emailExists) return res.status(400).json({ message: 'Email already registered' });
 
     const phoneExists = await User.findOne({ phone });
@@ -25,7 +45,7 @@ router.post('/register', async (req, res) => {
       email,
       password,
       phone,
-      role: role || 'user',
+      role: 'user', // SECURITY: role is never accepted from the client; promote admins via script
     });
 
     res.status(201).json({
@@ -37,7 +57,7 @@ router.post('/register', async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Registration failed' });
   }
 });
 
@@ -45,7 +65,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { emailOrPhone, password } = req.body;
-    
+    if (typeof emailOrPhone !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ message: 'Email/phone and password are required' });
+    }
+
     // Check if it's an email or phone number
     const isEmail = emailOrPhone.includes('@');
     
@@ -69,7 +92,8 @@ router.post('/login', async (req, res) => {
       res.status(401).json({ message: 'Invalid email/phone or password' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Login error:', error.message);
+    res.status(500).json({ message: 'Login failed' });
   }
 });
 
@@ -77,7 +101,10 @@ router.post('/login', async (req, res) => {
 router.post('/admin/login', async (req, res) => {
   try {
     const { emailOrPhone, password } = req.body;
-    
+    if (typeof emailOrPhone !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ message: 'Email/phone and password are required' });
+    }
+
     // Check if it's an email or phone number
     const isEmail = emailOrPhone.includes('@');
     
@@ -107,7 +134,7 @@ router.post('/admin/login', async (req, res) => {
 
 // 🧩 PROFILE (Private)
 router.get('/profile', protect, async (req, res) => {
-  const user = await User.findById(req.user._id).select('-password').populate('wishlist');
+  const user = await User.findById(req.user._id).select(SENSITIVE_FIELDS).populate('wishlist');
   res.json(user);
 });
 
@@ -146,7 +173,7 @@ router.put('/profile', protect, async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
+    user.email = req.body.email ? String(req.body.email).toLowerCase() : user.email;
     user.phone = req.body.phone || user.phone;
     
     // Handle addresses with phone number validation
@@ -159,7 +186,15 @@ router.put('/profile', protect, async (req, res) => {
       user.addresses = addressesWithPhone;
     }
     
-    if (req.body.password) user.password = req.body.password;
+    if (req.body.password) {
+      if (typeof req.body.password !== 'string' || req.body.password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters' });
+      }
+      if (!req.body.currentPassword || !(await user.comparePassword(req.body.currentPassword))) {
+        return res.status(400).json({ message: 'Current password is required and must be correct to set a new password' });
+      }
+      user.password = req.body.password;
+    }
 
     const updatedUser = await user.save();
     res.json({
@@ -179,7 +214,7 @@ router.put('/profile', protect, async (req, res) => {
 
 // 🧩 GET ALL USERS (Admin only)
 router.get('/all-users', protect, admin, async (req, res) => {
-  const users = await User.find().select('-password');
+  const users = await User.find().select(SENSITIVE_FIELDS);
   res.json(users);
 });
 
@@ -197,7 +232,7 @@ router.post('/forgot-password', async (req, res) => {
   try {
     const { identifier } = req.body; // Can be email or phone
     
-    if (!identifier) {
+    if (!identifier || typeof identifier !== 'string') {
       return res.status(400).json({ message: 'Please provide email or phone number' });
     }
 
@@ -212,8 +247,10 @@ router.post('/forgot-password', async (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({ 
-        message: `User not found with this ${isEmail ? 'email' : 'phone number'}` 
+      // Generic response so attackers cannot discover which accounts exist
+      return res.json({
+        method: isEmail ? 'email' : 'phone',
+        message: 'If an account exists for this identifier, reset instructions have been sent.'
       });
     }
 
@@ -250,7 +287,7 @@ router.post('/forgot-password', async (req, res) => {
         console.error('Email send error:', emailError);
         
         // In development, still provide the token if email fails
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === 'development' && process.env.EXPOSE_DEV_RESET_TOKEN === 'true') {
           return res.json({
             method: 'email',
             message: 'Email service unavailable. Here is your reset token for development:',
@@ -266,27 +303,31 @@ router.post('/forgot-password', async (req, res) => {
       
     } else {
       // PHONE-BASED RESET: Generate 6-digit OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otp = generateOTP();
       
-      // Store OTP (in production, hash this for security)
-      user.resetPasswordOTP = otp;
+      // Store only a hash of the OTP
+      user.resetPasswordOTP = hashValue(otp);
+      user.resetPasswordOTPAttempts = 0;
       user.resetPasswordOTPExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
       
       await user.save();
       
       // TODO: In production, integrate SMS service (Twilio, MSG91, etc.)
       // For now, just log OTP in development mode for testing
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === 'development' && process.env.EXPOSE_DEV_RESET_TOKEN === 'true') {
         console.log(`OTP for ${user.phone}: ${otp}`);
       }
       
-      // In production, send actual SMS here
-      // await sendSMS(user.phone, `Your VillageCrunch password reset OTP is: ${otp}. Valid for 10 minutes.`);
+      // Send the OTP by SMS (provider chosen via SMS_SERVICE; failures are logged, response stays generic)
+      try {
+        await sendSMS(user.phone, `Your VillageCrunch password reset OTP is: ${otp}. Valid for 10 minutes. Do not share it with anyone.`);
+      } catch (smsError) {
+        console.error('OTP SMS failed:', smsError.message);
+      }
       
       res.json({
         method: 'phone',
-        message: `OTP sent to ${user.phone.substring(0, 3)}****${user.phone.substring(user.phone.length - 2)}`,
-        phone: user.phone
+        message: 'If an account exists for this identifier, reset instructions have been sent.'
       });
     }
 
@@ -306,15 +347,31 @@ router.post('/verify-otp', async (req, res) => {
     }
     
     const user = await User.findOne({
-      phone,
-      resetPasswordOTP: otp,
+      phone: String(phone),
       resetPasswordOTPExpire: { $gt: Date.now() }
     });
-    
-    if (!user) {
+
+    if (!user || !user.resetPasswordOTP) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
-    
+
+    // Lock out after 5 wrong attempts
+    if ((user.resetPasswordOTPAttempts || 0) >= 5) {
+      user.resetPasswordOTP = undefined;
+      user.resetPasswordOTPExpire = undefined;
+      user.resetPasswordOTPAttempts = 0;
+      await user.save();
+      return res.status(429).json({ message: 'Too many attempts. Please request a new OTP.' });
+    }
+
+    const submitted = Buffer.from(hashValue(otp));
+    const stored = Buffer.from(user.resetPasswordOTP);
+    if (submitted.length !== stored.length || !crypto.timingSafeEqual(submitted, stored)) {
+      user.resetPasswordOTPAttempts = (user.resetPasswordOTPAttempts || 0) + 1;
+      await user.save();
+      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    }
+
     // Generate a temporary token for password reset
     const resetToken = crypto.randomBytes(20).toString('hex');
     user.resetPasswordToken = crypto
@@ -326,13 +383,13 @@ router.post('/verify-otp', async (req, res) => {
     // Clear OTP
     user.resetPasswordOTP = undefined;
     user.resetPasswordOTPExpire = undefined;
+    user.resetPasswordOTPAttempts = 0;
     
     await user.save();
     
     res.json({
       message: 'OTP verified successfully',
-      resetToken,
-      userId: user._id
+      resetToken
     });
     
   } catch (error) {
@@ -357,6 +414,10 @@ router.put('/reset-password/:resettoken', async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid or expired token' });
+    }
+
+    if (typeof req.body.password !== 'string' || req.body.password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
 
     // Set new password

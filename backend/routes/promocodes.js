@@ -134,6 +134,9 @@ router.delete('/:id', protect, admin, async (req, res) => {
 router.post('/validate', async (req, res) => {
   try {
     const { code, orderValue, products = [], categories = [], userId } = req.body;
+    if (typeof code !== 'string' || !code.trim()) {
+      return res.status(400).json({ valid: false, message: 'Please enter a promocode' });
+    }
     
     console.log('🔍 Validating promocode:', code, 'for user:', userId);
 

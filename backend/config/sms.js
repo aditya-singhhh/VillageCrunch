@@ -67,7 +67,11 @@ const sendSMS = async (phone, message) => {
 // Send order notification SMS to admin
 const sendAdminOrderSMS = async (orderData, userData) => {
   try {
-    const adminPhone = '6203009518'; // Admin phone number
+    const adminPhone = process.env.ADMIN_PHONE; // set ADMIN_PHONE in .env
+    if (!adminPhone) {
+      console.log('⚠️ ADMIN_PHONE not set - skipping admin SMS');
+      return { success: false, error: 'ADMIN_PHONE not configured' };
+    }
     
     const message = `🚨 NEW ORDER ALERT 🚨
 Order: #${orderData.orderNumber}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, createPaymentOrder, verifyPayment, updateOrderToPaid, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses } from '../utils/api';
+import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses } from '../utils/api';
 import { MapPin, Plus, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -106,7 +106,7 @@ const Checkout = () => {
             category: item.category
           }));
 
-          const totals = await calculateOrderTotal(cartProducts, 'standard', appliedPromocode);
+          const totals = await calculateOrderTotal(cartProducts, 'standard', appliedPromocode, paymentMethod);
           setOrderTotals(totals);
         }
       } catch (error) {
@@ -215,7 +215,10 @@ const Checkout = () => {
   // Add COD charges if payment method is COD
   const codCharges = paymentMethod === 'cod' ? (settings?.pricing?.codCharges ?? 0) : 0;
   
-  const total = orderTotals?.total ?? (subtotal + shipping + tax + codCharges - promocodeDiscount);
+  // Server totals exclude COD unless requested; add the COD charge for the chosen method
+  const total = orderTotals
+    ? orderTotals.total - (orderTotals.codCharge || 0) + codCharges
+    : subtotal + shipping + tax + codCharges - promocodeDiscount;
 
   const handleChange = (e) => {
     setShippingInfo({
@@ -355,7 +358,7 @@ const Checkout = () => {
       await waitForRazorpay();
       
       // Create Razorpay order
-      const paymentOrderData = await createPaymentOrder(total);
+      const paymentOrderData = await createPaymentOrder(cartItems, appliedPromocode);
 
       // Razorpay options with all payment methods
       const options = {
@@ -500,13 +503,6 @@ const Checkout = () => {
             };
 
             const order = await createOrder(orderData);
-
-            // Update order payment status
-            await updateOrderToPaid(order._id, {
-              razorpayPaymentId: response.razorpay_payment_id,
-              razorpayOrderId: response.razorpay_order_id,
-              razorpaySignature: response.razorpay_signature,
-            });
 
             // Clear cart and redirect
             clearCart();
