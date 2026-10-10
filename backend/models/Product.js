@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const productSchema = new mongoose.Schema({
   name: {
@@ -35,6 +36,10 @@ const productSchema = new mongoose.Schema({
     required: true,
     min: 0,
     default: 0,
+  },
+  isActive: {
+    type: Boolean,
+    default: true, // set false to hide a product without deleting it
   },
   featured: {
     type: Boolean,
@@ -82,4 +87,4 @@ const productSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-module.exports = mongoose.model('Product', productSchema);
+module.exports = defineModel('Product', productSchema, { collection: 'products' });

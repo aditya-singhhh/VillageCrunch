@@ -74,7 +74,7 @@ router.get('/pricing', async (req, res) => {
 router.put('/pricing', protect, admin, async (req, res) => {
   try {
     const settings = await Settings.getSettings();
-    settings.pricing = { ...settings.pricing, ...req.body };
+    settings.pricing = { ...settings.toObject().pricing, ...req.body };
     await settings.save();
     res.json(settings.pricing);
   } catch (error) {
@@ -100,7 +100,7 @@ router.get('/business', protect, admin, async (req, res) => {
 router.put('/business', protect, admin, async (req, res) => {
   try {
     const settings = await Settings.getSettings();
-    settings.business = { ...settings.business, ...req.body };
+    settings.business = { ...settings.toObject().business, ...req.body };
     await settings.save();
     res.json(settings.business);
   } catch (error) {

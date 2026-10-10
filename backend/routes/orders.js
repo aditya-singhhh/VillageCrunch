@@ -98,7 +98,7 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
     const pricing = await priceCart({
       items,
       paymentMethod: method === 'cod' ? 'cod' : 'online',
-      // For online orders the promocode was already consumed when the payment was created
+      // For online orders the discount was already priced into the payment; usage is recorded below
       promocodeCode: method === 'cod' ? promocodeCode : undefined,
       userId: req.user._id,
     });
@@ -207,10 +207,16 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { $push: { orders: order._id } });
 
     // Record promocode usage (this used to be tracked nowhere)
-    if (pricing.promo && amounts.promocodeDiscount > 0) {
+    // (online orders are priced from the paid LiveOrder, so look the code up here)
+    const usedPromo =
+      pricing.promo ||
+      (promocodeCode && amounts.promocodeDiscount > 0
+        ? await Promocode.findOne({ code: String(promocodeCode).toUpperCase() })
+        : null);
+    if (usedPromo && amounts.promocodeDiscount > 0) {
       try {
         await Promocode.updateOne(
-          { _id: pricing.promo._id },
+          { _id: usedPromo._id },
           {
             $push: { usedBy: { user: req.user._id, orderValue: amounts.itemsPrice, discountAmount: amounts.promocodeDiscount } },
             $inc: { usageCount: 1 },

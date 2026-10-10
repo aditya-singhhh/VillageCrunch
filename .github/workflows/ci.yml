@@ -20,7 +20,11 @@ jobs:
       - run: npm ci
       - name: Syntax check
         run: find . -name node_modules -prune -o -name '*.js' -path './frontend' -prune -o -name '*.js' -print0 | xargs -0 -n1 node --check
-      - run: npm test --if-present
+      - run: npm test
+      - name: Data layer smoke test against the real Firestore emulator
+        run: |
+          npm install -g firebase-tools@13
+          cd .. && firebase emulators:exec --only firestore --project demo-villagecrunch "cd backend && node scripts/smokeFirestore.js"
       - run: npm audit --omit=dev --audit-level=high
 
   frontend:

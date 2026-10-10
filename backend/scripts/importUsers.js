@@ -1,5 +1,5 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const db = require('../db');
 const User = require('../models/User');
 
 const users = [
@@ -51,14 +51,10 @@ const importUsers = async () => {
     process.exit(1);
   }
   try {
-    // Connect to MongoDB
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // Connect to Firestore
+    await db.connect();
     
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    
+        
     // Clear existing users
     await User.deleteMany({});
     console.log('🗑️ Existing users deleted');

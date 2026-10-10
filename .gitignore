@@ -58,3 +58,11 @@ backend/uploads/
 # Keep the example env file tracked
 !.env.example
 !backend/.env.example
+
+# Firebase
+.firebaserc
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+*-service-account*.json

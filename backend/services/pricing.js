@@ -5,7 +5,6 @@
  * computed here from database prices, current Settings and a server-validated
  * promocode. Nothing price-related from the request body is ever trusted.
  */
-const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Settings = require('../models/Settings');
 const Promocode = require('../models/Promocode');
@@ -39,7 +38,7 @@ const normaliseItems = (items) => {
   for (const item of items) {
     const id = String(item?.productId || item?.product || item?._id || '');
     const quantity = Number(item?.quantity);
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!/^[a-f0-9]{24}$/i.test(id)) {
       throw new PricingError('Invalid product in cart', 'INVALID_PRODUCT');
     }
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QTY_PER_ITEM) {

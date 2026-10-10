@@ -1,23 +1,22 @@
 // Test script for Live Order functionality
 // Run this file to test the live order creation and management
 
-const mongoose = require('mongoose');
+const db = require('../db');
 const LiveOrder = require('../models/LiveOrder');
 const LiveOrderManager = require('./liveOrderManager');
 
 // Test configuration
 const testConfig = {
-  mongoUri: 'mongodb://localhost:27017/villagecrunch', // Update with your MongoDB URI
   testUserId: '507f1f77bcf86cd799439011', // Replace with a valid user ID from your database
 };
 
 async function connectDb() {
   try {
-    await mongoose.connect(testConfig.mongoUri);
-    console.log('✅ Connected to MongoDB');
+    await db.connect();
+    console.log('✅ Connected to Firestore');
     return true;
   } catch (error) {
-    console.error('❌ MongoDB connection failed:', error.message);
+    console.error('❌ Firestore connection failed:', error.message);
     return false;
   }
 }
@@ -168,7 +167,7 @@ async function runTests() {
     }
     
     // Close connection
-    await mongoose.connection.close();
+    await db.disconnect();
     console.log('✅ Database connection closed');
   }
 }
@@ -205,7 +204,7 @@ function generateSampleApiRequests() {
 // Run tests if called directly
 if (require.main === module) {
   console.log('⚠️  Before running tests, please update:');
-  console.log('   - MongoDB URI in testConfig.mongoUri');
+  console.log('   - Firestore credentials (GOOGLE_APPLICATION_CREDENTIALS) or FIRESTORE_EMULATOR_HOST');
   console.log('   - Valid user ID in testConfig.testUserId');
   console.log('   - Valid product IDs in the test data\n');
   

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
@@ -88,17 +89,18 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔐 Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+// 🔐 Hash password before saving (runs from the Firestore save hook, see bottom of file)
+const BCRYPT_HASH = /^\$2[aby]\$\d{2}\$/;
+const hashPasswordIfNeeded = async function (doc) {
+  // Skip when unchanged or already hashed (a document can be saved twice in one request)
+  if (!doc.isModified('password') || BCRYPT_HASH.test(doc.password)) return;
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
+  doc.password = await bcrypt.hash(doc.password, salt);
+};
 
 // 🔍 Compare password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = defineModel('User', userSchema, { collection: 'users', beforeSave: [hashPasswordIfNeeded] });

@@ -240,15 +240,13 @@ router.get('/stats/overview', protect, admin, async (req, res) => {
       endDate: { $lt: new Date() } 
     });
 
-    const usageStats = await Promocode.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalUsage: { $sum: '$usageCount' },
-          totalDiscountGiven: { $sum: { $sum: '$usedBy.discountAmount' } }
-        }
-      }
-    ]);
+    // Firestore has no aggregation pipeline: sum in JavaScript (small collection)
+    const allPromos = await Promocode.find({}).select('usageCount usedBy');
+    const usageStats = [{
+      totalUsage: allPromos.reduce((sum, p) => sum + (p.usageCount || 0), 0),
+      totalDiscountGiven: allPromos.reduce(
+        (sum, p) => sum + (p.usedBy || []).reduce((s2, u) => s2 + (u.discountAmount || 0), 0), 0),
+    }];
 
     const topPromocodes = await Promocode.find({ usageCount: { $gt: 0 } })
       .sort({ usageCount: -1 })

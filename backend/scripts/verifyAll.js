@@ -1,19 +1,15 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const db = require('../db');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 
 const verifyAllData = async () => {
   try {
-    // Connect to MongoDB
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // Connect to Firestore
+    await db.connect();
     
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}\n`);
-
+    
     // Verify Users
     console.log('=== Users Summary ===');
     const users = await User.find({});

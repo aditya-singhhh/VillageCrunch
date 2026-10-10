@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const cartItemSchema = new mongoose.Schema({
   product: {
@@ -39,10 +40,9 @@ const cartSchema = new mongoose.Schema({
 });
 
 // Update lastUpdated on save
-cartSchema.pre('save', function(next) {
-  this.lastUpdated = new Date();
-  next();
-});
+const touchLastUpdated = (doc) => {
+  doc.lastUpdated = new Date();
+};
 
 // Methods
 cartSchema.methods.addItem = function(productId, quantity = 1, price) {
@@ -101,4 +101,4 @@ cartSchema.methods.getTotal = function() {
   }, 0);
 };
 
-module.exports = mongoose.model('Cart', cartSchema);
+module.exports = defineModel('Cart', cartSchema, { collection: 'carts', beforeSave: [touchLastUpdated] });

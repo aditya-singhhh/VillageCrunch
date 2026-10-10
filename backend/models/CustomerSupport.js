@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const customerSupportSchema = new mongoose.Schema({
   userId: {
@@ -78,9 +79,8 @@ const customerSupportSchema = new mongoose.Schema({
 });
 
 // Update timestamp on save
-customerSupportSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+const touchUpdatedAt = (doc) => {
+  doc.updatedAt = new Date();
+};
 
-module.exports = mongoose.model('CustomerSupport', customerSupportSchema);
+module.exports = defineModel('CustomerSupport', customerSupportSchema, { collection: 'customerSupports', beforeSave: [touchUpdatedAt] });

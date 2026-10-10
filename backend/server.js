@@ -2,7 +2,7 @@ require('dotenv').config({ path: __dirname + '/.env' });
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const mongoose = require('mongoose');
+const db = require('./db');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const path = require('path');
@@ -38,12 +38,13 @@ const { apiRateLimit, authRateLimit, publicFormRateLimit } = require('./middlewa
 const isProd = process.env.NODE_ENV === 'production';
 
 // --- Fail fast on unsafe configuration -------------------------------------------
-if (!process.env.MONGODB_URI) {
-  console.error('❌ MONGODB_URI is not set. Refusing to start.');
-  process.exit(1);
-}
 if (!process.env.JWT_SECRET || (isProd && process.env.JWT_SECRET.length < 32)) {
   console.error('❌ JWT_SECRET must be set (and at least 32 characters in production). Refusing to start.');
+  process.exit(1);
+}
+if (isProd && !process.env.FIRESTORE_EMULATOR_HOST && !process.env.K_SERVICE &&
+    !process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.FIREBASE_PROJECT_ID && !process.env.GOOGLE_CLOUD_PROJECT) {
+  console.error('❌ No Firestore target: run on Cloud Run, or set GOOGLE_CLOUD_PROJECT + GOOGLE_APPLICATION_CREDENTIALS, or FIRESTORE_EMULATOR_HOST.');
   process.exit(1);
 }
 
@@ -54,7 +55,7 @@ const app = express();
 app.set('trust proxy', parseInt(process.env.TRUST_PROXY || '1', 10));
 app.disable('x-powered-by');
 
-// Connect to MongoDB
+// Connect to Firestore
 connectDB();
 
 // --- Middleware ---
@@ -97,7 +98,7 @@ app.use(
 );
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
-// Block NoSQL operator injection ({"$gt": ""}) and HTTP parameter pollution
+// Strip query operators ({"$gt": ""}) from user input and block HTTP parameter pollution
 app.use(mongoSanitize());
 app.use(hpp());
 
@@ -159,11 +160,20 @@ app.use('/api/seo', require('./routes/seo'));
 app.use('/api/support', require('./routes/support'));
 
 // --- Health Check ---
-app.get('/api/health', (req, res) => {
-  const dbUp = mongoose.connection.readyState === 1;
-  res.status(dbUp ? 200 : 503).json({
-    status: dbUp ? 'OK' : 'DEGRADED',
-    database: dbUp ? 'connected' : 'disconnected',
+let healthCache = { at: 0, ok: false };
+app.get('/api/health', async (req, res) => {
+  // Probe Firestore at most every 10s so health checks stay cheap
+  if (Date.now() - healthCache.at > 10000) {
+    try {
+      await db.ping();
+      healthCache = { at: Date.now(), ok: true };
+    } catch (_) {
+      healthCache = { at: Date.now(), ok: false };
+    }
+  }
+  res.status(healthCache.ok ? 200 : 503).json({
+    status: healthCache.ok ? 'OK' : 'DEGRADED',
+    database: healthCache.ok ? 'connected' : 'unreachable',
     uptime: Math.round(process.uptime()),
   });
 });
@@ -186,7 +196,7 @@ app.get('/sitemap.xml', async (req, res) => {
     ];
 
     // Get all products
-    const products = await Product.find({ isActive: true }, '_id name category updatedAt').lean();
+    const products = await Product.find({ isActive: { $ne: false } }, '_id name updatedAt').lean();
 
     // Generate XML
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -313,7 +323,7 @@ server.on('error', (err) => {
 // Graceful shutdown (docker stop / systemd restart)
 const shutdown = (signal) => {
   console.log(`${signal} received, shutting down gracefully`);
-  server.close(() => mongoose.connection.close(false).then(() => process.exit(0)));
+  server.close(() => db.disconnect().finally(() => process.exit(0)));
   setTimeout(() => process.exit(1), 10000).unref();
 };
 ['SIGTERM', 'SIGINT'].forEach((sig) => process.on(sig, () => shutdown(sig)));

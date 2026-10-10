@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const liveOrderSchema = new mongoose.Schema({
   razorpayOrderId: {
     type: String,
-    required: true,
-    unique: true,
+    required: true, // unique by construction (issued by Razorpay)
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
@@ -64,7 +64,7 @@ const liveOrderSchema = new mongoose.Schema({
   expiryTime: {
     type: Date,
     default: () => new Date(Date.now() + 15 * 60 * 1000), // 15 minutes from creation
-    index: { expireAfterSeconds: 0 },
+    // Firestore: enable a TTL policy on liveOrders.expiryTime (see docs/FIREBASE_DEPLOYMENT.md)
   },
 }, { 
   timestamps: true,
@@ -107,4 +107,4 @@ liveOrderSchema.methods.convertToFullOrder = function(shippingAddress = null) {
   });
 };
 
-module.exports = mongoose.model('LiveOrder', liveOrderSchema);
+module.exports = defineModel('LiveOrder', liveOrderSchema, { collection: 'liveOrders' });

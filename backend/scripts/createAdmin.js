@@ -5,10 +5,11 @@
  *   node scripts/createAdmin.js <email> [name] [phone]
  *
  * The password is read from the ADMIN_PASSWORD env var (or generated and printed once).
+ * Needs Firestore access: GOOGLE_APPLICATION_CREDENTIALS (service-account key) or FIRESTORE_EMULATOR_HOST.
  */
 require('dotenv').config({ path: __dirname + '/../.env' });
 const crypto = require('crypto');
-const mongoose = require('mongoose');
+const db = require('../db');
 const User = require('../models/User');
 
 (async () => {
@@ -17,12 +18,7 @@ const User = require('../models/User');
     console.error('Usage: node scripts/createAdmin.js <email> [name] [phone]');
     process.exit(1);
   }
-  if (!process.env.MONGODB_URI) {
-    console.error('MONGODB_URI is not set');
-    process.exit(1);
-  }
-
-  await mongoose.connect(process.env.MONGODB_URI);
+  await db.connect();
   try {
     let user = await User.findOne({ email: email.toLowerCase() });
     if (user) {
@@ -37,7 +33,7 @@ const User = require('../models/User');
       if (!process.env.ADMIN_PASSWORD) console.log(`   Generated password (shown once): ${password}`);
     }
   } finally {
-    await mongoose.disconnect();
+    await db.disconnect();
   }
 })().catch((e) => {
   console.error('❌', e.message);
