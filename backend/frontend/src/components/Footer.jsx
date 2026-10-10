@@ -1,119 +1,97 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Instagram, Mail, Phone, ChevronDown } from 'lucide-react';
+import Logo from './Logo';
 
-const Footer = () => {
+const SHOP = [
+  { to: '/products', label: 'All products' },
+  { to: '/products?category=dry-fruits', label: 'Dry fruits' },
+  { to: '/products?category=makhana', label: 'Makhana' },
+  { to: '/products?category=thekua', label: 'Thekua' },
+];
+const HELP = [
+  { to: '/shipping-policy', label: 'Shipping policy' },
+  { to: '/returns-policy', label: 'Returns & refunds' },
+  { to: '/contact', label: 'Contact us' },
+  { to: '/about', label: 'About us' },
+  { to: '/support', label: 'Support' },
+];
+
+const linkCls = 'inline-flex items-center min-h-[44px] md:min-h-0 md:py-1.5 text-[15px] text-cream/90 hover:text-white hover:underline underline-offset-4';
+
+const useIsDesktop = () => {
+  const mq = typeof window !== 'undefined' ? window.matchMedia('(min-width: 768px)') : null;
+  const [desktop, setDesktop] = useState(mq ? mq.matches : true);
+  useEffect(() => {
+    if (!mq) return undefined;
+    const on = (e) => setDesktop(e.matches);
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  return desktop;
+};
+
+// Accordion on mobile, always-open columns from md up
+const Section = ({ title, children }) => {
+  const desktop = useIsDesktop();
+  const [open, setOpen] = useState(false);
+  const isOpen = desktop || open;
   return (
-    <footer className="bg-desi-brown text-white mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div>
-            <h3 className="text-2xl font-bold mb-4 text-desi-gold">VillageCrunch</h3>
-            <p className="text-sm text-gray-300 mb-4">
-              Premium quality dry fruits, makhana, traditional Bihari thekua, and authentic spices. 
-              Bringing authentic Indian flavors to your doorstep.
-            </p>
-            <div className="flex space-x-4">
-              <a href="https://facebook.com/villagecrunch" target="_blank" rel="noopener noreferrer">
-                <Facebook className="w-5 h-5 hover:text-desi-gold cursor-pointer transition" />
-              </a>
-              <a href="https://www.instagram.com/village_crunch/" target="_blank" rel="noopener noreferrer">
-                <Instagram className="w-5 h-5 hover:text-desi-gold cursor-pointer transition" />
-              </a>
-              <a href="https://twitter.com/villagecrunch" target="_blank" rel="noopener noreferrer">
-                <Twitter className="w-5 h-5 hover:text-desi-gold cursor-pointer transition" />
-              </a>
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4 text-desi-gold">Quick Links</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/products" className="text-sm hover:text-desi-gold transition">
-                  All Products
-                </Link>
-              </li>
-              <li>
-                <Link to="/products?category=dry-fruits" className="text-sm hover:text-desi-gold transition">
-                  Dry Fruits
-                </Link>
-              </li>
-              <li>
-                <Link to="/products?category=makhana" className="text-sm hover:text-desi-gold transition">
-                  Makhana
-                </Link>
-              </li>
-              <li>
-                <Link to="/products?category=thekua" className="text-sm hover:text-desi-gold transition">
-                  Thekua
-                </Link>
-              </li>
-              <li>
-                <Link to="/products?category=masala" className="text-sm hover:text-desi-gold transition">
-                  Masala & Spices
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Customer Service */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4 text-desi-gold">Customer Service</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/about" className="text-sm hover:text-desi-gold transition">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-sm hover:text-desi-gold transition">
-                  Contact Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/shipping-policy" className="text-sm hover:text-desi-gold transition">
-                  Shipping Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/returns-policy" className="text-sm hover:text-desi-gold transition">
-                  Returns & Refunds
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4 text-desi-gold">Contact Us</h4>
-            <ul className="space-y-3">
-              {/* Address commented out as requested */}
-              {/* 
-              <li className="flex items-start space-x-2 text-sm">
-                <MapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                <span>123 Market Street, Patna, Bihar, India</span>
-              </li>
-              */}
-              <li className="flex items-center space-x-2 text-sm">
-                <Phone className="w-5 h-5 flex-shrink-0" />
-                <span>+916203009518</span>
-              </li>
-              <li className="flex items-center space-x-2 text-sm">
-                <Mail className="w-5 h-5 flex-shrink-0" />
-                <span>villagecrunchcontact@gmail.com</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; 2025 VillageCrunch. All rights reserved. Made with ❤️ in Bihar.</p>
-        </div>
-      </div>
-    </footer>
+  <details className="group border-b border-white/10 md:border-0" open={isOpen}>
+    <summary
+      onClick={(e) => { e.preventDefault(); if (!desktop) setOpen((v) => !v); }}
+      className="flex items-center justify-between min-h-[48px] cursor-pointer list-none md:cursor-default md:pointer-events-none font-display font-semibold text-lg text-cream [&::-webkit-details-marker]:hidden">
+      {title}
+      <ChevronDown className="w-5 h-5 md:hidden transition-transform group-open:rotate-180" aria-hidden="true" />
+    </summary>
+    <div className="pb-3 md:pb-0">{children}</div>
+  </details>
   );
 };
+
+const Footer = () => (
+  <footer className="bg-brand-dark text-cream mt-0">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-14 pb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-x-10 gap-y-2 md:gap-y-8">
+        <div className="mb-4 md:mb-0">
+          <Logo light size="text-[26px]" />
+          <p className="mt-3 text-[15px] text-cream/85 max-w-xs">
+            Dry fruits, makhana and traditional Bihari thekua, packed fresh and delivered across India.
+          </p>
+          <div className="flex gap-1 mt-4 -ml-2">
+            <a href="https://www.instagram.com/village_crunch/" target="_blank" rel="noopener noreferrer" aria-label="VillageCrunch on Instagram" className="inline-flex items-center justify-center w-11 h-11 rounded-full hover:bg-white/10">
+              <Instagram className="w-5 h-5" />
+            </a>
+            <a href="https://facebook.com/villagecrunch" target="_blank" rel="noopener noreferrer" aria-label="VillageCrunch on Facebook" className="inline-flex items-center justify-center w-11 h-11 rounded-full hover:bg-white/10">
+              <Facebook className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+
+        <Section title="Shop">
+          <ul>{SHOP.map((l) => <li key={l.label}><Link to={l.to} className={linkCls}>{l.label}</Link></li>)}</ul>
+        </Section>
+        <Section title="Help">
+          <ul>{HELP.map((l) => <li key={l.label}><Link to={l.to} className={linkCls}>{l.label}</Link></li>)}</ul>
+        </Section>
+        <Section title="Contact">
+          <ul>
+            <li>
+              <a href="tel:+916203009518" className={linkCls}><Phone className="w-4 h-4 mr-2" aria-hidden="true" />+91 62030 09518</a>
+            </li>
+            <li>
+              <a href="mailto:villagecrunchcontact@gmail.com" className={`${linkCls} break-all`}><Mail className="w-4 h-4 mr-2 flex-shrink-0" aria-hidden="true" />villagecrunchcontact@gmail.com</a>
+            </li>
+          </ul>
+        </Section>
+      </div>
+
+      <div className="mt-8 pt-5 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-[13px] text-[#D9C7AE]">
+        <p>&copy; {new Date().getFullYear()} VillageCrunch. All rights reserved.</p>
+        <p>Pay with UPI, cards, net banking or cash on delivery</p>
+      </div>
+    </div>
+  </footer>
+);
 
 export default Footer;
