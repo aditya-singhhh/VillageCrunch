@@ -1,144 +1,38 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Heart, Award, Truck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Truck, RefreshCw, ShieldCheck, CreditCard, Check } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import SEOHead from '../components/SEOHead';
 import AIProductRecommendations from '../components/AIProductRecommendations';
 import { getProducts } from '../utils/api.js';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+
+const CATEGORIES = [
+  { to: '/products?category=dry-fruits', label: 'Dry fruits', sub: 'Almonds, cashews, walnuts', img: '/Product_Images/MixDry.jpg' },
+  { to: '/products?category=makhana', label: 'Makhana', sub: 'Light and crunchy fox nuts', img: '/Product_Images/Makhana.jpg' },
+  { to: '/products?category=thekua', label: 'Thekua', sub: 'Traditional Bihari sweet', img: '/thekua.jpg' },
+  { to: '/products', label: 'Shop all', sub: 'See the full range', img: '/Product_Images/Raisins.jpg' },
+];
+
+const TRUST = [
+  { icon: Truck, text: 'Delivery across India' },
+  { icon: RefreshCw, text: '7-day returns' },
+  { icon: ShieldCheck, text: 'Secure online payments' },
+  { icon: CreditCard, text: 'UPI, card or COD' },
+];
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
-  const [scrollY, setScrollY] = useState(0);
-
-  // Scroll reveal hooks for different sections
-  const heroRef = useScrollReveal({ threshold: 0.2 });
-  const featuresRef = useScrollReveal({ threshold: 0.2 });
-  const productsRef = useScrollReveal({ threshold: 0.1 });
-
-  // Parallax scroll effect
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Simple inline Carousel component
-  const Carousel = () => {
-    const images = [
-      { src: '/thekua.jpg', fallback: 'https://images.unsplash.com/photo-1607478900766-efe13248b125?w=600&h=600&fit=crop', alt: 'Thekua' },
-      { src: '/Makhana.jpg', fallback: 'https://images.unsplash.com/photo-1604908177261-1d9b1d5f7a2a?w=600&h=600&fit=crop', alt: 'Makhana' },
-      { src: '/391b485970e8dcdd2f41636fe121430a.jpg', fallback: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=600&h=600&fit=crop', alt: 'Mix' },
-      {src: '/almond.jpg', fallback: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=600&h=600&fit=crop', alt: 'Almond' },
-      {src: '/cashew.jpg', fallback: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=600&h=600&fit=crop', alt: 'Cashew' },
-      {src: '/guziya.jpg', fallback: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=600&h=600&fit=crop', alt: 'Cashew' },
-
-    ];
-
-  const [index, setIndex] = useState(0);
-  const [prev, setPrev] = useState(null);
-  const [paused, setPaused] = useState(false);
-  const timeoutRef = useRef(null);
-  const animDuration = 1400; // match CSS transform duration
-
-    useEffect(() => {
-      if (paused) return;
-      const t = setInterval(() => {
-        setIndex(i => {
-          // mark current as previous so it can animate out
-          setPrev(i);
-          // schedule prev clear after animation
-          if (timeoutRef.current) clearTimeout(timeoutRef.current);
-          timeoutRef.current = setTimeout(() => setPrev(null), animDuration);
-          return (i + 1) % images.length;
-        });
-      }, 3000);
-      return () => {
-        clearInterval(t);
-        if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      };
-    }, [paused]);
-
-    return (
-      // aspect-ratio box (1:1) to keep height stable
-      <div className="w-full max-w-md mx-auto" style={{ position: 'relative' }}>
-        <div style={{ paddingTop: '100%', position: 'relative', width: '100%' }}
-             onMouseEnter={() => setPaused(true)}
-             onMouseLeave={() => setPaused(false)}>
-          {images.map((img, i) => (
-            <img
-              key={i}
-              src={img.src}
-              alt={img.alt}
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = img.fallback; }}
-              className={`carousel-slot ${i === index ? 'active' : i === prev ? 'exiting' : ''}`}
-              style={{ borderRadius: '1rem', boxShadow: '0 25px 40px rgba(15,23,42,0.12)' }}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // Carousel functions for mobile
-  const nextSlide = () => {
-    setCurrentSlide((prev) => 
-      prev >= featuredProducts.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => 
-      prev <= 0 ? featuredProducts.length - 1 : prev - 1
-    );
-  };
-
-  // Touch handlers for mobile swipe
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchMove = (e) => {
-    touchEndX.current = e.targetTouches[0].clientX;
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStartX.current || !touchEndX.current) return;
-    
-    const distance = touchStartX.current - touchEndX.current;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe) {
-      nextSlide();
-    } else if (isRightSwipe) {
-      prevSlide();
-    }
-  };
-
-  // Auto-advance carousel on mobile
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (window.innerWidth < 768 && featuredProducts.length > 0) {
-        nextSlide();
-      }
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [featuredProducts.length]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
         const data = await getProducts({ featured: true });
-        setFeaturedProducts(data.slice(0, 4));
+        setFeaturedProducts(data.slice(0, 8));
       } catch (error) {
         console.error('Error fetching products:', error);
+      } finally {
+        setLoaded(true);
       }
     };
     fetchFeaturedProducts();
@@ -146,293 +40,146 @@ const Home = () => {
 
   return (
     <div>
-      <SEOHead 
+      <SEOHead
         title="Premium Dry Fruits & Makhana Online"
         description="Shop the finest quality dry fruits, roasted makhana, and traditional Bihari thekua at VillageCrunch. 100% natural products with fast delivery across India. Order now!"
         keywords="buy dry fruits online, premium almonds, cashews, pistachios, walnuts, makhana online, thekua Bihar, natural dry fruits, healthy snacks"
         url="/"
         type="website"
       />
-      
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-desi-cream to-amber-50 pattern-bg overflow-hidden">
-        {/* Parallax background elements */}
-        <div 
-          className="absolute inset-0 opacity-5 pointer-events-none"
-          style={{ transform: `translateY(${scrollY * 0.3}px)` }}
-        >
-          <div className="absolute top-20 left-10 w-64 h-64 bg-desi-gold rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-desi-brown rounded-full blur-3xl"></div>
-        </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="animate-fade-in-up">
-              <h1 className="text-5xl md:text-6xl font-bold text-desi-brown mb-6">
-                Premium Indian
-                <span className="block text-desi-gold animate-fade-in-up" style={{ animationDelay: '0.2s' }}>Dry Fruits & Makhana</span>
-              </h1>
-              <p className="text-lg text-gray-700 mb-8 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                Experience the richness of authentic Bihari tradition with our handpicked 
-                selection of premium dry fruits, roasted makhana, and traditional thekua.
-              </p>
-              <div className="flex flex-wrap gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                <Link
-                  to="/products"
-                  className="btn-primary flex items-center space-x-2 hover:shadow-2xl"
-                >
-                  <span>Shop Now</span>
-                  <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                </Link>
-                <Link
-                  to="/about"
-                  className="btn-secondary hover:shadow-lg"
-                >
-                  Learn More
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6 mt-12 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-                <div className="text-center transform hover:scale-110 transition-transform duration-300">
-                  <div className="text-3xl font-bold text-desi-brown">100%</div>
-                  <div className="text-sm text-gray-600">Natural</div>
-                </div>
-                <div className="text-center transform hover:scale-110 transition-transform duration-300">
-                  <div className="text-3xl font-bold text-desi-brown">10k+</div>
-                  <div className="text-sm text-gray-600">Happy Customers</div>
-                </div>
-                <div className="text-center transform hover:scale-110 transition-transform duration-300">
-                  <div className="text-3xl font-bold text-desi-brown">24/7</div>
-                  <div className="text-sm text-gray-600">Support</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-              {/* Carousel container */}
-              <div className="w-full max-w-md">
-                <Carousel />
-              </div>
-
-              {/* Compact badge always below carousel */}
-              <div className="mt-4 bg-white p-3 rounded-xl shadow-xl w-max hover:shadow-2xl transition-shadow duration-300">
-                <div className="flex items-center space-x-2 text-sm">
-                  <div className="bg-desi-gold p-2 rounded-full flex items-center justify-center">
-                    <Award className="w-4 h-4 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-desi-brown">Premium Quality</div>
-                    <div className="text-xs text-gray-600">Certified Products</div>
-                  </div>
-                </div>
-              </div>
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-paper to-cream">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-0 md:min-h-[520px] grid md:grid-cols-12 gap-6 md:gap-12 items-center">
+          <div className="md:col-span-7 md:order-2">
+            <div className="aspect-[4/3] md:aspect-[5/4] rounded-lg overflow-hidden bg-cream shadow-card">
+              <img
+                src="/thekua.jpg"
+                alt="Traditional Bihari thekua"
+                width="800"
+                height="640"
+                fetchpriority="high"
+                decoding="async"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section ref={featuresRef.ref} className="py-16 bg-white relative overflow-hidden">
-        {/* Decorative gradient background */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-desi-gold/5 to-transparent rounded-full blur-3xl -z-0"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-desi-brown/5 to-transparent rounded-full blur-3xl -z-0"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid md:grid-cols-4 gap-8">
-            {[
-              { icon: Heart, title: '100% Natural', desc: 'No preservatives or artificial additives', delay: '0s' },
-              { icon: Award, title: 'Premium Quality', desc: 'Handpicked and quality tested', delay: '0.1s' },
-              { icon: Truck, title: 'Fast Delivery', desc: 'Quick delivery across India', delay: '0.2s' },
-              { icon: Star, title: 'Trusted Brand', desc: 'Thousands of satisfied customers', delay: '0.3s' }
-            ].map((feature, index) => (
-              <div 
-                key={index}
-                className={`text-center group cursor-pointer ${featuresRef.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
-                style={{ animationDelay: feature.delay }}
-              >
-                <div className="bg-desi-cream p-4 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center group-hover:bg-desi-gold group-hover:scale-110 transition-all duration-300 shadow-md group-hover:shadow-xl">
-                  <feature.icon className="w-8 h-8 text-desi-brown group-hover:text-white transition-colors duration-300" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2 group-hover:text-desi-gold transition-colors duration-300">{feature.title}</h3>
-                <p className="text-sm text-gray-600">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section ref={productsRef.ref} className="py-16 pattern-bg relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-12 ${productsRef.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}>
-            <h2 className="section-title">Featured Products</h2>
-            <p className="text-gray-600 mt-2">
-              Explore our handpicked selection of premium products
+          <div className="md:col-span-5 md:order-1 md:py-16">
+            <p className="eyebrow">Straight from Bihar</p>
+            <h1 className="mt-2 font-display font-bold text-[34px] leading-[38px] md:text-[48px] md:leading-[54px] lg:text-[54px] lg:leading-[58px] text-ink">
+              Dry fruits, makhana &amp; thekua, packed fresh.
+            </h1>
+            <p className="mt-4 text-ink-soft text-base md:text-lg md:max-w-md">
+              Hand-picked dry fruits, crunchy makhana and traditional Bihari thekua, delivered to your door.
             </p>
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+              <Link to="/products" className="btn-primary w-full sm:w-auto">
+                Shop now <ArrowRight className="w-5 h-5" aria-hidden="true" />
+              </Link>
+              <Link to="/products?category=thekua" className="btn-ghost justify-center">Try the thekua</Link>
+            </div>
+            <ul className="mt-6 flex flex-wrap gap-2" aria-label="Why shop with us">
+              {['Hand-picked', 'Packed in Bihar', 'COD available'].map((t) => (
+                <li key={t} className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full bg-white border border-line text-[13px] font-medium text-ink-soft">
+                  <Check className="w-3.5 h-3.5 text-leaf" aria-hidden="true" /> {t}
+                </li>
+              ))}
+            </ul>
           </div>
+        </div>
+      </section>
 
-          {/* Desktop Grid Layout (hidden on mobile) */}
-          <div className="hidden md:grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product, index) => (
-              <div
-                key={product._id}
-                className={`${productsRef.isVisible ? 'animate-fade-in-up' : 'opacity-0'}`}
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+      {/* Trust strip */}
+      <section aria-label="Our promises" className="bg-white border-y border-line">
+        <ul className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3">
+          {TRUST.map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-center gap-3 text-sm font-medium text-ink">
+              <span className="w-10 h-10 rounded-full bg-cream inline-flex items-center justify-center flex-shrink-0">
+                <Icon className="w-5 h-5 text-brand" strokeWidth={1.75} aria-hidden="true" />
+              </span>
+              {text}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* Shop by category */}
+      <section className="container-page section-y !pb-6 md:!pb-10">
+        <h2 className="section-title">Shop by category</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+          {CATEGORIES.map((c) => (
+            <Link key={c.label} to={c.to} className="group relative block aspect-square rounded-lg overflow-hidden bg-cream zoom-on-hover">
+              <img
+                src={c.img}
+                alt=""
+                width="400" height="400" loading="lazy" decoding="async"
+                className="zoom-img w-full h-full object-cover"
+              />
+              <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" aria-hidden="true" />
+              <span className="absolute left-3 right-3 bottom-3 text-white">
+                <span className="block font-display font-semibold text-lg leading-6">{c.label}</span>
+                <span className="hidden sm:block text-sm text-white/90">{c.sub}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Featured */}
+      <section className="container-page section-y">
+        <div className="flex items-end justify-between gap-4 mb-6">
+          <h2 className="section-title !mb-0">Our favourites</h2>
+          <Link to="/products" className="btn-ghost -mr-3 h-11">View all <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
+        </div>
+        {!loaded ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5" aria-busy="true">
+            {[...Array(4)].map((_, i) => <div key={i} className="aspect-[3/4] skeleton" />)}
+          </div>
+        ) : (
+          <div className="flex gap-3 overflow-x-auto snap-x scroll-pl-4 scrollbar-none -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:grid md:grid-cols-4 md:gap-5 md:overflow-visible">
+            {featuredProducts.map((product) => (
+              <div key={product._id} className="flex-none w-[46%] sm:w-[34%] snap-start md:w-auto">
                 <ProductCard product={product} />
               </div>
             ))}
           </div>
+        )}
+      </section>
 
-          {/* Mobile Carousel Layout (hidden on desktop) */}
-          <div className="md:hidden relative">
-            <div 
-              className="overflow-hidden"
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div 
-                className="flex transition-transform duration-300 ease-in-out"
-                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-              >
-                {featuredProducts.map(product => (
-                  <div key={product._id} className="w-full flex-shrink-0 px-4">
-                    <ProductCard product={product} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Navigation Arrows */}
-            {featuredProducts.length > 1 && (
-              <>
-                <button
-                  onClick={prevSlide}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition"
-                  aria-label="Previous product"
-                >
-                  <ChevronLeft className="w-5 h-5 text-desi-brown" />
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg hover:bg-gray-50 transition"
-                  aria-label="Next product"
-                >
-                  <ChevronRight className="w-5 h-5 text-desi-brown" />
-                </button>
-              </>
-            )}
-
-            {/* Dots Indicator */}
-            {featuredProducts.length > 1 && (
-              <div className="flex justify-center mt-6 space-x-2">
-                {featuredProducts.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-2 h-2 rounded-full transition ${
-                      index === currentSlide 
-                        ? 'bg-desi-gold' 
-                        : 'bg-gray-300 hover:bg-gray-400'
-                    }`}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
+      {/* Gifting */}
+      <section className="container-page pb-10 md:pb-[72px]">
+        <div className="rounded-lg bg-cream border border-sand/60 px-6 py-8 md:px-12 md:py-12 md:flex md:items-center md:justify-between gap-8">
+          <div className="max-w-xl">
+            <p className="eyebrow">Gifting</p>
+            <h2 className="mt-1 font-display font-semibold text-2xl md:text-[32px] md:leading-[38px] text-ink">Something sweet to share</h2>
+            <p className="mt-3 text-ink-soft">
+              Thekua and premium dry fruits make a thoughtful gift for festivals, family visits and special occasions.
+            </p>
           </div>
-
-          <div className="text-center mt-12">
-            <Link
-              to="/products"
-              className="inline-flex items-center space-x-2 text-desi-gold font-semibold hover:text-yellow-600 transition"
-            >
-              <span>View All Products</span>
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+          <div className="mt-5 md:mt-0 flex flex-col sm:flex-row gap-3 flex-shrink-0">
+            <Link to="/products?category=thekua" className="btn-primary">Shop thekua</Link>
+            <Link to="/products?category=dry-fruits" className="btn-secondary">Shop dry fruits</Link>
           </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="section-title mb-12">Shop by Category</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <Link to="/products?category=dry-fruits" className="group relative overflow-hidden rounded-2xl shadow-lg h-64">
-              <img
-                src="/Product_Images/MixDry.jpg"
-                alt="Dry Fruits"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                <div className="p-6 text-white">
-                  <h3 className="text-2xl font-bold mb-2">Premium Dry Fruits</h3>
-                  <p className="text-sm">Almonds, Cashews, Walnuts & More</p>
-                </div>
+      {/* Why VillageCrunch */}
+      <section className="bg-white border-y border-line">
+        <div className="container-page section-y">
+          <h2 className="section-title">Why VillageCrunch</h2>
+          <div className="grid md:grid-cols-3 gap-6 md:gap-10">
+            {[
+              { t: 'Hand-picked', d: 'We select each product ourselves and pack it fresh before it ships.' },
+              { t: 'Rooted in Bihar', d: 'Makhana and thekua made the traditional way, from the region they come from.' },
+              { t: 'Simple ordering', d: 'Pay by UPI, card or net banking, or choose cash on delivery.' },
+            ].map((x) => (
+              <div key={x.t}>
+                <h3 className="font-display font-semibold text-lg text-ink">{x.t}</h3>
+                <p className="mt-1 text-ink-soft">{x.d}</p>
               </div>
-            </Link>
-
-            <Link to="/products?category=makhana" className="group relative overflow-hidden rounded-2xl shadow-lg h-64">
-              <img
-                src="/Product_Images/Makhana.jpg"
-                alt="Makhana"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                <div className="p-6 text-white">
-                  <h3 className="text-2xl font-bold mb-2">Makhana</h3>
-                  <p className="text-sm">Healthy & Crunchy Fox Nuts</p>
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/products?category=thekua" className="group relative overflow-hidden rounded-2xl shadow-lg h-64">
-              <img
-                src="/thekua.jpg"
-                alt="Thekua"
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                <div className="p-6 text-white">
-                  <h3 className="text-2xl font-bold mb-2">Traditional Thekua</h3>
-                  <p className="text-sm">Authentic Bihari Sweet Snack</p>
-                </div>
-              </div>
-            </Link>
+            ))}
           </div>
-        </div>
-      </section>
-
-      {/* Customer Reviews Info */}
-      <section className="py-16 bg-desi-cream">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="section-title mb-12">Authentic Customer Reviews</h2>
-          
-          <div className="text-center">
-            <div className="bg-white p-8 rounded-xl shadow-md max-w-2xl mx-auto">
-              <div className="flex justify-center mb-4">
-                <Star className="w-12 h-12 text-desi-gold" />
-              </div>
-              <h3 className="text-2xl font-bold text-desi-brown mb-4">
-                Real Reviews from Real Customers
-              </h3>
-              <p className="text-gray-700 mb-6">
-                We believe in authentic feedback. Our product reviews come only from customers 
-                who have purchased and received their orders. See genuine ratings and reviews 
-                on each product page.
-              </p>
-              <Link
-                to="/products"
-                className="inline-flex items-center space-x-2 bg-desi-gold text-desi-brown px-6 py-3 rounded-lg hover:bg-yellow-500 transition font-semibold"
-              >
-                <span>Browse Products & Reviews</span>
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
+          <Link to="/about" className="btn-ghost mt-4 -ml-3">Read our story <ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
         </div>
       </section>
 

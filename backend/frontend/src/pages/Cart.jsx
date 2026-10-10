@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag, Tag, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Minus, ShoppingBag, Tag, CheckCircle, XCircle, Lock, X } from 'lucide-react';
+import { formatINR } from '../utils/format';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
@@ -130,7 +131,7 @@ const Cart = () => {
         setPromocodeInput('');
         setPromocodeStatus(null); // Clear any previous status
         
-        toast.success(`Promocode applied! You saved ₹${Number(validation.discount).toFixed(2)}`);
+        toast.success(`Promocode applied! You saved ${formatINR(validation.discount)}`);
       } else {
         // Handle validation failure (valid: false)
         let statusMessage = '';
@@ -234,288 +235,196 @@ const Cart = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !settings) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-desi-gold"></div>
+      <div className="container-page py-10" aria-busy="true" aria-label="Loading cart">
+        <div className="h-9 skeleton w-48 mb-6" />
+        <div className="space-y-3">
+          <div className="h-28 skeleton" />
+          <div className="h-28 skeleton" />
+        </div>
       </div>
     );
   }
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <ShoppingBag className="w-24 h-24 mx-auto text-gray-400 mb-6" />
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-8">Add some delicious items to get started!</p>
-          <Link to="/products" className="btn-primary">
-            Continue Shopping
-          </Link>
-        </div>
+      <div className="container-page py-16 text-center">
+        <ShoppingBag className="w-12 h-12 mx-auto text-ink-mute mb-4" strokeWidth={1.5} aria-hidden="true" />
+        <h1 className="font-display text-2xl font-semibold text-ink mb-2">Your cart is empty</h1>
+        <p className="text-ink-soft mb-6">Add some dry fruits, makhana or thekua to get started.</p>
+        <Link to="/products" className="btn-primary">Start shopping</Link>
       </div>
     );
   }
 
+  const freeThreshold = settings?.pricing?.shippingCharges?.standard?.freeShippingThreshold;
+  const remainingForFree = freeThreshold ? Math.max(0, freeThreshold - subtotal) : 0;
+  const idOf = (item) => (user ? item._id : item.cartItemId);
+
   return (
-    <div className="min-h-screen bg-gray-50 py-6 sm:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">Shopping Cart</h1>
+    <div className="pb-6 lg:pb-12">
+      <div className="container-page pt-6 md:pt-10">
+        <h1 className="page-title mb-5 md:mb-8">Your cart</h1>
 
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          
+        <div className="grid lg:grid-cols-[8fr_4fr] gap-6 lg:gap-10 items-start">
+          {/* Items */}
+          <div className="space-y-5">
+            {shipping > 0 && freeThreshold > 0 && remainingForFree > 0 && (
+              <div className="panel !p-4">
+                <p className="text-sm text-ink">Add <strong>{formatINR(remainingForFree)}</strong> more for free delivery</p>
+                <div className="mt-2 h-2 rounded-full bg-cream overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={freeThreshold} aria-valuenow={Math.min(subtotal, freeThreshold)} aria-label="Progress to free delivery">
+                  <div className="h-full bg-leaf" style={{ width: `${Math.min(100, (subtotal / freeThreshold) * 100)}%` }} />
+                </div>
+              </div>
+            )}
 
-          
-          {/* Cart Items - Shows second on mobile */}
-          <div className="lg:col-span-2 lg:order-1 order-2">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <ul className="bg-white rounded-lg border border-line shadow-card divide-y divide-line">
               {cartItems.map((item) => (
-                <div
-                  key={user ? item._id : item.cartItemId}
-                  className="p-3 md:p-6 border-b last:border-b-0 hover:bg-gray-50 transition"
-                >
-                  {/* Mobile-First Responsive Layout */}
-                  <div className="space-y-3 md:space-y-0 md:flex md:items-center">
-                    
-                    {/* Product Image and Info Section */}
-                    <div className="flex items-start space-x-3 md:space-x-4 flex-1">
-                      <Link to={`/product/${item._id}`} className="flex-shrink-0">
-                        <img
-                          src={item.image || (item.images && item.images[0]) || '/placeholder-image.jpg'}
-                          alt={item.name}
-                          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 object-cover rounded-lg"
-                        />
-                      </Link>
-                      
-                      <div className="flex-1 min-w-0">
-                        <Link
-                          to={`/product/${item._id}`}
-                          className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 hover:text-desi-gold transition block"
-                        >
-                          <span className="line-clamp-2">{item.name}</span>
-                        </Link>
-                        <p className="text-xs sm:text-sm text-gray-600 mt-1">{item.weight}</p>
-                        <p className="text-sm sm:text-base md:text-lg font-bold text-desi-brown mt-1">
-                          ₹{item.price}
-                        </p>
-                        
-                        {/* Mobile: Show item subtotal under product info */}
-                        <p className="text-sm font-semibold text-gray-700 mt-2 md:hidden">
-                          Subtotal: ₹{(item.price * item.quantity).toFixed(2)}
-                        </p>
+                <li key={idOf(item)} className="p-3 sm:p-5 flex gap-3 sm:gap-4">
+                  <Link to={`/product/${item._id}`} className="flex-shrink-0" aria-label={item.name}>
+                    <img
+                      src={item.image || (item.images && item.images[0]) || '/placeholder-image.jpg'}
+                      alt=""
+                      width="80" height="80" loading="lazy" decoding="async"
+                      className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md bg-cream"
+                    />
+                  </Link>
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <div className="flex justify-between gap-3">
+                      <div className="min-w-0">
+                        <Link to={`/product/${item._id}`} className="font-semibold text-ink hover:text-action line-clamp-2 leading-snug">{item.name}</Link>
+                        <p className="text-sm text-ink-mute mt-0.5">{item.weight} &middot; {formatINR(item.price)} each</p>
                       </div>
-                      
-                      {/* Remove button - always visible on the right */}
-                      <button
-                        onClick={() => removeFromCart(user ? item._id : item.cartItemId)}
-                        className="text-red-500 hover:text-red-700 transition p-1 flex-shrink-0"
-                        aria-label="Remove item"
-                      >
-                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </button>
+                      <p className="font-semibold tabular-nums whitespace-nowrap">{formatINR(item.price * item.quantity)}</p>
                     </div>
-
-                    {/* Quantity Controls and Desktop Subtotal */}
-                    <div className="flex items-center justify-between md:justify-end md:space-x-6 md:ml-4">
-                      
-                      {/* Quantity Controls */}
-                      <div className="flex items-center space-x-1 sm:space-x-2 bg-gray-100 rounded-lg p-1">
+                    <div className="mt-auto pt-2 flex items-center justify-between">
+                      <div className="inline-flex items-center border border-[#CDBBA4] rounded-md bg-white" role="group" aria-label={`Quantity for ${item.name}`}>
                         <button
-                          onClick={() => updateQuantity(user ? item._id : item.cartItemId, item.quantity - 1)}
-                          className="p-1 sm:p-2 hover:bg-gray-200 rounded transition flex-shrink-0"
+                          onClick={() => updateQuantity(idOf(item), item.quantity - 1)}
                           disabled={item.quantity <= 1}
                           aria-label="Decrease quantity"
-                        >
-                          <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </button>
-                        <span className="w-6 sm:w-8 text-center font-semibold text-sm sm:text-base">
-                          {item.quantity}
-                        </span>
+                          className="w-11 h-11 inline-flex items-center justify-center disabled:text-sand"
+                        ><Minus className="w-4 h-4" /></button>
+                        <span className="w-8 text-center font-semibold tabular-nums" aria-live="polite">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(user ? item._id : item.cartItemId, item.quantity + 1)}
-                          className="p-1 sm:p-2 hover:bg-gray-200 rounded transition flex-shrink-0"
+                          onClick={() => updateQuantity(idOf(item), item.quantity + 1)}
                           disabled={item.quantity >= item.stock}
                           aria-label="Increase quantity"
-                        >
-                          <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                        </button>
-                      </div>
-
-                      {/* Desktop Subtotal - hidden on mobile */}
-                      <div className="hidden md:block w-20 lg:w-24 text-right">
-                        <span className="font-bold text-gray-900 text-sm lg:text-base">
-                          ₹{(item.price * item.quantity).toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <Link
-              to="/products"
-              className="inline-block mt-4 sm:mt-6 text-desi-gold hover:text-yellow-600 font-semibold transition text-sm sm:text-base"
-            >
-              ← Continue Shopping
-            </Link>
-          </div>
-
-          {/* Order Summary */}
-          <div className="lg:col-span-1 order-1 lg:order-2">
-            <div className="bg-white rounded-xl shadow-md p-3 sm:p-4 md:p-6 lg:sticky lg:top-24">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6">Order Summary</h2>
-
-              <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-                <div className="flex justify-between text-gray-700">
-                  <span className="text-sm sm:text-base">Subtotal ({cartItems.length} items)</span>
-                  <span className="font-semibold text-sm sm:text-base">₹{subtotal.toFixed(2)}</span>
-                </div>
-                
-                <div className="flex justify-between text-gray-700">
-                  <span className="text-sm sm:text-base">Shipping</span>
-                  <span className="font-semibold text-sm sm:text-base">
-                    {shipping === 0 ? (
-                      <span className="text-green-600">FREE</span>
-                    ) : (
-                      `₹${Number(shipping).toFixed(2)}`
-                    )}
-                  </span>
-                </div>
-
-                {shipping > 0 && settings?.pricing?.shippingCharges?.standard?.freeShippingThreshold && (
-                  <div className="text-xs sm:text-sm text-desi-gold bg-yellow-50 p-2 rounded">
-                    Add ₹{(settings.pricing.shippingCharges.standard.freeShippingThreshold - subtotal).toFixed(2)} more for free shipping!
-                  </div>
-                )}
-
-                {settings?.pricing?.taxRate > 0 && (
-                  <div className="flex justify-between py-2">
-                    <span className="text-sm sm:text-base">Tax ({settings.pricing.taxRate}% GST)</span>
-                    <span className="font-semibold text-sm sm:text-base">₹{Number(tax).toFixed(2)}</span>
-                  </div>
-                )}
-
-                {/* Promocode Discount */}
-                {appliedPromocode && (
-                  <div className="flex justify-between py-2 text-green-600">
-                    <span className="flex items-center text-sm sm:text-base">
-                      <Tag className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                      <span className="truncate">Promocode ({appliedPromocode.code})</span>
-                    </span>
-                    <span className="font-semibold text-sm sm:text-base">-₹{Number(promocodeDiscount).toFixed(2)}</span>
-                  </div>
-                )}
-
-                <div className="border-t pt-3 sm:pt-4">
-                  <div className="flex justify-between text-base sm:text-lg font-bold text-gray-900">
-                    <span>Total</span>
-                    <span className="text-desi-brown">₹{Number(total).toFixed(2)}</span>
-                  </div>
-                  {appliedPromocode && (
-                    <div className="text-xs sm:text-sm text-green-600 mt-1">
-                      You saved ₹{Number(promocodeDiscount).toFixed(2)} with {appliedPromocode.code}!
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={handleCheckout}
-                className="w-full btn-primary mb-3 sm:mb-4 py-3 sm:py-2 text-base font-semibold"
-              >
-                Proceed to Checkout
-              </button>
-
-              <div className="text-center text-xs sm:text-sm text-gray-600">
-                <p>🔒 Secure checkout</p>
-              </div>
-
-              {/* Promocode Section */}
-              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
-                <h3 className="font-semibold mb-3 flex items-center text-sm sm:text-base">
-                  <Tag className="w-4 h-4 mr-2" />
-                  Have a promocode?
-                </h3>
-                
-                {appliedPromocode ? (
-                  // Applied Promocode Display
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center min-w-0 flex-1">
-                        <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mr-2 flex-shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="font-semibold text-green-800 text-sm sm:text-base truncate">{appliedPromocode.code}</div>
-                          <div className="text-xs sm:text-sm text-green-600 truncate">{appliedPromocode.description}</div>
-                        </div>
+                          className="w-11 h-11 inline-flex items-center justify-center disabled:text-sand"
+                        ><Plus className="w-4 h-4" /></button>
                       </div>
                       <button
-                        onClick={removePromocode}
-                        className="text-red-600 hover:text-red-800 p-1 ml-2 flex-shrink-0"
-                        title="Remove promocode"
+                        onClick={() => removeFromCart(idOf(item))}
+                        className="min-h-[44px] px-2 text-sm font-medium text-berry hover:underline"
+                        aria-label={`Remove ${item.name} from cart`}
                       >
-                        <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                        Remove
                       </button>
                     </div>
                   </div>
-                ) : (
-                  // Promocode Input
-                  <div className="space-y-3">
-                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                      <input
-                        type="text"
-                        placeholder="Enter promocode"
-                        value={promocodeInput}
-                        onChange={(e) => {
-                          setPromocodeInput(e.target.value.toUpperCase());
-                          setPromocodeStatus(null); // Clear status when typing
-                        }}
-                        onKeyPress={(e) => e.key === 'Enter' && applyPromocode()}
-                        className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-desi-gold focus:border-desi-gold text-sm"
-                        disabled={promocodeLoading}
-                      />
-                      <button 
-                        onClick={applyPromocode}
-                        disabled={promocodeLoading || !promocodeInput.trim()}
-                        className="bg-desi-gold text-desi-brown px-4 py-2 rounded-lg hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-sm"
-                      >
-                        {promocodeLoading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-desi-brown"></div>
-                            <span className="hidden sm:inline">Validating...</span>
-                          </>
-                        ) : (
-                          <span>Apply</span>
-                        )}
-                      </button>
-                    </div>
-                    
-                    {/* Promocode Status Message */}
-                    {promocodeStatus && (
-                      <div className={`p-3 rounded-lg text-xs sm:text-sm mt-3 ${
-                        promocodeStatus.type === 'error' 
-                          ? 'bg-red-50 border border-red-200 text-red-700'
-                          : 'bg-blue-50 border border-blue-200 text-blue-700'
-                      }`}>
-                        <div className="flex items-start space-x-2">
-                          {promocodeStatus.type === 'error' ? (
-                            <XCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                          )}
-                          <span className="leading-relaxed">{promocodeStatus.message}</span>
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="text-xs text-gray-500">
-                      💡 Tip: Promocodes are automatically applied at the best available rate
+                </li>
+              ))}
+            </ul>
+
+            {/* Promocode */}
+            <div className="panel">
+              <h2 className="flex items-center gap-2 font-semibold text-ink mb-3">
+                <Tag className="w-4 h-4" aria-hidden="true" /> Have a promo code?
+              </h2>
+              {appliedPromocode ? (
+                <div className="flex items-center justify-between gap-3 bg-leaf-tint border border-leaf/30 rounded-md px-3 py-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CheckCircle className="w-5 h-5 text-leaf flex-shrink-0" aria-hidden="true" />
+                    <div className="min-w-0">
+                      <p className="font-semibold text-leaf truncate">{appliedPromocode.code}</p>
+                      {appliedPromocode.description && <p className="text-sm text-ink-soft truncate">{appliedPromocode.description}</p>}
                     </div>
                   </div>
-                )}
-              </div>
+                  <button onClick={removePromocode} className="w-11 h-11 inline-flex items-center justify-center text-ink-soft hover:text-berry flex-shrink-0" aria-label={`Remove promo code ${appliedPromocode.code}`}>
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <label htmlFor="promo" className="sr-only">Promo code</label>
+                    <input
+                      id="promo"
+                      type="text"
+                      placeholder="Enter code"
+                      autoCapitalize="characters"
+                      value={promocodeInput}
+                      onChange={(e) => {
+                        setPromocodeInput(e.target.value.toUpperCase());
+                        setPromocodeStatus(null);
+                      }}
+                      onKeyDown={(e) => e.key === 'Enter' && applyPromocode()}
+                      className="input-field min-w-0 flex-1"
+                      disabled={promocodeLoading}
+                    />
+                    <button
+                      onClick={applyPromocode}
+                      disabled={promocodeLoading || !promocodeInput.trim()}
+                      className="btn-secondary flex-shrink-0 px-5"
+                      aria-busy={promocodeLoading}
+                    >
+                      {promocodeLoading ? (
+                        <span className="animate-spin rounded-full h-4 w-4 border-2 border-brand/30 border-t-brand" aria-label="Validating"></span>
+                      ) : 'Apply'}
+                    </button>
+                  </div>
+                  {promocodeStatus && (
+                    <p role="alert" className="mt-3 flex items-start gap-2 text-sm text-berry bg-berry-tint rounded-md p-3">
+                      <XCircle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                      <span>{promocodeStatus.message}</span>
+                    </p>
+                  )}
+                </>
+              )}
             </div>
+
+            <Link to="/products" className="btn-ghost -ml-3">&larr; Continue shopping</Link>
           </div>
+
+          {/* Summary */}
+          <aside className="lg:sticky lg:top-24" aria-label="Order summary">
+            <div className="panel">
+              <h2 className="font-display text-xl font-semibold mb-4">Order summary</h2>
+              <dl className="space-y-2.5 text-[15px]">
+                <div className="flex justify-between"><dt className="text-ink-soft">Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</dt><dd className="tabular-nums">{formatINR(subtotal)}</dd></div>
+                {appliedPromocode && promocodeDiscount > 0 && (
+                  <div className="flex justify-between text-leaf"><dt className="flex items-center gap-1 min-w-0"><Tag className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" /><span className="truncate">Promo ({appliedPromocode.code})</span></dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
+                )}
+                <div className="flex justify-between"><dt className="text-ink-soft">Shipping</dt><dd className={`tabular-nums ${shipping === 0 ? 'text-leaf font-medium' : ''}`}>{shipping === 0 ? 'Free' : formatINR(shipping)}</dd></div>
+                {settings?.pricing?.taxRate > 0 && (
+                  <div className="flex justify-between"><dt className="text-ink-soft">GST ({settings.pricing.taxRate}%)</dt><dd className="tabular-nums">{formatINR(tax)}</dd></div>
+                )}
+              </dl>
+              <div className="border-t border-line mt-4 pt-4 flex justify-between items-baseline">
+                <span className="text-lg font-semibold">Total</span>
+                <span className="text-xl font-semibold tabular-nums">{formatINR(total)}</span>
+              </div>
+              {appliedPromocode && promocodeDiscount > 0 && (
+                <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount)} with {appliedPromocode.code}</p>
+              )}
+              <button onClick={handleCheckout} className="btn-primary w-full mt-5 hidden lg:inline-flex">Proceed to checkout</button>
+              <p className="hidden lg:flex items-center justify-center gap-1.5 text-sm text-ink-soft mt-3">
+                <Lock className="w-4 h-4" aria-hidden="true" /> Secure checkout
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      {/* Sticky checkout bar (mobile) */}
+      <div className="lg:hidden fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-30 bg-white border-t border-line shadow-raised px-4 py-3">
+        <div className="flex items-center gap-3 max-w-xl mx-auto">
+          <div className="leading-tight">
+            <p className="text-xs text-ink-mute">Total</p>
+            <p className="text-lg font-semibold tabular-nums">{formatINR(total)}</p>
+          </div>
+          <button onClick={handleCheckout} className="btn-primary flex-1">Checkout</button>
         </div>
       </div>
     </div>

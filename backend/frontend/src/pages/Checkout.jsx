@@ -3,7 +3,8 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses } from '../utils/api';
-import { MapPin, Plus, CheckCircle } from 'lucide-react';
+import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-react';
+import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
 
 // Utility function to wait for Razorpay to load
@@ -587,385 +588,250 @@ const Checkout = () => {
     return null;
   }
 
+  const readOnlyAddress = !useNewAddress && selectedAddress !== null;
+  const showForm = useNewAddress || addresses.length === 0;
+  const payLabel = paymentMethod === 'cod'
+    ? `Place order · ${formatINR(total)}`
+    : `Pay ${formatINR(total)}`;
+  const taxRate = settings?.pricing?.taxRate;
+
+  const submitContent = loading ? (
+    <>
+      <span className="animate-spin rounded-full h-5 w-5 border-2 border-white/40 border-t-white" aria-hidden="true"></span>
+      Processing...
+    </>
+  ) : payLabel;
+
+  const summaryRows = (
+    <>
+      <ul className="space-y-3 mb-4">
+        {cartItems.map((item) => (
+          <li key={item._id || item.cartItemId} className="flex items-center gap-3">
+            <img
+              src={item.image}
+              alt=""
+              width="56" height="56" loading="lazy" decoding="async"
+              className="w-14 h-14 object-cover rounded-md bg-cream flex-shrink-0"
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium line-clamp-2">{item.name}</p>
+              <p className="text-sm text-ink-mute">Qty {item.quantity}{item.weight ? ` · ${item.weight}` : ''}</p>
+            </div>
+            <p className="font-semibold text-sm tabular-nums">{formatINR(item.price * item.quantity)}</p>
+          </li>
+        ))}
+      </ul>
+      <dl className="border-t border-line pt-4 space-y-2 text-sm">
+        <div className="flex justify-between"><dt className="text-ink-soft">Subtotal</dt><dd className="tabular-nums">{formatINR(subtotal)}</dd></div>
+        <div className="flex justify-between"><dt className="text-ink-soft">Shipping</dt><dd className={`tabular-nums ${shipping === 0 ? 'text-leaf font-medium' : ''}`}>{shipping === 0 ? 'Free' : formatINR(shipping)}</dd></div>
+        {taxRate > 0 && (
+          <div className="flex justify-between"><dt className="text-ink-soft">GST ({taxRate}%)</dt><dd className="tabular-nums">{formatINR(tax)}</dd></div>
+        )}
+        {paymentMethod === 'cod' && codCharges > 0 && (
+          <div className="flex justify-between"><dt className="text-ink-soft">COD charges</dt><dd className="tabular-nums">{formatINR(codCharges)}</dd></div>
+        )}
+        {appliedPromocode && (
+          <div className="flex justify-between text-leaf"><dt>Promocode ({appliedPromocode.code})</dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
+        )}
+      </dl>
+      <div className="border-t border-line mt-4 pt-4 flex justify-between items-baseline">
+        <span className="text-lg font-semibold">Total</span>
+        <span className="text-xl font-semibold tabular-nums">{formatINR(total)}</span>
+      </div>
+      {appliedPromocode && promocodeDiscount > 0 && (
+        <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount)}</p>
+      )}
+    </>
+  );
+
+  const sectionHead = (n, title) => (
+    <h2 className="flex items-center gap-3 font-display text-xl font-semibold text-ink mb-4">
+      <span className="w-7 h-7 rounded-full bg-brand text-white text-sm font-sans font-semibold inline-flex items-center justify-center" aria-hidden="true">{n}</span>
+      {title}
+    </h2>
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+    <div className="pb-6 lg:pb-12">
+      <div className="container-page pt-6 md:pt-10">
+        <h1 className="page-title mb-5 md:mb-8">Checkout</h1>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Shipping Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-md p-8 mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Delivery Address</h2>
+        {/* Mobile collapsible summary */}
+        <details className="lg:hidden mb-5 bg-white border border-line rounded-lg shadow-card group">
+          <summary className="flex items-center justify-between min-h-[56px] px-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            <span className="flex items-center gap-2 text-sm font-medium text-action">
+              Order summary ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})
+              <ChevronDown className="w-4 h-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+            </span>
+            <span className="font-semibold tabular-nums">{formatINR(total)}</span>
+          </summary>
+          <div className="px-4 pb-4">{summaryRows}</div>
+        </details>
 
-              {/* Address Selection */}
+        <div className="grid lg:grid-cols-[7fr_5fr] gap-6 lg:gap-10 items-start">
+          <form id="checkout-form" onSubmit={handlePayment} className="space-y-5 max-w-xl lg:max-w-none">
+            {/* 1. Contact */}
+            <section className="panel" aria-labelledby="co-contact">
+              <div id="co-contact">{sectionHead(1, 'Contact')}</div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="co-name" className="field-label">Full name <span className="text-ink-mute font-normal">(required)</span></label>
+                  <input id="co-name" type="text" name="name" value={shippingInfo.name} onChange={handleChange} required
+                    autoComplete="name" className="input-field" readOnly={readOnlyAddress} />
+                </div>
+                <div>
+                  <label htmlFor="co-phone" className="field-label">Phone number <span className="text-ink-mute font-normal">(required)</span></label>
+                  <input id="co-phone" type="tel" inputMode="numeric" name="phone" value={shippingInfo.phone} onChange={handleChange} required
+                    autoComplete="tel-national" maxLength={10} className="input-field" readOnly={readOnlyAddress} />
+                </div>
+              </div>
+            </section>
+
+            {/* 2. Delivery address */}
+            <section className="panel" aria-labelledby="co-address">
+              <div id="co-address">{sectionHead(2, 'Delivery address')}</div>
+
               {addresses.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Choose Delivery Address</h3>
-                  <div className="space-y-3">
-                    {addresses.map((address, index) => (
-                      <div
-                        key={address._id || index}
-                        onClick={() => handleAddressSelect(address, index)}
-                        className={`p-4 border-2 rounded-lg cursor-pointer transition ${
-                          selectedAddress === index
-                            ? 'border-desi-gold bg-desi-cream/30'
-                            : 'border-gray-200 hover:border-desi-cream'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <MapPin className="w-4 h-4 text-desi-brown" />
-                              {address.isDefault && (
-                                <span className="bg-desi-gold text-white text-xs px-2 py-1 rounded-full font-medium">
-                                  Default
-                                </span>
-                              )}
-                            </div>
-                            <p className="font-medium text-gray-900">{address.street}</p>
-                            <p className="text-gray-600 text-sm">
-                              {address.city}, {address.state} - {address.pincode}
-                            </p>
-                          </div>
-                          {selectedAddress === index && (
-                            <CheckCircle className="w-5 h-5 text-desi-gold" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Add New Address Option */}
-                    <div
-                      onClick={handleNewAddress}
-                      className={`p-4 border-2 border-dashed rounded-lg cursor-pointer transition ${
-                        useNewAddress
-                          ? 'border-desi-gold bg-desi-cream/30'
-                          : 'border-gray-300 hover:border-desi-gold'
+                <div className="space-y-3 mb-5" role="radiogroup" aria-label="Saved addresses">
+                  {addresses.map((address, index) => (
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={selectedAddress === index}
+                      key={address._id || index}
+                      onClick={() => handleAddressSelect(address, index)}
+                      className={`w-full text-left p-4 border-[1.5px] rounded-lg transition-colors flex items-start gap-3 ${
+                        selectedAddress === index ? 'border-action bg-action-tint' : 'border-line bg-white hover:border-sand'
                       }`}
                     >
-                      <div className="flex items-center justify-center space-x-2 text-desi-brown">
-                        <Plus className="w-5 h-5" />
-                        <span className="font-medium">Use New Address</span>
-                        {useNewAddress && <CheckCircle className="w-5 h-5 text-desi-gold" />}
-                      </div>
-                    </div>
-                  </div>
+                      <MapPin className="w-5 h-5 mt-0.5 text-brand flex-shrink-0" aria-hidden="true" />
+                      <span className="flex-1 min-w-0">
+                        <span className="block font-medium text-ink">
+                          {address.street}
+                          {address.isDefault && <span className="ml-2 align-middle badge bg-brand">Default</span>}
+                        </span>
+                        <span className="block text-sm text-ink-soft">{address.city}, {address.state} - {address.pincode}</span>
+                        <span className="block text-sm text-ink-mute">Contact: {address.phone || user?.phone}</span>
+                      </span>
+                      {selectedAddress === index && <CheckCircle className="w-5 h-5 text-action flex-shrink-0" aria-hidden="true" />}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={useNewAddress}
+                    onClick={handleNewAddress}
+                    className={`w-full p-4 border-[1.5px] border-dashed rounded-lg flex items-center justify-center gap-2 font-medium min-h-[56px] transition-colors ${
+                      useNewAddress ? 'border-action bg-action-tint text-action-dark' : 'border-sand text-brand hover:border-brand'
+                    }`}
+                  >
+                    <Plus className="w-5 h-5" aria-hidden="true" /> Use a new address
+                  </button>
+                </div>
+              )}
 
-                  {addresses.length === 0 && (
-                    <div className="text-center py-6">
-                      <p className="text-gray-600 mb-4">
-                        No saved addresses found. (Debug: user.addresses = {user?.addresses?.length || 'undefined'})
-                      </p>
-                      <Link
-                        to="/profile"
-                        className="text-desi-gold hover:text-yellow-600 font-medium"
-                      >
-                        Add addresses in your profile
-                      </Link>
-                    </div>
+              {showForm && (
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="co-pin" className="field-label">PIN code <span className="text-ink-mute font-normal">(required)</span></label>
+                    <input id="co-pin" type="text" inputMode="numeric" name="pincode" value={shippingInfo.pincode} onChange={handleChange} required
+                      autoComplete="postal-code" maxLength={6} pattern="[0-9]{6}" title="6-digit PIN code" className="input-field" />
+                  </div>
+                  <div className="hidden sm:block" aria-hidden="true"></div>
+                  <div>
+                    <label htmlFor="co-city" className="field-label">City <span className="text-ink-mute font-normal">(required)</span></label>
+                    <input id="co-city" type="text" name="city" value={shippingInfo.city} onChange={handleChange} required
+                      autoComplete="address-level2" className="input-field" />
+                  </div>
+                  <div>
+                    <label htmlFor="co-state" className="field-label">State <span className="text-ink-mute font-normal">(required)</span></label>
+                    <input id="co-state" type="text" name="state" value={shippingInfo.state} onChange={handleChange} required
+                      autoComplete="address-level1" className="input-field" />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="co-street" className="field-label">House / flat and street <span className="text-ink-mute font-normal">(required)</span></label>
+                    <input id="co-street" type="text" name="street" value={shippingInfo.street} onChange={handleChange} required
+                      autoComplete="address-line1" className="input-field" placeholder="House/Flat No., Street name" />
+                  </div>
+                  <label className="sm:col-span-2 flex items-center gap-3 min-h-[44px] cursor-pointer">
+                    <input type="checkbox" checked={saveNewAddress} onChange={(e) => setSaveNewAddress(e.target.checked)}
+                      className="w-6 h-6 rounded border-[#CDBBA4] text-action focus:ring-action" />
+                    <span className="text-ink">Save this address for next time</span>
+                  </label>
+                  {addresses.length > 0 && (
+                    <p className="sm:col-span-2 text-sm"><Link to="/profile" className="text-action underline underline-offset-2">Manage saved addresses</Link></p>
                   )}
                 </div>
               )}
+            </section>
 
-              {/* Selected Address Summary */}
-              {!useNewAddress && selectedAddress !== null && addresses[selectedAddress] && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Selected Delivery Address</h3>
-                  <div className="bg-desi-cream/20 border border-desi-gold rounded-lg p-4">
-                    <div className="flex items-start space-x-3">
-                      <MapPin className="w-5 h-5 text-desi-brown mt-1" />
-                      <div>
-                        <p className="font-medium text-gray-900">{addresses[selectedAddress].street}</p>
-                        <p className="text-gray-600">
-                          {addresses[selectedAddress].city}, {addresses[selectedAddress].state} - {addresses[selectedAddress].pincode}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Contact: {addresses[selectedAddress].phone || user.phone}
-                        </p>
-                        {addresses[selectedAddress].isDefault && (
-                          <span className="inline-block bg-desi-gold text-white text-xs px-2 py-1 rounded-full font-medium mt-1">
-                            Default Address
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Address Form */}
-              {(useNewAddress || addresses.length === 0) && (
-                <>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {addresses.length > 0 ? 'New Address Details' : 'Shipping Information'}
-                    </h3>
-                    {addresses.length > 0 && (
-                      <Link
-                        to="/profile"
-                        className="text-sm text-desi-gold hover:text-yellow-600 font-medium"
-                      >
-                        Manage addresses in profile
-                      </Link>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Contact and Address Form */}
-            <form onSubmit={handlePayment} className="bg-white rounded-xl shadow-md p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Contact Information</h2>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={shippingInfo.name}
-                    onChange={handleChange}
-                    required
-                    className="input-field"
-                    readOnly={!useNewAddress && selectedAddress !== null}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={shippingInfo.phone}
-                    onChange={handleChange}
-                    required
-                    className="input-field"
-                    readOnly={!useNewAddress && selectedAddress !== null}
-                  />
-                </div>
-
-                {(useNewAddress || addresses.length === 0) && (
-                  <>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Street Address *
-                      </label>
-                      <input
-                        type="text"
-                        name="street"
-                        value={shippingInfo.street}
-                        onChange={handleChange}
-                        required
-                        className="input-field"
-                        placeholder="House/Flat No., Street Name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        City *
-                      </label>
-                      <input
-                        type="text"
-                        name="city"
-                        value={shippingInfo.city}
-                        onChange={handleChange}
-                        required
-                        className="input-field"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        State *
-                      </label>
-                      <input
-                        type="text"
-                        name="state"
-                        value={shippingInfo.state}
-                        onChange={handleChange}
-                        required
-                        className="input-field"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        PIN Code *
-                      </label>
-                      <input
-                        type="text"
-                        name="pincode"
-                        value={shippingInfo.pincode}
-                        onChange={handleChange}
-                        required
-                        className="input-field"
-                      />
-                    </div>
-
-                    {/* Save Address Checkbox */}
-                    <div className="md:col-span-2">
-                      <label className="flex items-center space-x-3 p-4 border border-desi-cream rounded-lg bg-desi-cream/10">
-                        <input
-                          type="checkbox"
-                          checked={saveNewAddress}
-                          onChange={(e) => setSaveNewAddress(e.target.checked)}
-                          className="h-4 w-4 text-desi-gold border-gray-300 rounded focus:ring-desi-gold"
-                        />
-                        <div>
-                          <p className="font-medium text-gray-900">Save this address for future orders</p>
-                          <p className="text-sm text-gray-600">
-                            This address will be added to your profile for quick checkout next time
-                          </p>
-                        </div>
-                      </label>
-                    </div>
-                  </>
-                )}
-
-                {selectedAddress !== null && !useNewAddress && (
-                  <div className="md:col-span-2">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="font-medium text-gray-900 mb-2">Selected Address:</h4>
-                      <p className="text-gray-700">
-                        {shippingInfo.street}<br />
-                        {shippingInfo.city}, {shippingInfo.state} - {shippingInfo.pincode}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Payment Method Selection */}
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method</h3>
-                <div className="space-y-4">
-                  <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="razorpay"
-                      checked={paymentMethod === 'razorpay'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="h-4 w-4 text-desi-brown focus:ring-desi-brown"
-                    />
-                    <div>
-                      <p className="font-medium">Online Payment</p>
-                      <p className="text-sm text-gray-500">Pay securely with UPI, Card, or Net Banking</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      value="cod"
-                      checked={paymentMethod === 'cod'}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="h-4 w-4 text-desi-brown focus:ring-desi-brown"
-                    />
-                    <div>
-                      <p className="font-medium">Cash on Delivery</p>
-                      <p className="text-sm text-gray-500">
-                        Pay with cash when your order arrives
-                        {codCharges > 0 && ` (+ ₹${codCharges} COD charges)`}
-                      </p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full mt-8 btn-primary flex items-center justify-center"
-              >
-                {loading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    {paymentMethod === 'cod' ? 'Place Order - Cash on Delivery' : `Pay ₹${total.toFixed(2)}`}
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-
-          {/* Order Summary */}
-          <div>
-            <div className="bg-white rounded-xl shadow-md p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
-
-              <div className="space-y-4 mb-6">
-                {cartItems.map((item) => (
-                  <div key={item._id} className="flex items-center space-x-4">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{item.name}</p>
-                      <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                    </div>
-                    <p className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="border-t pt-4 space-y-2 mb-4">
-                <div className="flex justify-between text-gray-700">
-                  <span>Subtotal</span>
-                  <span>₹{subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-gray-700">
-                  <span>Shipping</span>
-                  <span>{shipping === 0 ? 'FREE' : `₹${Number(shipping).toFixed(2)}`}</span>
-                </div>
-                {settings && settings.pricing.taxRate > 0 && (
-                  <div className="flex justify-between text-gray-700">
-                    <span>Tax ({settings.pricing.taxRate}% GST)</span>
-                    <span>₹{Number(tax).toFixed(2)}</span>
-                  </div>
-                )}
-                {paymentMethod === 'cod' && settings && settings.pricing.codCharges > 0 && (
-                  <div className="flex justify-between text-gray-700">
-                    <span>COD Charges</span>
-                    <span>₹{Number(settings.pricing.codCharges).toFixed(2)}</span>
-                  </div>
-                )}
-                {appliedPromocode && (
-                  <div className="flex justify-between text-green-600">
-                    <span className="flex items-center">
-                      💰 Promocode Discount ({appliedPromocode.code})
+            {/* 3. Payment */}
+            <section className="panel" aria-labelledby="co-pay">
+              <div id="co-pay">{sectionHead(3, 'Payment')}</div>
+              <div className="space-y-3" role="radiogroup" aria-label="Payment method">
+                <label className={`flex items-start gap-3 p-4 border-[1.5px] rounded-lg cursor-pointer transition-colors min-h-[64px] ${
+                  paymentMethod === 'razorpay' ? 'border-action bg-action-tint' : 'border-line hover:border-sand'
+                }`}>
+                  <input type="radio" name="paymentMethod" value="razorpay" checked={paymentMethod === 'razorpay'}
+                    onChange={(e) => setPaymentMethod(e.target.value)} className="mt-0.5 w-5 h-5 text-action focus:ring-action" />
+                  <span>
+                    <span className="block font-medium text-ink">UPI / Cards / Net banking</span>
+                    <span className="block text-sm text-ink-soft">Secure payment by Razorpay</span>
+                  </span>
+                </label>
+                <label className={`flex items-start gap-3 p-4 border-[1.5px] rounded-lg cursor-pointer transition-colors min-h-[64px] ${
+                  paymentMethod === 'cod' ? 'border-action bg-action-tint' : 'border-line hover:border-sand'
+                }`}>
+                  <input type="radio" name="paymentMethod" value="cod" checked={paymentMethod === 'cod'}
+                    onChange={(e) => setPaymentMethod(e.target.value)} className="mt-0.5 w-5 h-5 text-action focus:ring-action" />
+                  <span>
+                    <span className="block font-medium text-ink">Cash on delivery</span>
+                    <span className="block text-sm text-ink-soft">
+                      Pay when the parcel arrives
+                      {settings?.pricing?.codCharges > 0 && ` (+ ${formatINR(settings.pricing.codCharges)} COD charges)`}
                     </span>
-                    <span>-₹{Number(promocodeDiscount).toFixed(2)}</span>
-                  </div>
-                )}
+                  </span>
+                </label>
               </div>
 
-              <div className="border-t pt-4">
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span className="text-desi-brown">₹{Number(total).toFixed(2)}</span>
-                </div>
-                {appliedPromocode && (
-                  <div className="text-sm text-green-600 mt-1 text-right">
-                    You saved ₹{Number(promocodeDiscount).toFixed(2)}!
-                  </div>
-                )}
-              </div>
+              <button type="submit" disabled={loading} aria-busy={loading} className="btn-primary w-full mt-6 hidden lg:inline-flex">
+                {submitContent}
+              </button>
+              <p className="hidden lg:flex items-center justify-center gap-1.5 text-sm text-ink-soft mt-3">
+                <Lock className="w-4 h-4" aria-hidden="true" /> Secure checkout
+              </p>
+            </section>
+
+            {/* Trust row */}
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-ink-soft px-1">
+              <span className="inline-flex items-center gap-1.5 min-h-[32px]"><Lock className="w-4 h-4 text-leaf" aria-hidden="true" /> Payments secured by Razorpay</span>
+              <Link to="/returns-policy" className="inline-flex items-center min-h-[32px] hover:text-action underline underline-offset-2">7-day returns</Link>
+              <a href="tel:+916203009518" className="inline-flex items-center gap-1.5 min-h-[32px] hover:text-action"><Phone className="w-4 h-4" aria-hidden="true" /> Need help? Call us</a>
             </div>
-          </div>
+          </form>
+
+          {/* Desktop summary */}
+          <aside className="hidden lg:block panel sticky top-24" aria-label="Order summary">
+            <h2 className="font-display text-xl font-semibold mb-4">Order summary</h2>
+            {summaryRows}
+          </aside>
         </div>
+      </div>
+
+      {/* Sticky pay bar (mobile) */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line shadow-raised px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-3 max-w-xl mx-auto">
+          <div className="leading-tight">
+            <p className="text-xs text-ink-mute">Total</p>
+            <p className="text-lg font-semibold tabular-nums">{formatINR(total)}</p>
+          </div>
+          <button type="submit" form="checkout-form" disabled={loading} aria-busy={loading} className="btn-primary flex-1">
+            {submitContent}
+          </button>
+        </div>
+        <p className="flex items-center justify-center gap-1.5 text-xs text-ink-soft mt-1.5">
+          <Lock className="w-3.5 h-3.5" aria-hidden="true" /> Secure checkout &middot; Easy returns
+        </p>
       </div>
     </div>
   );
