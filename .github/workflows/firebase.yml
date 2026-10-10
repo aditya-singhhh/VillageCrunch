@@ -65,7 +65,14 @@ jobs:
 
       - name: Deploy
         if: github.event_name == 'push' || contains(inputs.action, 'deploy')
-        run: ./scripts/deploy-firebase.sh
+        run: |
+          set -o pipefail
+          ./scripts/deploy-firebase.sh 2>&1 | tee /tmp/deploy.log || {
+            # surface the end of the log as an annotation so it is readable without opening the log
+            tail -n 25 /tmp/deploy.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > /tmp/tail.txt
+            echo "::error title=Deploy failed::$(cat /tmp/tail.txt)"
+            exit 1
+          }
 
       - name: Create admin
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'create-admin'

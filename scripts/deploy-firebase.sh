@@ -19,7 +19,7 @@ cd "$(dirname "$0")/.."
 
 deploy_backend() {
   echo "==> Deploying Cloud Run service ${SERVICE} (${REGION})"
-  gcloud run deploy "$SERVICE" \
+  gcloud run deploy "$SERVICE" --quiet \
     --project "$PROJECT_ID" --region "$REGION" \
     --source . \
     --execution-environment gen2 \
