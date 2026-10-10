@@ -23,6 +23,8 @@ Firestore: `firestore.rules` denies all client access; only the API (Admin SDK) 
 > (Cloud Run 2M requests/month, Firestore 50k reads + 20k writes/day) but **set a budget
 > alert** (step 1).
 
+> **Prefer not to type commands?** Use [FIREBASE_AUTOMATED_SETUP.md](FIREBASE_AUTOMATED_SETUP.md): GitHub Actions runs steps 1–5 for you.
+
 Replace `PROJECT_ID` below with your project id. Region used throughout: `asia-south1` (Mumbai).
 
 ---
