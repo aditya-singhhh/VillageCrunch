@@ -231,7 +231,7 @@ const Profile = () => {
 
   return (
     <div className="bg-paper">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
         
         {/* Hero Section with Profile Overview */}
         <div className="relative bg-brand rounded-lg shadow-card p-8 mb-8 overflow-hidden">

@@ -51,7 +51,7 @@ const Section = ({ title, children }) => {
 
 const Footer = () => (
   <footer className="bg-brand-dark text-cream mt-0">
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10 pb-5">
+    <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10 pt-8 md:pt-10 pb-5">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-x-10 gap-y-2 md:gap-y-8">
         <div className="mb-4 md:mb-0">
           <Logo light size="text-[26px]" />

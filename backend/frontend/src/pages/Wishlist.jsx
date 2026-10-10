@@ -87,7 +87,7 @@ const Wishlist = () => {
 
   return (
     <div className="bg-paper py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
         
         {/* Header */}
         <div className="mb-8">

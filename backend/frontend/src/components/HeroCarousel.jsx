@@ -97,7 +97,7 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
   };
 
   // Reserve the final height before data arrives: no layout shift
-  const frame = 'h-[204px] sm:h-[240px] md:h-[300px] lg:h-[340px]';
+  const frame = 'h-[204px] sm:h-[240px] md:h-[300px] lg:h-[360px]';
   if (!ready || !count) return <div className="container-page pt-3 md:pt-5"><div className={`${frame} rounded-xl bg-cream`} aria-hidden="true" /></div>;
 
   const arrow = 'hidden md:inline-flex absolute top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full bg-white/90 text-ink shadow-raised hover:bg-white';
