@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, LogOut, Search, Phone, Package, Heart, UserCircle } from 'lucide-react';
+import { ShoppingCart, User, Menu, LogOut, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import Logo from './Logo';
 import CartDrawer from './CartDrawer';
+import MobileMenu from './MobileMenu';
 
 const SHOP_LINKS = [
   { to: '/products', label: 'Shop all' },
@@ -31,7 +32,6 @@ const Navbar = () => {
   const { getCartCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
-  const drawerRef = useRef(null);
   const menuBtnRef = useRef(null);
   const searchRef = useRef(null);
   const count = getCartCount();
@@ -44,32 +44,13 @@ const Navbar = () => {
     setSearchOpen(false);
   }, [location.pathname, location.search]);
 
-  // Drawer: ESC, scroll lock, focus trap
+  // Close the mobile drawer / desktop cart when the viewport crosses the md breakpoint
   useEffect(() => {
-    if (!drawerOpen) return undefined;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const node = drawerRef.current;
-    const focusables = () => node ? node.querySelectorAll('a[href],button:not([disabled])') : [];
-    focusables()[0]?.focus();
-    const onKey = (e) => {
-      if (e.key === 'Escape') setDrawerOpen(false);
-      if (e.key === 'Tab') {
-        const f = focusables();
-        if (!f.length) return;
-        const first = f[0];
-        const last = f[f.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    };
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      document.removeEventListener('keydown', onKey);
-      menuBtnRef.current?.focus();
-    };
-  }, [drawerOpen]);
+    const mq = window.matchMedia('(min-width: 768px)');
+    const on = () => { setDrawerOpen(false); setCartOpen(false); };
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
 
   useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
 
@@ -229,60 +210,7 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Mobile drawer */}
-      {drawerOpen && (
-        <div className="md:hidden fixed inset-0 z-[60]">
-          <div className="absolute inset-0 bg-ink/50 animate-fade-in" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-          <div
-            ref={drawerRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu"
-            className="absolute left-0 top-0 bottom-0 w-[85%] max-w-xs bg-paper shadow-raised flex flex-col animate-drawer-left"
-          >
-            <div className="flex items-center justify-between h-14 px-3 border-b border-line">
-              <Logo />
-              <button onClick={() => setDrawerOpen(false)} className="icon-btn" aria-label="Close menu">
-                <X className="w-6 h-6" strokeWidth={1.75} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto py-2">
-              <p className="px-5 pt-3 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-mute">Shop</p>
-              {SHOP_LINKS.map((l) => (
-                <Link key={l.label} to={l.to} className="flex items-center h-12 px-5 text-base font-medium hover:bg-cream">{l.label}</Link>
-              ))}
-              <div className="my-2 border-t border-line" />
-              <Link to="/about" className="flex items-center h-12 px-5 text-base font-medium hover:bg-cream">About</Link>
-              <Link to="/contact" className="flex items-center h-12 px-5 text-base font-medium hover:bg-cream">Contact</Link>
-              <div className="my-2 border-t border-line" />
-              {user ? (
-                <>
-                  <Link to="/orders" className="flex items-center gap-3 h-12 px-5 text-base hover:bg-cream"><Package className="w-5 h-5 text-ink-soft" /> My orders</Link>
-                  <Link to="/wishlist" className="flex items-center gap-3 h-12 px-5 text-base hover:bg-cream"><Heart className="w-5 h-5 text-ink-soft" /> Wishlist</Link>
-                  <Link to="/profile" className="flex items-center gap-3 h-12 px-5 text-base hover:bg-cream"><UserCircle className="w-5 h-5 text-ink-soft" /> Profile</Link>
-                  {user.role === 'admin' && (
-                    <Link to="/admin" className="flex items-center gap-3 h-12 px-5 text-base hover:bg-cream"><User className="w-5 h-5 text-ink-soft" /> Admin</Link>
-                  )}
-                  <button onClick={handleLogout} className="w-full flex items-center gap-3 h-12 px-5 text-base text-berry hover:bg-berry-tint">
-                    <LogOut className="w-5 h-5" /> Logout
-                  </button>
-                </>
-              ) : (
-                <div className="px-5 py-3 flex flex-col gap-2">
-                  <Link to="/login" className="btn-primary w-full">Login</Link>
-                  <Link to="/register" className="btn-secondary w-full">Create account</Link>
-                </div>
-              )}
-            </div>
-            <div className="border-t border-line px-5 py-4">
-              <a href="tel:+916203009518" className="inline-flex items-center gap-2 h-11 text-sm font-medium text-brand">
-                <Phone className="w-4 h-4" /> +91 62030 09518
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
+      <MobileMenu open={drawerOpen} onClose={() => setDrawerOpen(false)} links={SHOP_LINKS} user={user} onLogout={handleLogout} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </header>
   );

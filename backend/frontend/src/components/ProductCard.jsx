@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { createReview, toggleWishlist, getWishlist } from '../utils/api';
-import { formatINR, formatCategory, discountPercent, unitPrice, averageRating } from '../utils/format';
+import { formatINR, discountPercent, averageRating } from '../utils/format';
 import toast from 'react-hot-toast';
 
 const ProductCard = ({ product, showQuickRating = false, userCanRate = false, onRatingSubmit, compact = false }) => {
@@ -105,7 +105,6 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
   const isMasalaProduct = product.category === 'masala';
   const outOfStock = product.stock === 0;
   const discount = discountPercent(product.price, product.originalPrice);
-  const perUnit = unitPrice(product.price, product.weight);
 
   // Generate a fallback ID if _id is missing (for products from JSON file)
   const productId = product._id || product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -123,7 +122,7 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
           className={`zoom-img w-full h-full object-cover ${outOfStock ? 'opacity-50' : ''}`}
         />
         {discount > 0 && !outOfStock && !isMasalaProduct && (
-          <span className="badge bg-leaf absolute top-2 left-2">Save {discount}%</span>
+          <span className="badge bg-leaf absolute top-2 left-2">{discount}% OFF</span>
         )}
         {isMasalaProduct && (
           <span className="badge bg-brand absolute top-2 left-2">Coming soon</span>
@@ -148,10 +147,8 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
         </button>
       )}
 
-      <div className={`flex flex-col flex-1 ${compact ? 'p-2.5' : 'p-3 sm:p-4'}`}>
-        <p className="text-xs uppercase tracking-wide text-ink-mute mb-1">{formatCategory(product.category)}</p>
-
-        <h3 className="font-sans text-base font-semibold leading-snug text-ink line-clamp-2 min-h-[2.75rem]">
+      <div className={`flex flex-col flex-1 ${compact ? 'p-2.5' : 'p-3'}`}>
+        <h3 className="font-sans text-base font-semibold leading-snug text-ink line-clamp-2 min-h-[2.75rem] text-[15px]">
           <Link
             to={`/product/${productId}`}
             className="after:absolute after:inset-0 after:content-[''] focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-focus"
@@ -195,7 +192,6 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
               <span className="text-sm text-ink-mute line-through tabular-nums">{formatINR(product.originalPrice)}</span>
             )}
           </div>
-          {perUnit && <p className="text-xs text-ink-mute mt-0.5">{perUnit}</p>}
         </div>
 
         <div className="mt-auto pt-3">
