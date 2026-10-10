@@ -1203,7 +1203,7 @@ const saveSettings = async (e) => {
                 <tr>
                   {['Order #', 'Customer', 'Date', 'Products & Items', 'Total', 'Payment', 'Status', 'Actions'].map(
                     (head) => (
-                      <th key={head} className="px-6 py-4 text-left text-sm font-semibold text-desi-brown">
+                      <th key={head} className="px-4 py-4 text-left text-sm font-semibold text-desi-brown">
                         {head}
                       </th>
                     )
@@ -1216,16 +1216,16 @@ const saveSettings = async (e) => {
                   const StatusIcon = status.icon;
                   return (
                     <tr key={order._id} className="hover:bg-cream transition">
-                      <td className="px-6 py-4 font-mono font-semibold">#{order.orderNumber}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 font-mono font-semibold">#{order.orderNumber}</td>
+                      <td className="px-4 py-4">
                         <div className="space-y-1">
                           <p className="font-medium text-ink">{order.user?.name || order.shippingAddress?.name}</p>
                           <p className="text-sm text-ink-soft">{order.user?.email}</p>
                           <p className="text-sm text-ink-mute">{order.user?.phone || order.shippingAddress?.phone}</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
-                      <td className="px-6 py-4 text-sm">
+                      <td className="px-4 py-4 text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
+                      <td className="px-4 py-4 text-sm">
                         <div className="space-y-2">
                           <p className="font-medium text-ink">{order.items.length} items</p>
                           <div className="space-y-1">
@@ -1297,8 +1297,8 @@ const saveSettings = async (e) => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-semibold">₹{order.totalPrice.toFixed(2)}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 font-semibold">₹{order.totalPrice.toFixed(2)}</td>
+                      <td className="px-4 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${
                             order.isPaid ? 'bg-leaf-tint text-leaf' : 'bg-action-tint text-action-dark'
@@ -1307,13 +1307,13 @@ const saveSettings = async (e) => {
                           {order.paymentInfo.method.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className={`inline-flex items-center px-3 py-1 rounded-full ${status.bgColor} ${status.color}`}>
                           <StatusIcon className="w-4 h-4 mr-2" />
                           <span className="text-sm font-semibold">{status.label}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <button
                           onClick={() => {
                             setSelectedOrder(order);
@@ -1595,7 +1595,7 @@ const saveSettings = async (e) => {
                         const statusCfg = contactStatusConfig[contact.status];
                         return (
                           <tr key={contact._id} className="hover:bg-cream">
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-4">
                               <div>
                                 <div className="text-sm font-medium text-ink">{contact.name}</div>
                                 <div className="text-sm text-ink-mute flex items-center">
@@ -1608,7 +1608,7 @@ const saveSettings = async (e) => {
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-4">
                               <div className="text-sm text-ink">{contact.subject}</div>
                               <div className="text-sm text-ink-mute truncate max-w-xs">
                                 {contact.message.length > 50 
@@ -1617,18 +1617,18 @@ const saveSettings = async (e) => {
                                 }
                               </div>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-4">
                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusCfg.bgColor} ${statusCfg.color} ${statusCfg.borderColor} border`}>
                                 {statusCfg.label}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-sm text-ink-mute">
+                            <td className="px-4 py-4 text-sm text-ink-mute">
                               <div className="flex items-center">
                                 <Calendar className="w-4 h-4 mr-1" />
                                 {new Date(contact.createdAt).toLocaleDateString()}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-sm font-medium">
+                            <td className="px-4 py-4 text-sm font-medium">
                               <button
                                 onClick={() => {
                                   setSelectedContact(contact);
@@ -1815,7 +1815,7 @@ const saveSettings = async (e) => {
                     <tbody className="bg-white divide-y divide-line">
                       {filteredProducts.map((product) => (
                         <tr key={product._id} className="hover:bg-cream">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               {product.image ? (
                                 <div className="relative mr-4">
@@ -1848,12 +1848,12 @@ const saveSettings = async (e) => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-brand">
                               {product.category}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm text-ink">
                               <div className="flex items-center space-x-2">
                                 <span className="font-medium">₹{product.price}</span>
@@ -1866,7 +1866,7 @@ const saveSettings = async (e) => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <span className={`text-sm font-medium ${
                                 product.stock <= 0 ? 'text-berry' :
@@ -1887,14 +1887,14 @@ const saveSettings = async (e) => {
                               )}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               product.isActive !== false ? 'bg-leaf-tint text-leaf' : 'bg-cream text-ink'
                             }`}>
                               {product.isActive !== false ? 'Active' : 'Inactive'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => openProductEditModal(product)}
@@ -2567,39 +2567,39 @@ const saveSettings = async (e) => {
                         )
                         .map((promocode) => (
                           <tr key={promocode._id} className="hover:bg-cream">
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="bg-cream text-brand px-2 py-1 rounded text-sm font-medium">
                                   {promocode.code}
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-4">
                               <div className="text-sm text-ink">{promocode.description}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <div className="text-sm text-ink">
                                 {promocode.type === 'percentage' ? `${promocode.value}%` : `₹${promocode.value}`}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <div className="text-sm text-ink">
                                 {new Date(promocode.endDate).toLocaleDateString()}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                                 promocode.isActive ? 'bg-leaf-tint text-leaf' : 'bg-berry-tint text-berry'
                               }`}>
                                 {promocode.isActive ? 'Active' : 'Inactive'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <div className="text-sm text-ink">
                                 {promocode.usageCount || 0}/{promocode.usageLimit || '∞'}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                               <button
                                 onClick={() => {
                                   setSelectedPromocode(promocode);
