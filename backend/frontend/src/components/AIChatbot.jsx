@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Loader2, Sparkles, Headphones, User, Upload, Im
 import { getProducts } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const AIChatbot = () => {
   const { user } = useAuth();
@@ -95,7 +96,7 @@ const AIChatbot = () => {
       setShowAgentOptions(false);
       
       // Create a new support ticket
-      const response = await fetch('http://localhost:8080/api/support/create', {
+      const response = await fetch(`${API_URL}/support/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -483,7 +484,7 @@ const AIChatbot = () => {
           formData.append('image', imageFile);
         }
 
-        const response = await fetch(`http://localhost:8080/api/support/${currentTicketId}/message`, {
+        const response = await fetch(`${API_URL}/support/${currentTicketId}/message`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`

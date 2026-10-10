@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const contactSchema = new mongoose.Schema({
   name: {
@@ -42,4 +43,4 @@ const contactSchema = new mongoose.Schema({
 contactSchema.index({ createdAt: -1 });
 contactSchema.index({ status: 1 });
 
-module.exports = mongoose.model('Contact', contactSchema);
+module.exports = defineModel('Contact', contactSchema, { collection: 'contacts' });

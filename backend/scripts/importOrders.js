@@ -1,5 +1,5 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const db = require('../db');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
@@ -11,14 +11,10 @@ const generateOrderNumber = () => {
 
 const createSampleOrders = async () => {
   try {
-    // Connect to MongoDB
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://sauravsinghking9876_db_user:Saurav867882@villagecluster.d9ah8fv.mongodb.net/', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // Connect to Firestore
+    await db.connect();
     
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-
+    
     // Get users and products for reference
     const users = await User.find({});
     const products = await Product.find({});
@@ -105,20 +101,17 @@ const createSampleOrders = async () => {
     console.log(`✅ Successfully imported ${createdOrders.length} orders`);
 
     // Print some order statistics
-    const ordersByStatus = await Order.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } }
-    ]);
+    const ordersByStatus = [...createdOrders.reduce((m, o) => m.set(o.status, (m.get(o.status) || 0) + 1), new Map())]
+      .map(([status, count]) => ({ _id: status, count }));
 
     console.log('\nOrders by status:');
     ordersByStatus.forEach(status => {
       console.log(`${status._id}: ${status.count} orders`);
     });
 
-    const totalRevenue = await Order.aggregate([
-      { $group: { _id: null, total: { $sum: '$totalPrice' } } }
-    ]);
+    const totalRevenue = createdOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
-    console.log(`\nTotal Revenue: ₹${totalRevenue[0].total.toFixed(2)}`);
+    console.log(`\nTotal Revenue: ₹${totalRevenue.toFixed(2)}`);
 
     process.exit(0);
   } catch (error) {

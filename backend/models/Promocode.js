@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const promocodeSchema = new mongoose.Schema({
   code: {
@@ -278,4 +279,4 @@ promocodeSchema.methods.calculateDiscount = function(orderValue, products = [], 
   };
 };
 
-module.exports = mongoose.model('Promocode', promocodeSchema);
+module.exports = defineModel('Promocode', promocodeSchema, { collection: 'promocodes' });

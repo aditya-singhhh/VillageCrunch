@@ -73,21 +73,27 @@ const Products = () => {
         title: `${selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)} - Premium Quality Online`,
         description: `Buy premium ${selectedCategory} online at VillageCrunch. Fresh, natural, and authentic ${selectedCategory} with fast delivery across India. Shop now!`,
         keywords: `${selectedCategory} online, buy ${selectedCategory}, premium ${selectedCategory}, natural ${selectedCategory}`,
-        url: `/products?category=${selectedCategory}`
+        url: `/products?category=${encodeURIComponent(selectedCategory)}`,
+        canonical: `/products?category=${encodeURIComponent(selectedCategory)}`,
+        noIndex: false
       };
     } else if (searchTerm) {
       return {
         title: `Search Results for "${searchTerm}" - VillageCrunch Products`,
         description: `Find ${searchTerm} and related products at VillageCrunch. Premium quality dry fruits, makhana, and traditional snacks.`,
         keywords: `${searchTerm}, search products, dry fruits search`,
-        url: `/products?search=${searchTerm}`
+        url: `/products?search=${encodeURIComponent(searchTerm)}`,
+        canonical: '/products',
+        noIndex: true
       };
     } else {
       return {
         title: 'All Products - Premium Dry Fruits, Makhana & Traditional Snacks',
         description: 'Browse our complete collection of premium dry fruits, roasted makhana, thekua, and authentic Bihari snacks. Quality guaranteed with fast delivery.',
         keywords: 'all products, dry fruits collection, makhana varieties, thekua types, premium snacks',
-        url: '/products'
+        url: '/products',
+        canonical: '/products',
+        noIndex: false
       };
     }
   };
@@ -101,6 +107,8 @@ const Products = () => {
         description={seoData.description}
         keywords={seoData.keywords}
         url={seoData.url}
+        canonical={seoData.canonical}
+        noIndex={seoData.noIndex}
         breadcrumbs={[
           { name: 'Home', url: '/' },
           { name: 'Products', url: '/products' },

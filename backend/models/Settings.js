@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const settingsSchema = new mongoose.Schema({
+  // Single document with a fixed id
+  _id: { type: String, default: 'main' },
+
   // Pricing Settings - SIMPLIFIED TO MATCH FRONTEND
   pricing: {
     currency: {
@@ -109,8 +113,14 @@ const settingsSchema = new mongoose.Schema({
 settingsSchema.statics.getSettings = async function() {
   let settings = await this.findOne({});
   if (!settings) {
-    settings = new this({});
-    await settings.save();
+    try {
+      settings = new this({});
+      await settings.save();
+    } catch (err) {
+      // Another instance created it first (fixed id => ALREADY_EXISTS): read theirs
+      settings = await this.findOne({});
+      if (!settings) throw err;
+    }
   }
   return settings;
 };
@@ -121,4 +131,4 @@ settingsSchema.statics.updateSettings = async function(updates) {
   return await settings.save();
 };
 
-module.exports = mongoose.model('Settings', settingsSchema);
+module.exports = defineModel('Settings', settingsSchema, { collection: 'settings' });

@@ -3,122 +3,65 @@ const router = express.Router();
 const crypto = require('crypto');
 const razorpay = require('../config/razorpay');
 const { protect } = require('../middleware/auth');
-const { paymentRateLimit, securityMonitor, validatePrices } = require('../middleware/security');
+const { paymentRateLimit, securityMonitor } = require('../middleware/security');
 const LiveOrder = require('../models/LiveOrder');
-const Product = require('../models/Product');
+const { priceCart, cartSignature, PricingError } = require('../services/pricing');
+
+// Verified payments must outlive the 15 minute TTL used for abandoned checkouts,
+// otherwise a customer who paid could lose the record that proves it.
+const VERIFIED_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+// Abandoned/unpaid checkouts: Razorpay checkout can stay open for a while.
+const PENDING_RETENTION_MS = 2 * 60 * 60 * 1000;
+
+const safeEqual = (a, b) => {
+  const ab = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  return ab.length === bb.length && crypto.timingSafeEqual(ab, bb);
+};
 
 // @route   POST /api/payment/create-order
-// @desc    Create Razorpay order with all payment methods enabled
+// @desc    Create a Razorpay order. The amount is ALWAYS computed server-side
+//          from the cart; any amount sent by the client is ignored.
 // @access  Private
-router.post('/create-order', protect, paymentRateLimit, securityMonitor, validatePrices, async (req, res) => {
+router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (req, res) => {
   try {
     if (!razorpay) {
-      return res.status(503).json({ 
-        message: 'Payment service not configured. Please contact administrator.' 
+      return res.status(503).json({
+        message: 'Payment service not configured. Please contact administrator.',
       });
     }
-    
-    const { amount, cartItems } = req.body;
-    
-    // 🔒 CRITICAL SECURITY: Validate payment amount against cart items
-    if (cartItems && cartItems.length > 0) {
-      let calculatedAmount = 0;
-      
-      console.log('🔍 PAYMENT SECURITY: Validating payment amount');
-      console.log('🔍 User:', req.user._id);
-      console.log('🔍 Submitted amount:', amount);
-      console.log('🔍 Cart items:', cartItems);
-      
-      // Validate each cart item price
-      for (let item of cartItems) {
-        const product = await Product.findById(item.productId || item._id);
-        if (!product) {
-          console.log('❌ PAYMENT SECURITY: Product not found:', item.productId || item._id);
-          return res.status(400).json({ message: 'Invalid product in cart' });
-        }
-        
-        // Validate price match
-        if (parseFloat(item.price) !== parseFloat(product.price)) {
-          console.log('🚨 PAYMENT SECURITY ALERT: Price mismatch detected!');
-          console.log('🚨 Product:', product.name);
-          console.log('🚨 Database price:', product.price);
-          console.log('🚨 Submitted price:', item.price);
-          
-          return res.status(400).json({ 
-            message: 'Price validation failed. Please refresh your cart.',
-            code: 'PAYMENT_PRICE_MISMATCH'
-          });
-        }
-        
-        calculatedAmount += parseFloat(product.price) * parseInt(item.quantity);
-      }
-      
-      // Add basic shipping and tax (simplified calculation)
-      const shipping = calculatedAmount >= 500 ? 0 : 50;
-      const tax = calculatedAmount * 0.18;
-      const expectedTotal = calculatedAmount + shipping + tax;
-      
-      // Allow 1% tolerance for different calculation methods
-      if (Math.abs(parseFloat(amount) - expectedTotal) > (expectedTotal * 0.01)) {
-        console.log('🚨 PAYMENT SECURITY ALERT: Amount validation failed!');
-        console.log('🚨 Expected amount:', expectedTotal);
-        console.log('🚨 Submitted amount:', amount);
-        console.log('🚨 User:', req.user._id, req.user.email);
-        
-        return res.status(400).json({ 
-          message: 'Payment amount validation failed. Please try again.',
-          code: 'PAYMENT_AMOUNT_MISMATCH'
-        });
-      }
-      
-      console.log('✅ PAYMENT SECURITY: Amount validation passed');
+
+    const { cartItems, promocode } = req.body;
+    const promocodeCode = typeof promocode === 'string' ? promocode : promocode?.code;
+
+    const pricing = await priceCart({
+      items: cartItems,
+      paymentMethod: 'online',
+      promocodeCode,
+      userId: req.user._id,
+    });
+
+    if (pricing.total <= 0) {
+      return res.status(400).json({ message: 'Order total must be greater than zero' });
     }
 
-    const options = {
-      amount: amount * 100, // amount in paise (e.g., 1000 INR = 100000 paise)
+    const amountPaise = Math.round(pricing.total * 100);
+
+    const order = await razorpay.orders.create({
+      amount: amountPaise,
       currency: 'INR',
-      receipt: `receipt_${Date.now()}`,
-      payment_capture: 1, // Auto capture payment
+      receipt: `rcpt_${Date.now()}_${req.user._id.toString().slice(-6)}`,
+      payment_capture: 1,
       notes: {
         user_id: req.user._id.toString(),
         user_name: req.user.name,
-      }
-    };
+      },
+    });
 
-    const order = await razorpay.orders.create(options);
-    
-    // 💾 Save to live_orders collection for verification and order fulfillment
+    // Fail closed: if we cannot record what this payment is for, do not let the
+    // customer pay for it.
     try {
-      // Prepare cart items with full product details
-      const enhancedCartItems = [];
-      let itemsPrice = 0;
-      
-      if (cartItems && cartItems.length > 0) {
-        for (let item of cartItems) {
-          const product = await Product.findById(item.productId || item._id);
-          if (product) {
-            const enhancedItem = {
-              productId: product._id,
-              name: product.name,
-              price: product.price,
-              quantity: item.quantity,
-              weight: product.weight,
-              image: product.images && product.images.length > 0 ? product.images[0] : '',
-              category: product.category,
-            };
-            enhancedCartItems.push(enhancedItem);
-            itemsPrice += product.price * item.quantity;
-          }
-        }
-      }
-      
-      // Calculate price breakdown
-      const shipping = itemsPrice >= 500 ? 0 : 50;
-      const tax = itemsPrice * 0.18;
-      const totalPrice = itemsPrice + shipping + tax;
-      
-      // Create live order record
-      const liveOrder = new LiveOrder({
+      await LiveOrder.create({
         razorpayOrderId: order.id,
         user: req.user._id,
         userInfo: {
@@ -127,39 +70,36 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, validat
           email: req.user.email,
           phone: req.user.phone || '',
         },
-        amount: amount,
+        amount: pricing.total,
         currency: 'INR',
-        cartItems: enhancedCartItems,
+        cartItems: pricing.lines.map((l) => ({
+          productId: l.product,
+          name: l.name,
+          price: l.price,
+          quantity: l.quantity,
+          weight: l.weight,
+          image: l.image || '',
+          category: l.category,
+        })),
         priceBreakdown: {
-          itemsPrice: itemsPrice,
-          shippingPrice: shipping,
-          taxPrice: tax,
-          totalPrice: totalPrice,
-          promocodeDiscount: 0, // TODO: Add promocode logic if needed
+          itemsPrice: pricing.subtotal,
+          shippingPrice: pricing.shipping,
+          taxPrice: pricing.tax,
+          totalPrice: pricing.total,
+          promocodeDiscount: pricing.discount,
         },
         status: 'created',
+        expiryTime: new Date(Date.now() + PENDING_RETENTION_MS),
         notes: new Map([
           ['user_id', req.user._id.toString()],
-          ['user_name', req.user.name],
           ['order_source', 'web'],
-          ['creation_time', new Date().toISOString()],
+          ['promocode', promocodeCode ? String(promocodeCode).toUpperCase() : ''],
+          ['cart_signature', cartSignature(pricing.lines)],
         ]),
       });
-      
-      await liveOrder.save();
-      
-      console.log('✅ LIVE ORDER SAVED:', {
-        liveOrderId: liveOrder._id,
-        razorpayOrderId: order.id,
-        userId: req.user._id,
-        amount: amount,
-        itemsCount: enhancedCartItems.length
-      });
-      
     } catch (dbError) {
-      console.error('❌ Error saving live order to database:', dbError);
-      // Continue with payment flow even if DB save fails
-      // You might want to implement retry logic or alert system here
+      console.error('❌ Could not record live order, aborting payment:', dbError.message);
+      return res.status(500).json({ message: 'Could not start payment. Please try again.' });
     }
 
     res.json({
@@ -167,92 +107,68 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, validat
       amount: order.amount,
       currency: order.currency,
       keyId: process.env.RAZORPAY_KEY_ID,
+      // Authoritative breakdown so the UI can show exactly what will be charged
+      total: pricing.total,
     });
   } catch (error) {
-    console.error('Razorpay order creation error:', error);
-    res.status(500).json({ 
-      message: 'Error creating payment order',
-      error: error.message 
-    });
+    if (error instanceof PricingError) {
+      return res.status(error.status).json({ message: error.message, code: error.code });
+    }
+    console.error('Razorpay order creation error:', error.message);
+    res.status(500).json({ message: 'Error creating payment order' });
   }
 });
 
 // @route   POST /api/payment/verify
-// @desc    Verify Razorpay payment signature and update live order
+// @desc    Verify Razorpay signature and mark the live order as paid
 // @access  Private
 router.post('/verify', protect, async (req, res) => {
   try {
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
 
-    const body = razorpayOrderId + '|' + razorpayPaymentId;
+    if (![razorpayOrderId, razorpayPaymentId, razorpaySignature].every((v) => typeof v === 'string' && v)) {
+      return res.status(400).json({ success: false, message: 'Missing payment details' });
+    }
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(503).json({ success: false, message: 'Payment service not configured' });
+    }
+
+    // The live order must exist and belong to the caller
+    const liveOrder = await LiveOrder.findOne({ razorpayOrderId, user: req.user._id });
+    if (!liveOrder) {
+      return res.status(404).json({ success: false, message: 'Payment session not found' });
+    }
+
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
       .digest('hex');
 
-    if (expectedSignature === razorpaySignature) {
-      // 💾 Update live order status on successful payment verification
-      try {
-        const liveOrder = await LiveOrder.findOne({ razorpayOrderId: razorpayOrderId });
-        
-        if (liveOrder) {
-          liveOrder.razorpayPaymentId = razorpayPaymentId;
-          liveOrder.razorpaySignature = razorpaySignature;
-          liveOrder.paymentVerified = true;
-          liveOrder.status = 'paid';
-          
-          await liveOrder.save();
-          
-          console.log('✅ LIVE ORDER UPDATED ON PAYMENT VERIFICATION:', {
-            liveOrderId: liveOrder._id,
-            razorpayOrderId: razorpayOrderId,
-            razorpayPaymentId: razorpayPaymentId,
-            userId: liveOrder.user
-          });
-        } else {
-          console.log('⚠️  Live order not found for verification:', razorpayOrderId);
-        }
-      } catch (dbError) {
-        console.error('❌ Error updating live order on payment verification:', dbError);
-        // Continue with success response as payment is verified
-      }
-
-      res.json({
-        success: true,
-        message: 'Payment verified successfully',
-      });
-    } else {
-      // 💾 Update live order status on failed payment verification
-      try {
-        const liveOrder = await LiveOrder.findOne({ razorpayOrderId: razorpayOrderId });
-        
-        if (liveOrder) {
-          liveOrder.status = 'payment_failed';
-          await liveOrder.save();
-          
-          console.log('❌ LIVE ORDER MARKED AS PAYMENT FAILED:', {
-            liveOrderId: liveOrder._id,
-            razorpayOrderId: razorpayOrderId,
-            reason: 'signature_mismatch'
-          });
-        }
-      } catch (dbError) {
-        console.error('❌ Error updating live order on payment failure:', dbError);
-      }
-
-      res.status(400).json({
-        success: false,
-        message: 'Payment verification failed',
-      });
+    if (!safeEqual(expectedSignature, razorpaySignature)) {
+      liveOrder.status = 'payment_failed';
+      await liveOrder.save();
+      return res.status(400).json({ success: false, message: 'Payment verification failed' });
     }
+
+    // Do not let a later call downgrade/alter an order that is already used
+    if (liveOrder.status !== 'converted_to_order') {
+      liveOrder.razorpayPaymentId = razorpayPaymentId;
+      liveOrder.razorpaySignature = razorpaySignature;
+      liveOrder.paymentVerified = true;
+      liveOrder.status = 'paid';
+      liveOrder.expiryTime = new Date(Date.now() + VERIFIED_RETENTION_MS);
+      await liveOrder.save();
+    }
+
+    res.json({ success: true, message: 'Payment verified successfully' });
   } catch (error) {
-    console.error('Payment verification error:', error);
+    console.error('Payment verification error:', error.message);
     res.status(500).json({ message: 'Error verifying payment' });
   }
 });
 
 // @route   GET /api/payment/key
-// @desc    Get Razorpay key
+// @desc    Get Razorpay public key id
 // @access  Public
 router.get('/key', (req, res) => {
   res.json({ key: process.env.RAZORPAY_KEY_ID });

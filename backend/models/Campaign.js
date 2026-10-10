@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const campaignSchema = new mongoose.Schema({
   name: {
@@ -98,4 +99,4 @@ campaignSchema.methods.updateMetrics = function(orderValue, discountAmount) {
   return this.save();
 };
 
-module.exports = mongoose.model('Campaign', campaignSchema);
+module.exports = defineModel('Campaign', campaignSchema, { collection: 'campaigns' });

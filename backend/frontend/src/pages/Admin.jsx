@@ -66,17 +66,16 @@ const Admin = () => {
   const getDisplayImageUrl = (imagePath) => {
     if (!imagePath) return '';
     if (isFullUrl(imagePath)) return imagePath;
-    // Convert relative path to full URL for display
-    return `http://localhost:5173${imagePath}`;
+    // Convert relative path to same-origin absolute URL for display
+    return `${window.location.origin}${imagePath}`;
   };
 
   const getStorageImagePath = (imageInput) => {
     if (!imageInput) return '';
     if (isFullUrl(imageInput)) {
-      // If it's a full URL, check if it's our local server
-      if (imageInput.includes('localhost:5173/Product_Images/')) {
-        // Extract just the path part for storage
-        return imageInput.replace('http://localhost:5173', '');
+      const currentOrigin = window.location.origin;
+      if (imageInput.startsWith(currentOrigin)) {
+        return imageInput.replace(currentOrigin, '');
       }
       // Keep external URLs as-is
       return imageInput;

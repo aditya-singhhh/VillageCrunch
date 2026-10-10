@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { defineModel } = require('../db');
 
 const orderSchema = new mongoose.Schema({
   user: {
@@ -73,4 +74,4 @@ const orderSchema = new mongoose.Schema({
   trackingNumber: String,
 }, { timestamps: true });
 
-module.exports = mongoose.model('Order', orderSchema);
+module.exports = defineModel('Order', orderSchema, { collection: 'orders' });

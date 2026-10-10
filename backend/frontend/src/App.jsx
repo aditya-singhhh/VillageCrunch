@@ -28,7 +28,7 @@ import Admin from './pages/Admin';
 import Wishlist from './pages/Wishlist';
 import CustomerSupport from './pages/CustomerSupport';
 import ProtectedRoute from './components/ProtectedRoute';
-import OrdersDetail from './pages/OrderDeatail';
+import OrdersDetail from './pages/OrderDetail';
 
 function App() {
   return (

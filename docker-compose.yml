@@ -1,0 +1,44 @@
+# Local / internal stack: app + Firestore emulator (+ optional Caddy for HTTPS).
+# Data lives in the emulator and is lost on restart; production uses real Firestore (docs/FIREBASE_DEPLOYMENT.md).
+#   cp backend/.env.example backend/.env   # then fill in JWT_SECRET, Razorpay TEST keys, etc.
+#   docker compose up -d --build
+#   docker compose exec app node scripts/createAdmin.js you@company.com "Your Name" 9XXXXXXXXX
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      FIRESTORE_EMULATOR_HOST: firestore:8080
+      FIREBASE_PROJECT_ID: demo-villagecrunch
+      UPLOAD_DIR: /data/uploads
+    depends_on:
+      - firestore
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
+  firestore:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    restart: unless-stopped
+    command: gcloud emulators firestore start --host-port=0.0.0.0:8080 --project=demo-villagecrunch
+    # Not published to the host: only the app can reach it.
+
+  # Optional HTTPS reverse proxy (enable with: docker compose --profile proxy up -d)
+  caddy:
+    image: caddy:2
+    profiles: ["proxy"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      - app
+
+volumes:
+  uploads:
+  caddy-data:

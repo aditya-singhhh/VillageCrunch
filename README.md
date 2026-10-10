@@ -1,6 +1,6 @@
 # Premium Dry Fruits E-Commerce Store
 
-A full-stack e-commerce platform for selling premium Indian dry fruits, makhana, and traditional Bihari thekua. Built with React.js, Node.js, Express, MongoDB, and Razorpay payment integration.
+A full-stack e-commerce platform for selling premium Indian dry fruits, makhana, and traditional Bihari thekua. Built with React.js, Node.js, Express, Firebase (Firestore + Hosting + Cloud Run), and Razorpay payment integration.
 
 ## Features
 
@@ -17,7 +17,7 @@ A full-stack e-commerce platform for selling premium Indian dry fruits, makhana,
 
 ### Backend
 - 🚀 RESTful API with Express.js
-- 🗄️ MongoDB database with Mongoose
+- 🗄️ Firestore database (Mongoose used as the schema layer)
 - 🔒 JWT authentication
 - 💰 Razorpay payment integration
 - 📧 Order management system
@@ -37,18 +37,22 @@ A full-stack e-commerce platform for selling premium Indian dry fruits, makhana,
 **Backend:**
 - Node.js
 - Express.js
-- MongoDB & Mongoose
+- Firestore (Firebase Admin SDK) with Mongoose schemas
 - JSON Web Tokens (JWT)
 - Bcrypt.js
 - Razorpay SDK
 - Helmet (Security)
 - Express Rate Limit
 
+## Hosting
+
+Internal/self-hosted deployment with Docker: see [docs/INTERNAL_HOSTING.md](docs/INTERNAL_HOSTING.md). Planned improvements: [docs/ROADMAP.md](docs/ROADMAP.md). Create admins with `node scripts/createAdmin.js` (sign-up can no longer create admins).
+
 ## Installation
 
 ### Prerequisites
 - Node.js (v16 or higher)
-- MongoDB (local or Atlas)
+- Firebase project (or the Firestore emulator for local work)
 - Razorpay account (for payment integration)
 
 ### Backend Setup
@@ -67,7 +71,8 @@ npm install
 ```env
 PORT=5000
 NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/premium-dryfruits
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080   # firebase emulators:start --only firestore
+FIREBASE_PROJECT_ID=demo-villagecrunch
 JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 RAZORPAY_KEY_ID=your_razorpay_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
@@ -215,7 +220,7 @@ premium-dryfruits-store/
 ```env
 PORT=5000
 NODE_ENV=development
-MONGODB_URI=your_mongodb_connection_string
+FIREBASE_PROJECT_ID=your_firebase_project_id
 JWT_SECRET=your_jwt_secret_key
 RAZORPAY_KEY_ID=your_razorpay_key_id
 RAZORPAY_KEY_SECRET=your_razorpay_key_secret
@@ -236,7 +241,7 @@ FRONTEND_URL=http://localhost:5173
 
 1. Set environment variables in your hosting platform
 2. Update `FRONTEND_URL` to your production frontend URL
-3. Update `MONGODB_URI` to production database
+3. Follow [docs/FIREBASE_DEPLOYMENT.md](docs/FIREBASE_DEPLOYMENT.md) (Firestore + Cloud Run + Hosting)
 4. Deploy backend code
 
 ### Frontend Deployment (Vercel/Netlify)

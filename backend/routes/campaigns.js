@@ -179,25 +179,20 @@ router.get('/:id/analytics', protect, admin, async (req, res) => {
       })
     );
 
-    // Daily usage over campaign period
-    const dailyUsage = await Promocode.aggregate([
-      { $match: { campaign: campaign._id } },
-      { $unwind: '$usedBy' },
-      {
-        $group: {
-          _id: {
-            $dateToString: {
-              format: '%Y-%m-%d',
-              date: '$usedBy.usedAt'
-            }
-          },
-          orders: { $sum: 1 },
-          revenue: { $sum: '$usedBy.orderValue' },
-          discount: { $sum: '$usedBy.discountAmount' }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
+    // Daily usage over campaign period (computed in JavaScript; Firestore has no $group)
+    const campaignPromos = await Promocode.find({ campaign: campaign._id }).select('usedBy');
+    const byDay = new Map();
+    for (const promo of campaignPromos) {
+      for (const usage of promo.usedBy || []) {
+        const day = new Date(usage.usedAt || Date.now()).toISOString().slice(0, 10);
+        const row = byDay.get(day) || { _id: day, orders: 0, revenue: 0, discount: 0 };
+        row.orders += 1;
+        row.revenue += usage.orderValue || 0;
+        row.discount += usage.discountAmount || 0;
+        byDay.set(day, row);
+      }
+    }
+    const dailyUsage = [...byDay.values()].sort((x, y) => (x._id < y._id ? -1 : 1));
 
     res.json({
       campaign: {
@@ -237,17 +232,14 @@ router.get('/stats/overview', protect, admin, async (req, res) => {
     const activeCampaigns = await Campaign.countDocuments({ status: 'active' });
     const completedCampaigns = await Campaign.countDocuments({ status: 'completed' });
 
-    const campaignMetrics = await Campaign.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalRevenue: { $sum: '$metrics.totalRevenue' },
-          totalOrders: { $sum: '$metrics.totalOrders' },
-          totalDiscount: { $sum: '$metrics.totalDiscount' },
-          averageConversionRate: { $avg: '$metrics.conversionRate' }
-        }
-      }
-    ]);
+    const allCampaigns = await Campaign.find({}).select('metrics');
+    const sumMetric = (key) => allCampaigns.reduce((sum, c) => sum + ((c.metrics && c.metrics[key]) || 0), 0);
+    const campaignMetrics = [{
+      totalRevenue: sumMetric('totalRevenue'),
+      totalOrders: sumMetric('totalOrders'),
+      totalDiscount: sumMetric('totalDiscount'),
+      averageConversionRate: allCampaigns.length ? sumMetric('conversionRate') / allCampaigns.length : 0,
+    }];
 
     const topCampaigns = await Campaign.find({ 'metrics.totalOrders': { $gt: 0 } })
       .sort({ 'metrics.totalRevenue': -1 })

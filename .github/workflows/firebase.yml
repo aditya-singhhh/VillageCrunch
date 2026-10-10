@@ -1,0 +1,75 @@
+name: Firebase
+# Actions > Firebase > Run workflow:
+#   bootstrap  = one-time cloud setup (database, bucket, secrets...)   -> run this FIRST
+#   deploy     = build + publish the site (also runs automatically on push to main)
+#   create-admin = make/promote an admin user (needs ADMIN_EMAIL, ADMIN_PASSWORD secrets)
+# Setup: docs/FIREBASE_AUTOMATED_SETUP.md
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: What to run
+        type: choice
+        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin]
+        default: bootstrap-and-deploy
+
+concurrency:
+  group: firebase
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION || 'asia-south1' }}
+  SITE_URL: ${{ vars.SITE_URL }}
+  TRUST_PROXY: ${{ vars.TRUST_PROXY || '2' }}
+
+jobs:
+  run:
+    # Pushes to main only auto-deploy once you set the repository variable AUTO_DEPLOY=true
+    # (after the first successful manual bootstrap-and-deploy).
+    if: github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check configuration
+        run: |
+          [ -n "$PROJECT_ID" ] || { echo "::error::Set the repository variable GCP_PROJECT_ID"; exit 1; }
+          [ -n "${{ secrets.GCP_SA_KEY }}" ] || { echo "::error::Set the repository secret GCP_SA_KEY"; exit 1; }
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bootstrap cloud resources
+        if: github.event_name == 'workflow_dispatch' && contains(inputs.action, 'bootstrap')
+        env:
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+        run: ./scripts/bootstrap-firebase.sh
+
+      - name: Run tests
+        if: github.event_name == 'push' || contains(inputs.action, 'deploy')
+        run: cd backend && npm ci && npm test
+
+      - name: Deploy
+        if: github.event_name == 'push' || contains(inputs.action, 'deploy')
+        run: ./scripts/deploy-firebase.sh
+
+      - name: Create admin
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'create-admin'
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: |
+          cd backend && npm ci --omit=dev
+          node scripts/createAdmin.js "${{ secrets.ADMIN_EMAIL }}" "Admin" "${{ vars.ADMIN_PHONE || '9000000000' }}"

@@ -2,7 +2,6 @@
 // Use this file for testing and managing live orders
 
 const LiveOrder = require('../models/LiveOrder');
-const mongoose = require('mongoose');
 
 class LiveOrderManager {
   
@@ -104,15 +103,16 @@ class LiveOrderManager {
   // Get order statistics
   static async getOrderStats() {
     try {
-      const stats = await LiveOrder.aggregate([
-        {
-          $group: {
-            _id: '$status',
-            count: { $sum: 1 },
-            totalAmount: { $sum: '$amount' }
-          }
-        }
-      ]);
+      // Group by status in JavaScript (Firestore has no aggregation pipeline)
+      const all = await LiveOrder.find({}).select('status amount');
+      const grouped = new Map();
+      for (const o of all) {
+        const g = grouped.get(o.status) || { _id: o.status, count: 0, totalAmount: 0 };
+        g.count += 1;
+        g.totalAmount += o.amount || 0;
+        grouped.set(o.status, g);
+      }
+      const stats = [...grouped.values()];
       
       const totalOrders = await LiveOrder.countDocuments();
       
@@ -173,7 +173,7 @@ module.exports = LiveOrderManager;
 // Example usage (uncomment to test):
 /*
 (async () => {
-  await mongoose.connect('your-mongodb-connection-string');
+  await require('../db').connect();
   
   // Get all orders
   const allOrders = await LiveOrderManager.getAllOrders();

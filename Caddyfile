@@ -1,0 +1,7 @@
+# Replace with your internal hostname. For purely internal hosts Caddy issues certs from its
+# own internal CA ("tls internal"); use a real domain for public Let's Encrypt certificates.
+shop.internal.example.com {
+	tls internal
+	encode gzip zstd
+	reverse_proxy app:8080
+}

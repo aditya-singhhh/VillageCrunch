@@ -2,11 +2,36 @@ const express = require('express');
 const Product = require('../models/Product');
 
 const router = express.Router();
+const DEFAULT_PUBLIC_SITE_URL = 'https://villagecrunch.me';
+
+const isPrivateHost = (hostname) => {
+  return hostname === 'localhost'
+    || hostname === '127.0.0.1'
+    || hostname.endsWith('.local')
+    || /^10\./.test(hostname)
+    || /^192\.168\./.test(hostname)
+    || /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname);
+};
+
+const getPublicSiteUrl = () => {
+  const configuredUrl = process.env.PUBLIC_SITE_URL || process.env.SITE_URL || process.env.FRONTEND_URL || DEFAULT_PUBLIC_SITE_URL;
+
+  try {
+    const parsedUrl = new URL(configuredUrl);
+    if (isPrivateHost(parsedUrl.hostname)) {
+      return DEFAULT_PUBLIC_SITE_URL;
+    }
+
+    return parsedUrl.origin;
+  } catch (error) {
+    return DEFAULT_PUBLIC_SITE_URL;
+  }
+};
 
 // Generate sitemap.xml
 router.get('/sitemap.xml', async (req, res) => {
   try {
-    const baseUrl = process.env.FRONTEND_URL || 'https://villagecrunch.me';
+    const baseUrl = getPublicSiteUrl();
     
     // Static pages
     const staticPages = [
@@ -16,20 +41,10 @@ router.get('/sitemap.xml', async (req, res) => {
       { url: '/products', priority: '0.9', changefreq: 'daily' },
       { url: '/shipping-policy', priority: '0.5', changefreq: 'yearly' },
       { url: '/returns-policy', priority: '0.5', changefreq: 'yearly' },
-      { url: '/login', priority: '0.6', changefreq: 'monthly' },
-      { url: '/register', priority: '0.6', changefreq: 'monthly' },
     ];
 
     // Get all products
-    const products = await Product.find({ isActive: true }, '_id name updatedAt').lean();
-    
-    // Category pages
-    const categories = [...new Set(products.map(p => p.category))];
-    const categoryPages = categories.map(category => ({
-      url: `/products?category=${encodeURIComponent(category)}`,
-      priority: '0.8',
-      changefreq: 'weekly'
-    }));
+    const products = await Product.find({ isActive: { $ne: false } }, '_id name updatedAt').lean();
 
     // Generate XML
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -38,17 +53,6 @@ router.get('/sitemap.xml', async (req, res) => {
 
     // Add static pages
     staticPages.forEach(page => {
-      sitemap += `
-  <url>
-    <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
-    <changefreq>${page.changefreq}</changefreq>
-    <priority>${page.priority}</priority>
-  </url>`;
-    });
-
-    // Add category pages
-    categoryPages.forEach(page => {
       sitemap += `
   <url>
     <loc>${baseUrl}${page.url}</loc>
@@ -86,7 +90,7 @@ router.get('/sitemap.xml', async (req, res) => {
 
 // Generate robots.txt
 router.get('/robots.txt', (req, res) => {
-  const baseUrl = process.env.FRONTEND_URL || 'https://villagecrunch.me';
+  const baseUrl = getPublicSiteUrl();
   
   const robotsTxt = `User-agent: *
 Allow: /

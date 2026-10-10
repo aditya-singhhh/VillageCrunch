@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Phone, Mail, MessageSquare, Image as ImageIcon, Send, Clock, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const CustomerSupport = () => {
   const { user } = useAuth();
@@ -25,8 +26,8 @@ const CustomerSupport = () => {
   const fetchTickets = async () => {
     try {
       const endpoint = user?.role === 'admin' 
-        ? `http://localhost:8080/api/support/admin/all?status=${filter !== 'all' ? filter : ''}`
-        : 'http://localhost:8080/api/support/my-tickets';
+        ? `${API_URL}/support/admin/all?status=${filter !== 'all' ? filter : ''}`
+        : `${API_URL}/support/my-tickets`;
       
       const response = await fetch(endpoint, {
         headers: {
@@ -50,7 +51,7 @@ const CustomerSupport = () => {
     if (!replyMessage.trim()) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/support/admin/${selectedTicket._id}/reply`, {
+      const response = await fetch(`${API_URL}/support/admin/${selectedTicket._id}/reply`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +83,7 @@ const CustomerSupport = () => {
       const resolution = prompt('Enter resolution notes:');
       if (!resolution) return;
 
-      const response = await fetch(`http://localhost:8080/api/support/admin/${selectedTicket._id}/close`, {
+      const response = await fetch(`${API_URL}/support/admin/${selectedTicket._id}/close`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -279,7 +280,7 @@ const CustomerSupport = () => {
                           <p className="whitespace-pre-wrap">{msg.message}</p>
                           {msg.image && (
                             <img
-                              src={`http://localhost:8080${msg.image}`}
+                              src={msg.image.startsWith('http') ? msg.image : `${window.location.origin}${msg.image}`}
                               alt="Attachment"
                               className="mt-2 rounded max-w-full"
                             />

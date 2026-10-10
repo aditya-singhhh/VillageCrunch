@@ -56,6 +56,35 @@ const cartRateLimit = rateLimit({
   }
 });
 
+
+// Generic API limiter (per IP) - protects every /api route from floods
+const apiRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: parseInt(process.env.API_RATE_LIMIT || '300', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests. Please slow down.', code: 'API_RATE_LIMIT' },
+});
+
+// Strict limiter for credential endpoints: login, register, forgot/verify/reset password
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.AUTH_RATE_LIMIT || '20', 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // only failed attempts count towards the limit
+  message: { message: 'Too many attempts. Please try again in 15 minutes.', code: 'AUTH_RATE_LIMIT' },
+});
+
+// Public form/lookup endpoints (contact form, promo code checks)
+const publicFormRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests. Please try again later.', code: 'FORM_RATE_LIMIT' },
+});
+
 // Security monitoring middleware
 const securityMonitor = (req, res, next) => {
   // Log suspicious patterns
@@ -136,6 +165,9 @@ const logAdminActions = (req, res, next) => {
 };
 
 module.exports = {
+  apiRateLimit,
+  authRateLimit,
+  publicFormRateLimit,
   orderRateLimit,
   paymentRateLimit,
   cartRateLimit,

@@ -1,12 +1,12 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const db = require('../db');
 const User = require('../models/User');
 
 const users = [
   {
     name: 'Admin User',
     email: 'admin@villagecrunch.com',
-    password: 'admin123',
+    password: process.env.SEED_ADMIN_PASSWORD || require('crypto').randomBytes(12).toString('base64url'),
     phone: '9876543210',
     role: 'admin',
     addresses: [{
@@ -20,7 +20,7 @@ const users = [
   {
     name: 'John Doe',
     email: 'john@example.com',
-    password: 'john123',
+    password: require('crypto').randomBytes(12).toString('base64url'),
     phone: '9876543211',
     addresses: [{
       street: '456 Main Street',
@@ -33,7 +33,7 @@ const users = [
   {
     name: 'Jane Smith',
     email: 'jane@example.com',
-    password: 'jane123',
+    password: require('crypto').randomBytes(12).toString('base64url'),
     phone: '9876543212',
     addresses: [{
       street: '789 Oak Road',
@@ -46,15 +46,15 @@ const users = [
 ];
 
 const importUsers = async () => {
+  if (process.env.NODE_ENV === 'production' && process.env.CONFIRM_WIPE_USERS !== 'yes') {
+    console.error('Refusing to delete all users in production. Set CONFIRM_WIPE_USERS=yes to override.');
+    process.exit(1);
+  }
   try {
-    // Connect to MongoDB
-    const conn = await mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://sauravsinghking9876_db_user:Saurav867882@villagecluster.d9ah8fv.mongodb.net/', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // Connect to Firestore
+    await db.connect();
     
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    
+        
     // Clear existing users
     await User.deleteMany({});
     console.log('🗑️ Existing users deleted');
