@@ -12,7 +12,7 @@ on:
       action:
         description: What to run
         type: choice
-        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate]
+        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate, seed-products]
         default: bootstrap-and-deploy
 
 concurrency:
@@ -91,6 +91,14 @@ jobs:
           }
           tail -n 25 /tmp/migrate.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > /tmp/tail.txt
           echo "::warning title=Migration summary::$(cat /tmp/tail.txt)"
+
+      - name: Load starter products
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'seed-products'
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+        run: |
+          cd backend && npm ci --omit=dev
+          node scripts/seedProducts.js
 
       - name: Create admin
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'create-admin'
