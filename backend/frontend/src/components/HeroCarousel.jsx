@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { OFFER_SLIDES } from '../config/offers';
+import { ChhathScene, FolkBorder } from './ChhathArt';
 import { formatINR, discountPercent } from '../utils/format';
 
 const AUTOPLAY_MS = 5000;
@@ -29,7 +30,9 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
 
   const slides = useMemo(() => {
     const have = { threshold: freeShippingThreshold > 0, discount: maxOff > 0 };
-    return OFFER_SLIDES.filter((s) => (s.needs || []).every((n) => have[n])).map((s) => {
+    const now = Date.now();
+    const inWindow = (s) => (!s.from || now >= Date.parse(s.from)) && (!s.until || now <= Date.parse(`${s.until}T23:59:59+05:30`));
+    return OFFER_SLIDES.filter((s) => inWindow(s) && (s.needs || []).every((n) => have[n])).map((s) => {
       const match = s.product && products.find((p) => p.name?.toLowerCase().includes(s.product.toLowerCase()));
       const vars = { threshold: freeShippingThreshold, maxOff };
       return {
@@ -94,7 +97,7 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
   };
 
   // Reserve the final height before data arrives: no layout shift
-  const frame = 'h-[190px] sm:h-[240px] md:h-[300px] lg:h-[340px]';
+  const frame = 'h-[204px] sm:h-[240px] md:h-[300px] lg:h-[340px]';
   if (!ready || !count) return <div className="container-page pt-3 md:pt-5"><div className={`${frame} rounded-xl bg-cream`} aria-hidden="true" /></div>;
 
   const arrow = 'hidden md:inline-flex absolute top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full bg-white/90 text-ink shadow-raised hover:bg-white';
@@ -129,6 +132,15 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
             className={`relative flex-none w-full h-full snap-center overflow-hidden ${s.dark ? 'text-white' : 'text-ink'}`}
             style={{ background: s.bg }}
           >
+            {s.art === 'chhath' ? (
+              <>
+                <ChhathScene
+                  className="absolute right-0 top-0 h-full w-[56%] md:w-[52%]"
+                  style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0%, #000 38%)', maskImage: 'linear-gradient(to right, transparent 0%, #000 38%)' }}
+                />
+                <FolkBorder className="absolute bottom-0 left-0 opacity-70" />
+              </>
+            ) : (
             <img
               src={s.image}
               alt=""
@@ -141,6 +153,7 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
               className="absolute right-0 top-0 h-full w-[52%] md:w-[48%] object-cover"
               style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0%, #000 45%)', maskImage: 'linear-gradient(to right, transparent 0%, #000 45%)' }}
             />
+            )}
             <div className="relative z-10 h-full px-5 sm:px-8 md:pl-20 md:pr-12 flex flex-col justify-center">
               <div className="max-w-[62%] sm:max-w-[52%] md:max-w-[46%]">
                 <h2 className="font-display font-bold text-[22px] leading-[26px] sm:text-3xl sm:leading-9 lg:text-[40px] lg:leading-[46px]">
