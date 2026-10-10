@@ -135,13 +135,8 @@ const AIProductRecommendations = ({ currentProduct, category, limit = 4 }) => {
       <div className={currentProduct ? '' : 'container-page'}>
         <div className="mb-6">
           <h2 className="section-title !mb-1">
-            {currentProduct ? 'Picked for you' : 'Recommended for you'}
+            {currentProduct ? 'You may also like' : 'Recommended for you'}
           </h2>
-          <p className="text-ink-soft">
-            {currentProduct
-              ? 'Suggestions based on this product'
-              : 'Selected from our range'}
-          </p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">

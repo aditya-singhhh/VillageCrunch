@@ -9,7 +9,6 @@ import toast from 'react-hot-toast';
 import ReviewForm from '../components/ReviewForm';
 import ReviewList from '../components/ReviewList';
 import SEOHead from '../components/SEOHead';
-import AIProductRecommendations from '../components/AIProductRecommendations';
 import ProductCard from '../components/ProductCard';
 import useStoreSettings from '../hooks/useStoreSettings';
 import { formatINR, formatCategory, discountPercent, unitPrice, averageRating } from '../utils/format';
@@ -387,7 +386,7 @@ const ProductDetail = () => {
   const maxQty = Math.max(1, Math.min(product.stock || 1, 10));
   const taxRate = settings?.pricing?.taxRate;
   const canBuy = !isMasalaProduct && !outOfStock;
-  const longDesc = (product.description || '').length > 160;
+  const longDesc = (product.description || '').length > 90;
 
   const stepper = (
     <div className="inline-flex items-center border border-[#CDBBA4] rounded-md bg-white flex-shrink-0" role="group" aria-label="Quantity">
@@ -480,7 +479,7 @@ const ProductDetail = () => {
                   draggable={false}
                 />
               </div>
-              {discount > 0 && canBuy && <span className="badge bg-leaf absolute top-3 left-3 text-sm px-2.5 py-1">Save {discount}%</span>}
+              {discount > 0 && canBuy && <span className="badge bg-leaf absolute top-3 left-3 text-sm px-2.5 py-1">{discount}% OFF</span>}
 
               {images.length > 1 && (
                 <>
@@ -541,8 +540,7 @@ const ProductDetail = () => {
 
           {/* Buy box */}
           <div className="md:sticky md:top-24">
-            <p className="eyebrow">{formatCategory(product.category)}</p>
-            <h1 className="mt-1 font-display font-bold text-2xl leading-[30px] md:text-[32px] md:leading-[38px] text-ink">{product.name}</h1>
+            <h1 className=" font-display font-bold text-2xl leading-[30px] md:text-[32px] md:leading-[38px] text-ink">{product.name}</h1>
 
             {reviewCount > 0 && (
               <a href="#reviews" className="mt-2 inline-flex items-center gap-1.5 text-sm text-ink-soft hover:text-action min-h-[32px]">
@@ -559,14 +557,14 @@ const ProductDetail = () => {
                 {product.originalPrice > product.price && (
                   <>
                     <span className="text-lg text-ink-mute line-through tabular-nums">{formatINR(product.originalPrice)}</span>
-                    <span className="text-sm font-semibold text-leaf">Save {formatINR(product.originalPrice - product.price)} ({discount}%)</span>
+                    <span className="text-sm font-semibold text-leaf">{discount}% OFF</span>
                   </>
                 )}
               </div>
               <p className="text-sm text-ink-mute mt-1">
                 {perUnit && <span>{perUnit}</span>}
                 {perUnit && taxRate > 0 && <span> &middot; </span>}
-                {taxRate > 0 && <span>GST ({taxRate}%) is added at checkout</span>}
+                {taxRate > 0 && <span>+ {taxRate}% GST at checkout</span>}
               </p>
             </div>
 
@@ -583,7 +581,7 @@ const ProductDetail = () => {
             {/* Description */}
             {product.description && (
               <div className="mt-4">
-                <p className={`text-ink-soft leading-relaxed ${!descOpen && longDesc ? 'line-clamp-3' : ''}`}>{product.description}</p>
+                <p className={`text-ink-soft leading-relaxed ${!descOpen && longDesc ? 'line-clamp-2' : ''}`}>{product.description}</p>
                 {longDesc && (
                   <button onClick={() => setDescOpen((v) => !v)} className="text-sm font-medium text-action hover:underline min-h-[44px]" aria-expanded={descOpen}>
                     {descOpen ? 'Show less' : 'Read more'}
@@ -659,7 +657,7 @@ const ProductDetail = () => {
             {/* Accordions */}
             <div className="mt-2 divide-y divide-line">
               {product.benefits?.length > 0 && (
-                <details className="group" open>
+                <details className="group">
                   <summary className="flex items-center justify-between min-h-[52px] cursor-pointer list-none font-semibold text-ink [&::-webkit-details-marker]:hidden">
                     Benefits <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" aria-hidden="true" />
                   </summary>
@@ -686,8 +684,8 @@ const ProductDetail = () => {
                   Shipping &amp; returns <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" aria-hidden="true" />
                 </summary>
                 <p className="pb-4 text-ink-soft">
-                  Read our <Link to="/shipping-policy" className="text-action underline underline-offset-2">shipping policy</Link> and{' '}
-                  <Link to="/returns-policy" className="text-action underline underline-offset-2">returns &amp; refunds policy</Link>.
+                  <Link to="/shipping-policy" className="text-action underline underline-offset-2">Shipping</Link>{' · '}
+                  <Link to="/returns-policy" className="text-action underline underline-offset-2">Returns</Link>
                 </p>
               </details>
             </div>
@@ -730,8 +728,6 @@ const ProductDetail = () => {
           </section>
         )}
 
-        {/* AI-Powered Recommendations */}
-        {product && <AIProductRecommendations currentProduct={product} limit={4} />}
       </div>
 
       {/* Sticky buy bar (mobile) */}

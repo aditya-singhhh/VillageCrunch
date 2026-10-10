@@ -51,13 +51,10 @@ const Section = ({ title, children }) => {
 
 const Footer = () => (
   <footer className="bg-brand-dark text-cream mt-0">
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 md:pt-14 pb-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10 pb-5">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-x-10 gap-y-2 md:gap-y-8">
         <div className="mb-4 md:mb-0">
           <Logo light size="text-[26px]" />
-          <p className="mt-3 text-[15px] text-cream/85 max-w-xs">
-            Dry fruits, makhana and traditional Bihari thekua, packed fresh and delivered across India.
-          </p>
           <div className="flex gap-1 mt-4 -ml-2">
             <a href="https://www.instagram.com/village_crunch/" target="_blank" rel="noopener noreferrer" aria-label="VillageCrunch on Instagram" className="inline-flex items-center justify-center w-11 h-11 rounded-full hover:bg-white/10">
               <Instagram className="w-5 h-5" />
@@ -86,9 +83,9 @@ const Footer = () => (
         </Section>
       </div>
 
-      <div className="mt-8 pt-5 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-[13px] text-[#D9C7AE]">
+      <div className="mt-5 pt-4 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-[13px] text-[#D9C7AE]">
         <p>&copy; {new Date().getFullYear()} VillageCrunch. All rights reserved.</p>
-        <p>Pay with UPI, cards, net banking or cash on delivery</p>
+        <p>UPI · Cards · COD</p>
       </div>
     </div>
   </footer>
