@@ -156,6 +156,11 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
             )}
             <div className="relative z-10 h-full px-5 sm:px-8 md:pl-20 md:pr-12 flex flex-col justify-center">
               <div className="max-w-[62%] sm:max-w-[52%] md:max-w-[46%]">
+                {s.badge && (
+                  <span className="inline-block mb-2 px-3 py-1 rounded-full bg-white/15 border border-white/40 text-[11px] sm:text-xs font-semibold uppercase tracking-widest">
+                    {s.badge}
+                  </span>
+                )}
                 <h2 className="font-display font-bold text-[22px] leading-[26px] sm:text-3xl sm:leading-9 lg:text-[40px] lg:leading-[46px]">
                   {s.headline}
                 </h2>

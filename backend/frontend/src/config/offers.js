@@ -16,6 +16,7 @@
  *   image     a photo from /public (for example '/Product_Images/MixDry.jpg')
  *   bg        background CSS gradient (any valid CSS background value)
  *   dark      true  = light text on a dark background, false = dark text on a light background
+ *   badge     OPTIONAL: small label above the headline, e.g. 'Coming soon'
  *   art       OPTIONAL: 'chhath' draws the built-in Chhath illustration instead of a photo
  *   from      OPTIONAL: first day this slide shows, as 'YYYY-MM-DD'
  *   until     OPTIONAL: last day this slide shows (it disappears by itself afterwards)
@@ -36,6 +37,19 @@ export const OFFER_SLIDES = [
     to: '/products?sort=discount',
     art: 'chhath',
     bg: 'linear-gradient(110deg,#5E1409 0%,#9A2F10 55%,#C2410C 100%)',
+    dark: true,
+    from: '2026-10-10',
+    until: '2026-11-17',
+  },
+  {
+    id: 'roots',
+    badge: 'Coming soon',
+    headline: 'Jadon se judiye',
+    sub: 'Ghar ka swaad, ghar se door bhi',
+    cta: 'Shop thekua',
+    to: '/products?category=thekua',
+    art: 'chhath',
+    bg: 'linear-gradient(110deg,#4A1208 0%,#7C1D12 55%,#A8330F 100%)',
     dark: true,
     from: '2026-10-10',
     until: '2026-11-17',
