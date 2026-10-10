@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { formatINR, discountPercent } from '../utils/format';
 import { createReview, getUserOrders } from '../utils/api';
 import toast from 'react-hot-toast';
 
@@ -95,42 +96,38 @@ const RatableProductCard = ({ product, orderId }) => {
     toast.success('Added to cart', { duration: 1500 });
   };
 
+  const discount = discountPercent(product.price, product.originalPrice);
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+    <div className="bg-white rounded-lg border border-line shadow-card overflow-hidden">
       <Link to={`/product/${productId}`} className="block">
-        <div className="relative overflow-hidden h-48">
+        <div className="relative overflow-hidden aspect-[4/3] bg-cream">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+            width="400" height="300" loading="lazy" decoding="async"
+            className={`w-full h-full object-cover ${product.stock === 0 ? 'opacity-50' : ''}`}
           />
-          {product.originalPrice && (
-            <div className="absolute top-4 left-4 bg-desi-terracotta text-white px-3 py-1 rounded-full text-sm font-semibold">
-              {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-            </div>
+          {discount > 0 && (
+            <span className="badge bg-leaf absolute top-2 left-2">Save {discount}%</span>
           )}
-          {product.stock === 0 && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-              <span className="text-white font-bold text-xl">Out of Stock</span>
-            </div>
-          )}
+          {product.stock === 0 && <span className="badge bg-ink absolute top-2 right-2">Out of stock</span>}
         </div>
       </Link>
 
-      <div className="p-5">
+      <div className="p-4">
         <Link to={`/product/${productId}`}>
-          <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2 hover:text-desi-brown transition-colors">
+          <h3 className="font-sans text-base font-semibold text-ink mb-1 line-clamp-2 hover:text-action transition-colors">
             {product.name}
           </h3>
         </Link>
 
-        <p className="text-sm text-gray-600 mb-3">{product.weight}</p>
+        <p className="text-sm text-ink-soft mb-3">{product.weight}</p>
 
         {/* Rating Section */}
         <div className="mb-4">
           {canRate ? (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-desi-brown">Rate this product:</p>
+              <p className="text-sm font-medium text-ink">Rate this product:</p>
               <div 
                 className="flex items-center space-x-1"
                 onMouseLeave={() => setHoveredRating(0)}
@@ -141,28 +138,28 @@ const RatableProductCard = ({ product, orderId }) => {
                     onClick={() => handleQuickRating(starNum)}
                     onMouseEnter={() => setHoveredRating(starNum)}
                     disabled={isSubmittingRating}
-                    className="focus:outline-none hover:scale-125 transition-all disabled:opacity-50"
-                    title={`Rate ${starNum} star${starNum !== 1 ? 's' : ''}`}
+                    className="w-9 h-11 inline-flex items-center justify-center disabled:opacity-50"
+                    aria-label={`Rate ${starNum} star${starNum !== 1 ? 's' : ''}`}
                   >
                     <Star
                       className={`w-6 h-6 transition-colors ${
                         starNum <= hoveredRating
-                          ? 'text-desi-gold fill-current' 
+                          ? 'text-gold fill-current' 
                           : starNum <= averageRating
-                          ? 'text-desi-gold fill-current'
-                          : 'text-gray-300'
+                          ? 'text-gold fill-current'
+                          : 'text-sand'
                       }`}
                     />
                   </button>
                 ))}
-                <span className="ml-2 text-sm text-gray-600">
+                <span className="ml-2 text-sm text-ink-soft">
                   {hoveredRating > 0 ? `${hoveredRating} star${hoveredRating !== 1 ? 's' : ''}` : 'Click to rate'}
                 </span>
               </div>
             </div>
           ) : reviewCount > 0 ? (
             <div className="flex items-center">
-              <div className="flex text-desi-gold">
+              <div className="flex text-gold">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
@@ -170,43 +167,43 @@ const RatableProductCard = ({ product, orderId }) => {
                   />
                 ))}
               </div>
-              <span className="ml-2 text-sm text-gray-600">
+              <span className="ml-2 text-sm text-ink-soft">
                 ({averageRating}) • {reviewCount} review{reviewCount !== 1 ? 's' : ''}
               </span>
               {hasRated && (
-                <span className="ml-2 text-xs text-green-600">✓ You rated this</span>
+                <span className="ml-2 text-xs text-leaf">✓ You rated this</span>
               )}
             </div>
           ) : (
-            <div className="text-sm text-gray-500">No ratings yet</div>
+            <div className="text-sm text-ink-mute">No ratings yet</div>
           )}
         </div>
 
         <div className="flex items-center justify-between mb-4">
           <div>
-            <span className="text-2xl font-bold text-desi-brown">
-              ₹{product.price}
+            <span className="text-xl font-semibold text-ink tabular-nums">
+              {formatINR(product.price)}
             </span>
-            {product.originalPrice && (
-              <span className="ml-2 text-sm text-gray-500 line-through">
-                ₹{product.originalPrice}
+            {product.originalPrice > product.price && (
+              <span className="ml-2 text-sm text-ink-mute line-through tabular-nums">
+                {formatINR(product.originalPrice)}
               </span>
             )}
           </div>
         </div>
 
         {isMasalaProduct ? (
-          <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-800">
+          <div className="w-full h-11 inline-flex items-center justify-center rounded-md bg-cream text-sm font-medium text-ink-soft">
             Not available for purchase yet
           </div>
         ) : (
           <button
             onClick={handleAddToCart}
             disabled={product.stock === 0}
-            className={`w-full py-2 px-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all ${
+            className={`w-full h-11 rounded-md text-sm font-semibold flex items-center justify-center gap-2 transition-colors ${
               product.stock === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-desi-gold text-white hover:bg-yellow-600'
+                ? 'bg-cream text-ink-mute cursor-not-allowed'
+                : 'bg-action text-white hover:bg-action-dark'
             }`}
           >
             <ShoppingCart className="w-5 h-5" />

@@ -8,7 +8,7 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
           <h2 className={`${compact ? 'text-3xl' : 'text-4xl'} font-bold text-desi-brown mb-4`}>
             Meet Our Founders
           </h2>
-          <p className={`${compact ? 'text-lg' : 'text-xl'} text-gray-600 max-w-3xl mx-auto`}>
+          <p className={`${compact ? 'text-lg' : 'text-xl'} text-ink-soft max-w-3xl mx-auto`}>
             The visionary leaders behind VillageCrunch, committed to bringing authentic Bihar flavors 
             and premium quality products to your doorstep.
           </p>
@@ -16,10 +16,10 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
         
         <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
           {/* Founder - Saurav Kumar */}
-          <div className="bg-gradient-to-br from-gray-50 to-desi-cream rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+          <div className="bg-cream rounded-lg overflow-hidden shadow-card hover:shadow-card transition-all duration-300">
             <div className={`${compact ? 'p-6' : 'p-8'} text-center`}>
               <div className="relative mb-6">
-                <div className={`${compact ? 'w-24 h-24' : 'w-32 h-32'} mx-auto rounded-full overflow-hidden shadow-xl bg-white`}>
+                <div className={`${compact ? 'w-24 h-24' : 'w-32 h-32'} mx-auto rounded-full overflow-hidden shadow-card bg-white`}>
                   <img 
                     src="/images/Saurav_image.jpeg"
                     alt="Saurav Kumar - Founder & CEO"
@@ -29,11 +29,11 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
                       e.target.nextSibling.style.display = 'flex';
                     }}
                   />
-                  <div className="w-full h-full bg-gradient-to-br from-desi-gold to-desi-brown flex items-center justify-center" style={{display: 'none'}}>
-                    <span className="text-white text-3xl font-bold">SK</span>
+                  <div className="w-full h-full bg-brand flex items-center justify-center" style={{display: 'none'}}>
+                    <span className="text-white text-2xl md:text-[28px] font-display font-semibold">SK</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-desi-gold rounded-full p-3 shadow-lg">
+                <div className="absolute -bottom-2 -right-2 bg-desi-gold rounded-full p-3 shadow-card">
                   <Users className="w-5 h-5 text-desi-brown" />
                 </div>
               </div>
@@ -45,7 +45,7 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
                 Founder & CEO
               </p>
               
-              <div className="text-gray-700 leading-relaxed space-y-3">
+              <div className="text-ink-soft leading-relaxed space-y-3">
                 <p>
                   A passionate entrepreneur from Bihar with a deep-rooted connection to traditional 
                   Indian cuisine and agriculture. Saurav founded VillageCrunch with a mission to 
@@ -64,10 +64,10 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
           </div>
 
           {/* Co-Founder - Aditya Singh */}
-          <div className="bg-gradient-to-br from-gray-50 to-desi-cream rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
+          <div className="bg-cream rounded-lg overflow-hidden shadow-card hover:shadow-card transition-all duration-300">
             <div className={`${compact ? 'p-6' : 'p-8'} text-center`}>
               <div className="relative mb-6">
-                <div className={`${compact ? 'w-24 h-24' : 'w-32 h-32'} mx-auto rounded-full overflow-hidden shadow-xl bg-white`}>
+                <div className={`${compact ? 'w-24 h-24' : 'w-32 h-32'} mx-auto rounded-full overflow-hidden shadow-card bg-white`}>
                   <img 
                     src="/images/Aditya_image.jpeg"
                     alt="Aditya Singh - Co-Founder & COO"
@@ -77,11 +77,11 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
                       e.target.nextSibling.style.display = 'flex';
                     }}
                   />
-                  <div className="w-full h-full bg-gradient-to-br from-desi-brown to-desi-gold flex items-center justify-center" style={{display: 'none'}}>
-                    <span className="text-white text-3xl font-bold">AS</span>
+                  <div className="w-full h-full bg-brand flex items-center justify-center" style={{display: 'none'}}>
+                    <span className="text-white text-2xl md:text-[28px] font-display font-semibold">AS</span>
                   </div>
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-desi-gold rounded-full p-3 shadow-lg">
+                <div className="absolute -bottom-2 -right-2 bg-desi-gold rounded-full p-3 shadow-card">
                   <Heart className="w-5 h-5 text-desi-brown" />
                 </div>
               </div>
@@ -93,7 +93,7 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
                 Co-Founder & COO
               </p>
               
-              <div className="text-gray-700 leading-relaxed space-y-3">
+              <div className="text-ink-soft leading-relaxed space-y-3">
                 <p>
                   A strategic business leader with expertise in operations and supply chain 
                   management. Aditya brings innovation and efficiency to VillageCrunch's 
@@ -115,10 +115,10 @@ const FoundersSection = ({ showQuote = true, compact = false }) => {
         {/* Founders Quote */}
         {showQuote && (
           <div className="mt-16 text-center">
-            <div className="bg-desi-brown rounded-2xl p-8 max-w-4xl mx-auto">
+            <div className="bg-desi-brown rounded-lg p-8 max-w-4xl mx-auto">
               <blockquote className="text-white">
                 <p className={`${compact ? 'text-lg md:text-xl' : 'text-xl md:text-2xl'} font-medium leading-relaxed mb-6`}>
-                  "Our mission is simple yet profound - to preserve and share the authentic flavors 
+ "Our mission is simple yet profound - to preserve and share the authentic flavors 
                   of Bihar while supporting local farmers and producers. Every product we offer 
                   carries the essence of our heritage and the promise of quality."
                 </p>

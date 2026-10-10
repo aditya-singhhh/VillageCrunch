@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send, Loader2, Sparkles, Headphones, User, Upload, Image as ImageIcon } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { getProducts } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -7,6 +8,10 @@ const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 const AIChatbot = () => {
   const { user } = useAuth();
+  const { pathname } = useLocation();
+  const hideLauncher = /^\/(admin|login|register|checkout)/.test(pathname);
+  // On small screens only show the launcher on content pages so it never covers grids, prices or CTAs
+  const hideLauncherMobile = !/^\/($|about|contact|shipping-policy|returns-policy|support)/.test(pathname);
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -551,44 +556,42 @@ const AIChatbot = () => {
   return (
     <>
       {/* Chat Button */}
-      {!isOpen && (
+      {!isOpen && !hideLauncher && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-desi-gold to-yellow-600 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 z-50 group"
-          aria-label="Open AI Chat"
+          className={`fixed right-4 bottom-[calc(72px+env(safe-area-inset-bottom))] ${hideLauncherMobile ? 'max-md:hidden' : ''} md:right-6 md:bottom-6 w-12 h-12 md:w-14 md:h-14 inline-flex items-center justify-center bg-brand text-white rounded-full shadow-raised hover:bg-brand-dark transition-colors z-40`}
+          aria-label="Chat with Villy, our shopping assistant"
         >
           <MessageCircle className="w-6 h-6" />
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-semibold rounded-full px-1.5 py-0.5 flex items-center justify-center animate-pulse">
-            Villy
-          </span>
-          <span className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            Ask me anything! 💬
-          </span>
         </button>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 animate-scale-in border-2 border-desi-gold/20">
+        <div
+          role="dialog"
+          aria-label="Villy shopping assistant"
+          className="fixed inset-0 md:inset-auto md:bottom-6 md:right-6 md:w-96 md:h-[600px] md:max-h-[calc(100vh-48px)] bg-white md:rounded-lg shadow-raised flex flex-col z-[65] animate-sheet-up border border-line"
+        >
           {/* Header */}
-          <div className="bg-gradient-to-r from-desi-gold to-yellow-600 text-white p-4 rounded-t-2xl flex items-center justify-between">
+          <div className="bg-brand text-white p-4 md:rounded-t-lg flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-desi-gold" />
+                <div className="w-10 h-10 bg-cream rounded-full flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-brand" />
                 </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-brand"></div>
               </div>
               <div>
-                <h3 className="font-bold">Villy {isConnectedToAgent && '→ Customer Care'}</h3>
-                <p className="text-xs opacity-90">
-                  {isConnectedToAgent ? '🟢 Connected to Agent' : 'Your AI Shopping Assistant'}
+                <h3 className="font-semibold font-sans">Villy {isConnectedToAgent && '→ Customer Care'}</h3>
+                <p className="text-xs text-cream">
+                  {isConnectedToAgent ? 'Connected to agent' : 'Your shopping assistant'}
                 </p>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="hover:bg-white/20 p-2 rounded-full transition"
+              className="hover:bg-white/20 w-11 h-11 inline-flex items-center justify-center rounded-full transition"
               aria-label="Close chat"
             >
               <X className="w-5 h-5" />
@@ -596,7 +599,7 @@ const AIChatbot = () => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-paper">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -605,7 +608,7 @@ const AIChatbot = () => {
                 <div
                   className={`max-w-[80%] p-3 rounded-2xl ${
                     msg.type === 'user'
-                      ? 'bg-desi-gold text-white rounded-br-none'
+                      ? 'bg-action text-white rounded-br-none'
                       : msg.type === 'system'
                       ? 'bg-blue-50 text-blue-900 rounded-lg border-2 border-blue-200'
                       : msg.type === 'agent'
@@ -633,7 +636,7 @@ const AIChatbot = () => {
               <div className="flex justify-center">
                 <button
                   onClick={connectToAgent}
-                  className="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-green-700 transition flex items-center space-x-2 shadow-lg"
+                  className="bg-leaf text-white px-6 py-3 rounded-xl hover:bg-leaf transition flex items-center space-x-2 shadow-lg"
                 >
                   <Headphones className="w-5 h-5" />
                   <span className="font-semibold">Connect to Customer Care</span>
@@ -647,7 +650,7 @@ const AIChatbot = () => {
                   isConnectedToAgent ? 'bg-green-50 border-2 border-green-200' : 'bg-white border border-gray-100'
                 }`}>
                   <Loader2 className={`w-5 h-5 animate-spin ${
-                    isConnectedToAgent ? 'text-green-600' : 'text-desi-gold'
+                    isConnectedToAgent ? 'text-green-600' : 'text-action'
                   }`} />
                 </div>
               </div>
@@ -656,7 +659,7 @@ const AIChatbot = () => {
           </div>
 
           {/* Input */}
-          <div className="p-4 bg-white border-t border-gray-200 rounded-b-2xl">
+          <div className="p-4 bg-white border-t border-line md:rounded-b-lg pb-[max(1rem,env(safe-area-inset-bottom))]">
             {/* Image Preview */}
             {imagePreview && (
               <div className="mb-3 relative inline-block">
@@ -666,7 +669,8 @@ const AIChatbot = () => {
                     setImagePreview(null);
                     setSelectedImage(null);
                   }}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                  aria-label="Remove image"
+                  className="absolute -top-2 -right-2 bg-berry text-white rounded-full p-1 hover:bg-red-800"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -680,10 +684,10 @@ const AIChatbot = () => {
                   <button
                     key={index}
                     onClick={() => handleQuickAction(action.value)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all transform hover:scale-105 ${
+                    className={`px-4 min-h-[40px] rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                       action.primary
-                        ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg hover:shadow-xl'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-gradient-to-r from-action to-action-dark text-white'
+                        : 'bg-cream text-ink-soft hover:bg-sand'
                     }`}
                   >
                     {action.label}
@@ -705,8 +709,9 @@ const AIChatbot = () => {
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2 rounded-full hover:bg-gray-100 transition text-gray-600"
+                    className="w-11 h-11 inline-flex items-center justify-center rounded-full hover:bg-cream transition text-ink-soft"
                     title="Upload product image"
+                    aria-label="Upload product image"
                   >
                     <ImageIcon className="w-5 h-5" />
                   </button>
@@ -718,22 +723,22 @@ const AIChatbot = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={isConnectedToAgent ? "Describe your issue..." : "Ask me anything..."}
-                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-full focus:outline-none focus:border-desi-gold transition"
+                className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-full focus:outline-none focus:border-action focus:ring-2 focus:ring-action/25 transition text-base"
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() && !selectedImage}
-                className={`p-2 rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`w-11 h-11 inline-flex items-center justify-center rounded-full transition disabled:opacity-50 disabled:cursor-not-allowed ${
                   isConnectedToAgent 
                     ? 'bg-green-500 hover:bg-green-600 text-white' 
-                    : 'bg-desi-gold hover:bg-yellow-600 text-white'
+                    : 'bg-action hover:bg-action-dark text-white'
                 }`}
                 aria-label="Send message"
               >
                 <Send className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="text-xs text-ink-mute mt-2 text-center">
               {isConnectedToAgent 
                 ? '🟢 Connected • Agent will respond shortly' 
                 : 'Villy AI • Instant responses'}

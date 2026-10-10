@@ -115,24 +115,11 @@ const AIProductRecommendations = ({ currentProduct, category, limit = 4 }) => {
 
   if (loading) {
     return (
-      <section className="py-12 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center space-x-2 mb-8">
-            <Sparkles className="w-6 h-6 text-desi-gold animate-pulse" />
-            <h2 className="text-2xl md:text-3xl font-bold text-desi-brown">
-              Villy is finding perfect matches...
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-md h-96 animate-pulse">
-                <div className="h-64 bg-gray-200"></div>
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                </div>
-              </div>
-            ))}
+      <section className="py-10 md:py-14" aria-busy="true">
+        <div className="container-page">
+          <div className="h-8 skeleton w-56 mb-6" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+            {[...Array(4)].map((_, i) => <div key={i} className="aspect-[3/4] skeleton" />)}
           </div>
         </div>
       </section>
@@ -144,43 +131,25 @@ const AIProductRecommendations = ({ currentProduct, category, limit = 4 }) => {
   }
 
   return (
-    <section className="py-12 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
-      {/* Decorative background */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-desi-gold/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-desi-brown/5 rounded-full blur-3xl"></div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-desi-brown mb-2">
-            {currentProduct ? 'You May Also Like' : 'Recommended For You'}
+    <section className={`py-10 md:py-14 ${currentProduct ? '' : 'bg-white border-t border-line'}`}>
+      <div className={currentProduct ? '' : 'container-page'}>
+        <div className="mb-6">
+          <h2 className="section-title !mb-1">
+            {currentProduct ? 'Picked for you' : 'Recommended for you'}
           </h2>
-          <p className="text-gray-600">
-            {currentProduct 
-              ? 'Handpicked by our AI based on this product'
-              : 'Specially selected just for you'}
+          <p className="text-ink-soft">
+            {currentProduct
+              ? 'Suggestions based on this product'
+              : 'Selected from our range'}
           </p>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {recommendations.map((product, index) => (
-            <div
-              key={product._id}
-              className="animate-fade-in-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+          {recommendations.map((product) => (
+            <div key={product._id}>
               <ProductCard product={product} />
             </div>
           ))}
-        </div>
-
-        {/* Info Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500 flex items-center justify-center space-x-2">
-            <Sparkles className="w-4 h-4 text-desi-gold" />
-            <span>Smart recommendations powered by Villy</span>
-          </p>
         </div>
       </div>
     </section>

@@ -106,21 +106,21 @@ const CustomerSupport = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'open': return 'bg-blue-100 text-blue-800';
-      case 'in-progress': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'open': return 'bg-cream text-brand';
+      case 'in-progress': return 'bg-action-tint text-action-dark';
+      case 'resolved': return 'bg-leaf-tint text-leaf';
+      case 'closed': return 'bg-cream text-ink';
+      default: return 'bg-cream text-ink';
     }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'urgent': return 'bg-red-100 text-red-800';
+      case 'urgent': return 'bg-berry-tint text-berry';
       case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'medium': return 'bg-action-tint text-action-dark';
+      case 'low': return 'bg-leaf-tint text-leaf';
+      default: return 'bg-cream text-ink';
     }
   };
 
@@ -133,13 +133,13 @@ const CustomerSupport = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-10">
+    <div className="bg-paper pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white rounded-lg shadow-card overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-3 h-[calc(100vh-12rem)]">
             {/* Tickets List */}
-            <div className="border-r border-gray-200 overflow-y-auto">
-              <div className="p-4 border-b border-gray-200 bg-[#D4AF37]">
+            <div className="border-r border-line overflow-y-auto">
+              <div className="p-4 border-b border-line bg-[#D4AF37]">
                 <h2 className="text-xl font-bold text-white">
                   {user?.role === 'admin' ? 'All Support Tickets' : 'My Tickets'}
                 </h2>
@@ -163,7 +163,7 @@ const CustomerSupport = () => {
               </div>
 
               {tickets.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center text-ink-mute">
                   <MessageSquare className="mx-auto h-12 w-12 mb-2" />
                   <p>No tickets found</p>
                 </div>
@@ -173,25 +173,25 @@ const CustomerSupport = () => {
                     <div
                       key={ticket._id}
                       onClick={() => setSelectedTicket(ticket)}
-                      className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 ${
-                        selectedTicket?._id === ticket._id ? 'bg-blue-50' : ''
+                      className={`p-4 border-b border-line cursor-pointer hover:bg-cream ${
+                        selectedTicket?._id === ticket._id ? 'bg-cream' : ''
                       }`}
                     >
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-ink">
                             {ticket.userName}
                           </h3>
-                          <p className="text-sm text-gray-500">{ticket.userEmail}</p>
+                          <p className="text-sm text-ink-mute">{ticket.userEmail}</p>
                         </div>
                         <span className={`px-2 py-1 rounded text-xs ${getStatusColor(ticket.status)}`}>
                           {ticket.status}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 truncate">
+                      <p className="text-sm text-ink-soft truncate">
                         {ticket.messages[0]?.message}
                       </p>
-                      <div className="mt-2 flex items-center gap-2 text-xs text-gray-400">
+                      <div className="mt-2 flex items-center gap-2 text-xs text-ink-mute">
                         <Clock className="h-3 w-3" />
                         {new Date(ticket.createdAt).toLocaleString()}
                       </div>
@@ -206,7 +206,7 @@ const CustomerSupport = () => {
               {selectedTicket ? (
                 <>
                   {/* Header */}
-                  <div className="p-4 border-b border-gray-200 bg-gray-50">
+                  <div className="p-4 border-b border-line bg-cream">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <button
@@ -216,7 +216,7 @@ const CustomerSupport = () => {
                           <ArrowLeft className="h-5 w-5" />
                         </button>
                         <div>
-                          <h3 className="font-bold text-gray-900">
+                          <h3 className="font-display font-bold text-ink">
                             {selectedTicket.userName}
                           </h3>
                           <div className="flex items-center gap-2 mt-1">
@@ -296,7 +296,7 @@ const CustomerSupport = () => {
 
                   {/* Reply Box (Admin only) */}
                   {user?.role === 'admin' && selectedTicket.status !== 'closed' && (
-                    <div className="p-4 border-t border-gray-200 bg-gray-50">
+                    <div className="p-4 border-t border-line bg-cream">
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -304,7 +304,7 @@ const CustomerSupport = () => {
                           onChange={(e) => setReplyMessage(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && handleReply()}
                           placeholder="Type your reply..."
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-[#D4AF37]"
+                          className="flex-1 px-4 py-2 border border-[#CDBBA4] rounded-lg focus:outline-none focus:border-[#D4AF37]"
                         />
                         <button
                           onClick={handleReply}
@@ -318,7 +318,7 @@ const CustomerSupport = () => {
                   )}
                 </>
               ) : (
-                <div className="flex-1 flex items-center justify-center text-gray-500">
+                <div className="flex-1 flex items-center justify-center text-ink-mute">
                   <div className="text-center">
                     <MessageSquare className="mx-auto h-16 w-16 mb-4" />
                     <p className="text-lg">Select a ticket to view details</p>

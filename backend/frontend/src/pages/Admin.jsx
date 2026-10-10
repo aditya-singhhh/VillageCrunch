@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { formatINR } from '../utils/format';
 import {
   getContacts, 
   updateContactStatus as updateContactStatusAPI,
@@ -219,16 +220,16 @@ const Admin = () => {
   const statusConfig = {
     pending: {
       icon: Clock,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
+      color: 'text-action-dark',
+      bgColor: 'bg-action-tint',
       borderColor: 'border-yellow-200',
       label: 'Pending',
     },
     confirmed: {
       icon: CheckCircle,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
+      color: 'text-brand',
+      bgColor: 'bg-cream',
+      borderColor: 'border-sand',
       label: 'Confirmed',
     },
     processing: {
@@ -247,16 +248,16 @@ const Admin = () => {
     },
     delivered: {
       icon: CheckCircle,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
+      color: 'text-leaf',
+      bgColor: 'bg-leaf-tint',
+      borderColor: 'border-leaf/30',
       label: 'Delivered',
     },
     cancelled: {
       icon: XCircle,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200',
+      color: 'text-berry',
+      bgColor: 'bg-berry-tint',
+      borderColor: 'border-berry/30',
       label: 'Cancelled',
     },
   };
@@ -264,21 +265,21 @@ const Admin = () => {
   // Contact status configurations
   const contactStatusConfig = {
     pending: {
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
+      color: 'text-action-dark',
+      bgColor: 'bg-action-tint',
       borderColor: 'border-yellow-200',
       label: 'Pending',
     },
     'in-progress': {
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200',
+      color: 'text-brand',
+      bgColor: 'bg-cream',
+      borderColor: 'border-sand',
       label: 'In Progress',
     },
     resolved: {
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200',
+      color: 'text-leaf',
+      bgColor: 'bg-leaf-tint',
+      borderColor: 'border-leaf/30',
       label: 'Resolved',
     },
   };
@@ -1026,27 +1027,27 @@ const saveSettings = async (e) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-paper flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-desi-brown"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="bg-paper py-6 md:py-8 max-w-full overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-desi-brown mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600 mb-6">Manage orders and customer inquiries</p>
+        <h1 className="page-title mb-1">Admin dashboard</h1>
+        <p className="text-ink-soft mb-6">Manage orders and customer inquiries</p>
 
         {/* Tab Navigation */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
+        <div className="border-b border-line mb-6 md:mb-8 overflow-x-auto scrollbar-none snap-x">
+          <nav className="-mb-px flex space-x-6 md:space-x-8 min-w-max pr-4" aria-label="Admin sections">
             <button
               onClick={() => setActiveTab('orders')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
                 activeTab === 'orders'
                   ? 'border-desi-gold text-desi-brown'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-ink-mute hover:text-ink-soft hover:border-[#CDBBA4]'
               }`}
             >
               <Package className="w-5 h-5 inline-block mr-2" />
@@ -1054,10 +1055,10 @@ const saveSettings = async (e) => {
             </button>
             <button
               onClick={() => setActiveTab('contacts')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
                 activeTab === 'contacts'
                   ? 'border-desi-gold text-desi-brown'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-ink-mute hover:text-ink-soft hover:border-[#CDBBA4]'
               }`}
             >
               <MessageSquare className="w-5 h-5 inline-block mr-2" />
@@ -1065,10 +1066,10 @@ const saveSettings = async (e) => {
             </button>
             <button
               onClick={() => setActiveTab('products')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
                 activeTab === 'products'
                   ? 'border-desi-gold text-desi-brown'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-ink-mute hover:text-ink-soft hover:border-[#CDBBA4]'
               }`}
             >
               <Hash className="w-5 h-5 inline-block mr-2" />
@@ -1076,10 +1077,10 @@ const saveSettings = async (e) => {
             </button>
             <button
               onClick={() => setActiveTab('promocodes')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
                 activeTab === 'promocodes'
                   ? 'border-desi-gold text-desi-brown'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-ink-mute hover:text-ink-soft hover:border-[#CDBBA4]'
               }`}
             >
               <Tag className="w-5 h-5 inline-block mr-2" />
@@ -1087,10 +1088,10 @@ const saveSettings = async (e) => {
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
                 activeTab === 'settings'
                   ? 'border-desi-gold text-desi-brown'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-ink-mute hover:text-ink-soft hover:border-[#CDBBA4]'
               }`}
             >
               <Settings className="w-5 h-5 inline-block mr-2" />
@@ -1103,45 +1104,45 @@ const saveSettings = async (e) => {
         {activeTab === 'orders' && (
           <>
             {/* ✅ Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6 md:mb-8">
           {[
-            ['Total Orders', stats.total, Package, 'border-desi-gold'],
-            ['Pending', stats.pending, Clock, 'border-yellow-500'],
-            ['Processing', stats.processing, Package, 'border-indigo-500'],
-            ['Shipped', stats.shipped, Truck, 'border-purple-500'],
-            ['Delivered', stats.delivered, CheckCircle, 'border-green-500'],
+            ['Total Orders', stats.total, Package, 'border-action'],
+            ['Pending', stats.pending, Clock, 'border-gold'],
+            ['Processing', stats.processing, Package, 'border-brand'],
+            ['Shipped', stats.shipped, Truck, 'border-ink-soft'],
+            ['Delivered', stats.delivered, CheckCircle, 'border-leaf'],
           ].map(([label, value, Icon, border]) => (
-            <div key={label} className={`bg-white rounded-xl shadow-md p-6 border-l-4 ${border}`}>
+            <div key={label} className={`bg-white rounded-lg shadow-card p-4 md:p-6 border-l-4 ${border}`}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-600 text-sm">{label}</p>
-                  <p className="text-2xl font-bold text-gray-900">{value}</p>
+                  <p className="text-ink-soft text-sm">{label}</p>
+                  <p className="text-2xl font-display font-bold text-ink">{value}</p>
                 </div>
-                <Icon className="w-8 h-8 text-desi-gold" />
+                <Icon className="w-6 h-6 md:w-8 md:h-8 text-action" aria-hidden="true" />
               </div>
             </div>
           ))}
         </div>
 
         {/* ✅ Filters and Search */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-8 grid md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-lg shadow-card p-4 md:p-6 mb-6 md:mb-8 grid md:grid-cols-2 gap-3 md:gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ink-mute w-5 h-5" />
             <input
               type="text"
               placeholder="Search by order number, name, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-desi-gold"
+              className="input-field pl-10"
             />
           </div>
 
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ink-mute w-5 h-5" />
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-desi-gold appearance-none"
+              className="input-field pl-10 appearance-none"
             >
               <option value="all">All Status</option>
               {Object.entries(statusConfig).map(([key, val]) => (
@@ -1150,62 +1151,96 @@ const saveSettings = async (e) => {
                 </option>
               ))}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-ink-mute w-5 h-5 pointer-events-none" />
           </div>
         </div>
 
         {/* ✅ Orders Table */}
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-white rounded-lg shadow-card overflow-hidden">
           {filteredOrders.length === 0 ? (
             <div className="text-center py-12">
-              <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No orders found</p>
+              <Package className="w-16 h-16 text-ink-mute mx-auto mb-4" />
+              <p className="text-ink-soft">No orders found</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            <ul className="md:hidden divide-y divide-line">
+              {filteredOrders.map((order) => {
+                const status = statusConfig[order.status];
+                const StatusIcon = status.icon;
+                return (
+                  <li key={order._id} className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-mono font-semibold text-sm break-all">#{order.orderNumber}</p>
+                        <p className="font-medium text-ink mt-0.5 truncate">{order.user?.name || order.shippingAddress?.name}</p>
+                        <p className="text-sm text-ink-mute">{new Date(order.createdAt).toLocaleDateString('en-IN')} &middot; {order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>
+                      </div>
+                      <p className="font-semibold tabular-nums whitespace-nowrap">{formatINR(order.totalPrice)}</p>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.isPaid ? 'bg-leaf-tint text-leaf' : 'bg-action-tint text-action-dark'}`}>
+                        {order.paymentInfo.method.toUpperCase()}
+                      </span>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full ${status.bgColor} ${status.color}`}>
+                        <StatusIcon className="w-4 h-4 mr-1.5" aria-hidden="true" />
+                        <span className="text-xs font-semibold">{status.label}</span>
+                      </span>
+                      <button
+                        onClick={() => { setSelectedOrder(order); setShowModal(true); }}
+                        className="btn-secondary btn-sm ml-auto"
+                      >
+                        <Edit className="w-4 h-4" aria-hidden="true" /> Manage
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
               <thead className="bg-desi-cream">
                 <tr>
                   {['Order #', 'Customer', 'Date', 'Products & Items', 'Total', 'Payment', 'Status', 'Actions'].map(
                     (head) => (
-                      <th key={head} className="px-6 py-4 text-left text-sm font-semibold text-desi-brown">
+                      <th key={head} className="px-4 py-4 text-left text-sm font-semibold text-desi-brown">
                         {head}
                       </th>
                     )
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-line">
                 {filteredOrders.map((order) => {
                   const status = statusConfig[order.status];
                   const StatusIcon = status.icon;
                   return (
-                    <tr key={order._id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 font-mono font-semibold">#{order.orderNumber}</td>
-                      <td className="px-6 py-4">
+                    <tr key={order._id} className="hover:bg-cream transition">
+                      <td className="px-4 py-4 font-mono font-semibold">#{order.orderNumber}</td>
+                      <td className="px-4 py-4">
                         <div className="space-y-1">
-                          <p className="font-medium text-gray-900">{order.user?.name || order.shippingAddress?.name}</p>
-                          <p className="text-sm text-gray-600">{order.user?.email}</p>
-                          <p className="text-sm text-gray-500">{order.user?.phone || order.shippingAddress?.phone}</p>
+                          <p className="font-medium text-ink">{order.user?.name || order.shippingAddress?.name}</p>
+                          <p className="text-sm text-ink-soft">{order.user?.email}</p>
+                          <p className="text-sm text-ink-mute">{order.user?.phone || order.shippingAddress?.phone}</p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
-                      <td className="px-6 py-4 text-sm">
+                      <td className="px-4 py-4 text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
+                      <td className="px-4 py-4 text-sm">
                         <div className="space-y-2">
-                          <p className="font-medium text-gray-900">{order.items.length} items</p>
+                          <p className="font-medium text-ink">{order.items.length} items</p>
                           <div className="space-y-1">
                             {/* Always show first 2 items with details */}
                             {order.items?.slice(0, 2).map((item, index) => (
-                              <div key={index} className="text-xs text-gray-700 bg-gray-50 px-2 py-1 rounded border">
+                              <div key={index} className="text-xs text-ink-soft bg-cream px-2 py-1 rounded border">
                                 <div className="font-medium truncate">
                                   {item.product?.name || item.name || 'Product'}
                                 </div>
-                                <div className="text-gray-500 flex justify-between">
+                                <div className="text-ink-mute flex justify-between">
                                   <span>Qty: {item.quantity}</span>
                                   <span>₹{item.price}</span>
                                 </div>
                                 {item.weight && (
-                                  <div className="text-gray-400 text-xs">{item.weight}</div>
+                                  <div className="text-ink-mute text-xs">{item.weight}</div>
                                 )}
                               </div>
                             ))}
@@ -1214,16 +1249,16 @@ const saveSettings = async (e) => {
                             {expandedOrders.has(order._id) && order.items.length > 2 && (
                               <div className="space-y-1">
                                 {order.items.slice(2).map((item, index) => (
-                                  <div key={index + 2} className="text-xs text-gray-700 bg-gray-50 px-2 py-1 rounded border">
+                                  <div key={index + 2} className="text-xs text-ink-soft bg-cream px-2 py-1 rounded border">
                                     <div className="font-medium truncate">
                                       {item.product?.name || item.name || 'Product'}
                                     </div>
-                                    <div className="text-gray-500 flex justify-between">
+                                    <div className="text-ink-mute flex justify-between">
                                       <span>Qty: {item.quantity}</span>
                                       <span>₹{item.price}</span>
                                     </div>
                                     {item.weight && (
-                                      <div className="text-gray-400 text-xs">{item.weight}</div>
+                                      <div className="text-ink-mute text-xs">{item.weight}</div>
                                     )}
                                   </div>
                                 ))}
@@ -1244,7 +1279,7 @@ const saveSettings = async (e) => {
                                   e.stopPropagation();
                                   toggleOrderExpanded(order._id);
                                 }}
-                                className="text-xs text-desi-gold hover:text-desi-brown font-medium flex items-center gap-1 px-2 py-1 rounded hover:bg-yellow-50 transition-colors"
+                                className="text-xs text-desi-gold hover:text-desi-brown font-medium flex items-center gap-1 px-2 py-1 rounded hover:bg-action-tint transition-colors"
                               >
                                 {expandedOrders.has(order._id) ? (
                                   <>
@@ -1262,29 +1297,30 @@ const saveSettings = async (e) => {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-semibold">₹{order.totalPrice.toFixed(2)}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 font-semibold">₹{order.totalPrice.toFixed(2)}</td>
+                      <td className="px-4 py-4">
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            order.isPaid ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                            order.isPaid ? 'bg-leaf-tint text-leaf' : 'bg-action-tint text-action-dark'
                           }`}
                         >
                           {order.paymentInfo.method.toUpperCase()}
                         </span>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className={`inline-flex items-center px-3 py-1 rounded-full ${status.bgColor} ${status.color}`}>
                           <StatusIcon className="w-4 h-4 mr-2" />
                           <span className="text-sm font-semibold">{status.label}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <button
                           onClick={() => {
                             setSelectedOrder(order);
                             setShowModal(true);
                           }}
-                          className="text-desi-gold hover:text-yellow-600"
+                          className="w-11 h-11 inline-flex items-center justify-center text-action hover:text-action-dark"
+                          aria-label={`Manage order ${order.orderNumber}`}
                         >
                           <Edit className="w-5 h-5" />
                         </button>
@@ -1295,14 +1331,15 @@ const saveSettings = async (e) => {
               </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
 
         {/* ✅ Edit Order Modal */}
       {showModal && selectedOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-desi-gold to-yellow-600 p-6 text-white flex justify-between">
+          <div className="bg-white rounded-lg shadow-card max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-action hover:bg-action-dark p-6 text-white flex justify-between">
               <h2 className="text-2xl font-bold">Order Details</h2>
               <button onClick={() => setShowModal(false)} className="text-white hover:text-gray-200">
                 <XCircle className="w-6 h-6" />
@@ -1318,8 +1355,8 @@ const saveSettings = async (e) => {
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {/* Customer Account Details */}
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-3">Account Details</h4>
+                  <div className="bg-cream p-4 rounded-lg">
+                    <h4 className="font-semibold text-brand mb-3">Account Details</h4>
                     <div className="space-y-2 text-sm">
                       <p><strong>Name:</strong> {selectedOrder.user?.name || 'N/A'}</p>
                       <p><strong>Email:</strong> {selectedOrder.user?.email || 'N/A'}</p>
@@ -1328,8 +1365,8 @@ const saveSettings = async (e) => {
                   </div>
                   
                   {/* Shipping Address */}
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-green-800 mb-3">Shipping Address</h4>
+                  <div className="bg-leaf-tint p-4 rounded-lg">
+                    <h4 className="font-semibold text-leaf mb-3">Shipping Address</h4>
                     <div className="space-y-2 text-sm">
                       <p><strong>Deliver To:</strong> {selectedOrder.shippingAddress?.name}</p>
                       <p><Phone className="w-4 h-4 inline mr-2" />{selectedOrder.shippingAddress?.phone}</p>
@@ -1347,7 +1384,7 @@ const saveSettings = async (e) => {
                   <ShoppingBag className="w-5 h-5 mr-2" />
                   Order Summary
                 </h3>
-                <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <div className="bg-cream p-4 rounded-lg space-y-3">
                   <div className="flex justify-between items-center">
                     <span><strong>Order #:</strong></span>
                     <span className="font-mono font-bold">#{selectedOrder.orderNumber}</span>
@@ -1359,7 +1396,7 @@ const saveSettings = async (e) => {
                   <div className="flex justify-between items-center">
                     <span><strong>Payment Method:</strong></span>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      selectedOrder.isPaid ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                      selectedOrder.isPaid ? 'bg-leaf-tint text-leaf' : 'bg-action-tint text-action-dark'
                     }`}>
                       {selectedOrder.paymentInfo?.method?.toUpperCase()} {selectedOrder.isPaid ? '(Paid)' : '(Pending)'}
                     </span>
@@ -1383,10 +1420,10 @@ const saveSettings = async (e) => {
                 </h3>
                 <div className="space-y-3">
                   {selectedOrder.items?.map((item, index) => (
-                    <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div key={index} className="bg-white border border-line rounded-lg p-4 hover:shadow-card transition">
                       <div className="flex items-center space-x-4">
                         {/* Product Image */}
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
+                        <div className="w-16 h-16 bg-cream rounded-lg flex-shrink-0 overflow-hidden">
                           {item.product?.image || item.image ? (
                             <img 
                               src={item.product?.image || item.image} 
@@ -1398,7 +1435,7 @@ const saveSettings = async (e) => {
                               }}
                             />
                           ) : null}
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                          <div className="w-full h-full bg-sand flex items-center justify-center text-ink-mute">
                             <Package className="w-6 h-6" />
                           </div>
                         </div>
@@ -1407,10 +1444,10 @@ const saveSettings = async (e) => {
                         <div className="flex-1">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h4 className="font-semibold text-gray-900 mb-1">
+                              <h4 className="font-semibold text-ink mb-1">
                                 {item.product?.name || item.name || 'Product Name Not Available'}
                               </h4>
-                              <div className="text-sm text-gray-600 space-y-1">
+                              <div className="text-sm text-ink-soft space-y-1">
                                 {item.weight && (
                                   <p><strong>Weight:</strong> {item.weight}</p>
                                 )}
@@ -1422,7 +1459,7 @@ const saveSettings = async (e) => {
                               <p className="text-lg font-bold text-desi-brown">
                                 ₹{(item.price * item.quantity).toFixed(2)}
                               </p>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-sm text-ink-mute">
                                 ₹{item.price} × {item.quantity}
                               </p>
                             </div>
@@ -1433,7 +1470,7 @@ const saveSettings = async (e) => {
                   ))}
                   
                   {(!selectedOrder.items || selectedOrder.items.length === 0) && (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-ink-mute">
                       <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
                       <p>No product details available</p>
                     </div>
@@ -1455,7 +1492,7 @@ const saveSettings = async (e) => {
                         className={`p-4 rounded-lg border-2 transition ${
                           selectedOrder.status === key
                             ? `${cfg.borderColor} ${cfg.bgColor}`
-                            : 'border-gray-200 hover:border-desi-gold'
+                            : 'border-line hover:border-desi-gold'
                         }`}
                       >
                         <Icon className={`w-6 h-6 mx-auto mb-2 ${cfg.color}`} />
@@ -1479,17 +1516,17 @@ const saveSettings = async (e) => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               {[
                 ['Total Contacts', contactStats.total, MessageSquare, 'border-desi-gold'],
-                ['Pending', contactStats.pending, Clock, 'border-yellow-500'],
+                ['Pending', contactStats.pending, Clock, 'border-gold'],
                 ['In Progress', contactStats.inProgress, Edit, 'border-blue-500'],
-                ['Resolved', contactStats.resolved, CheckCircle, 'border-green-500'],
+                ['Resolved', contactStats.resolved, CheckCircle, 'border-leaf'],
               ].map(([label, value, Icon, borderClass]) => (
                 <div key={label} className={`bg-white p-6 rounded-lg shadow-sm border-l-4 ${borderClass}`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">{label}</p>
-                      <p className="text-2xl font-bold text-gray-900">{value}</p>
+                      <p className="text-sm font-medium text-ink-soft">{label}</p>
+                      <p className="text-2xl font-display font-bold text-ink">{value}</p>
                     </div>
-                    <Icon className="w-8 h-8 text-gray-400" />
+                    <Icon className="w-8 h-8 text-ink-mute" />
                   </div>
                 </div>
               ))}
@@ -1500,11 +1537,11 @@ const saveSettings = async (e) => {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
                 <div className="flex-1 max-w-lg">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ink-mute w-5 h-5" />
                     <input
                       type="text"
                       placeholder="Search by name, email, or subject..."
-                      className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                      className="pl-10 pr-4 py-2 w-full border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -1512,9 +1549,9 @@ const saveSettings = async (e) => {
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="relative">
-                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ink-mute w-4 h-4" />
                     <select
-                      className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                      className="pl-10 pr-8 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                       value={contactFilterStatus}
                       onChange={(e) => setContactFilterStatus(e.target.value)}
                     >
@@ -1532,24 +1569,24 @@ const saveSettings = async (e) => {
             {contactsLoading ? (
               <div className="bg-white p-8 rounded-lg shadow-sm text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-desi-brown mx-auto mb-2"></div>
-                <p className="text-gray-500">Loading contacts...</p>
+                <p className="text-ink-mute">Loading contacts...</p>
               </div>
             ) : (
               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-cream">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Contact Info</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Subject</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-line">
                     {filteredContacts.length === 0 ? (
                       <tr>
-                        <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                        <td colSpan="5" className="px-6 py-8 text-center text-ink-mute">
                           No contacts found
                         </td>
                       </tr>
@@ -1557,41 +1594,41 @@ const saveSettings = async (e) => {
                       filteredContacts.map((contact) => {
                         const statusCfg = contactStatusConfig[contact.status];
                         return (
-                          <tr key={contact._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4">
+                          <tr key={contact._id} className="hover:bg-cream">
+                            <td className="px-4 py-4">
                               <div>
-                                <div className="text-sm font-medium text-gray-900">{contact.name}</div>
-                                <div className="text-sm text-gray-500 flex items-center">
+                                <div className="text-sm font-medium text-ink">{contact.name}</div>
+                                <div className="text-sm text-ink-mute flex items-center">
                                   <Mail className="w-4 h-4 mr-1" />
                                   {contact.email}
                                 </div>
-                                <div className="text-sm text-gray-500 flex items-center">
+                                <div className="text-sm text-ink-mute flex items-center">
                                   <Phone className="w-4 h-4 mr-1" />
                                   {contact.phone}
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-900">{contact.subject}</div>
-                              <div className="text-sm text-gray-500 truncate max-w-xs">
+                            <td className="px-4 py-4">
+                              <div className="text-sm text-ink">{contact.subject}</div>
+                              <div className="text-sm text-ink-mute truncate max-w-xs">
                                 {contact.message.length > 50 
                                   ? contact.message.substring(0, 50) + '...' 
                                   : contact.message
                                 }
                               </div>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-4 py-4">
                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusCfg.bgColor} ${statusCfg.color} ${statusCfg.borderColor} border`}>
                                 {statusCfg.label}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-ink-mute">
                               <div className="flex items-center">
                                 <Calendar className="w-4 h-4 mr-1" />
                                 {new Date(contact.createdAt).toLocaleDateString()}
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-sm font-medium">
+                            <td className="px-4 py-4 text-sm font-medium">
                               <button
                                 onClick={() => {
                                   setSelectedContact(contact);
@@ -1620,60 +1657,60 @@ const saveSettings = async (e) => {
             {/* Product Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {/* Total Products */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-blue-100">
+              <div className="bg-white p-6 rounded-lg shadow-card border border-blue-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-blue-600 text-sm font-medium">Total Products</p>
-                    <p className="text-2xl font-bold text-blue-800">{productStats.total}</p>
+                    <p className="text-brand text-sm font-medium">Total Products</p>
+                    <p className="text-2xl font-bold text-brand">{productStats.total}</p>
                   </div>
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <Hash className="w-6 h-6 text-blue-600" />
+                  <div className="p-3 bg-cream rounded-full">
+                    <Hash className="w-6 h-6 text-brand" />
                   </div>
                 </div>
               </div>
 
               {/* Active Products */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-green-100">
+              <div className="bg-white p-6 rounded-lg shadow-card border border-green-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-green-600 text-sm font-medium">Active Products</p>
-                    <p className="text-2xl font-bold text-green-800">{productStats.active}</p>
+                    <p className="text-leaf text-sm font-medium">Active Products</p>
+                    <p className="text-2xl font-bold text-leaf">{productStats.active}</p>
                   </div>
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <CheckCircle className="w-6 h-6 text-green-600" />
+                  <div className="p-3 bg-leaf-tint rounded-full">
+                    <CheckCircle className="w-6 h-6 text-leaf" />
                   </div>
                 </div>
               </div>
 
               {/* Out of Stock */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-red-100">
+              <div className="bg-white p-6 rounded-lg shadow-card border border-red-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-red-600 text-sm font-medium">Out of Stock</p>
-                    <p className="text-2xl font-bold text-red-800">{productStats.outOfStock}</p>
+                    <p className="text-berry text-sm font-medium">Out of Stock</p>
+                    <p className="text-2xl font-bold text-berry">{productStats.outOfStock}</p>
                   </div>
-                  <div className="p-3 bg-red-100 rounded-full">
-                    <XCircle className="w-6 h-6 text-red-600" />
+                  <div className="p-3 bg-berry-tint rounded-full">
+                    <XCircle className="w-6 h-6 text-berry" />
                   </div>
                 </div>
               </div>
 
               {/* Low Stock */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border border-yellow-100">
+              <div className="bg-white p-6 rounded-lg shadow-card border border-yellow-100">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-yellow-600 text-sm font-medium">Low Stock</p>
-                    <p className="text-2xl font-bold text-yellow-800">{productStats.lowStock}</p>
+                    <p className="text-action-dark text-sm font-medium">Low Stock</p>
+                    <p className="text-2xl font-bold text-action-dark">{productStats.lowStock}</p>
                   </div>
-                  <div className="p-3 bg-yellow-100 rounded-full">
-                    <AlertCircle className="w-6 h-6 text-yellow-600" />
+                  <div className="p-3 bg-action-tint rounded-full">
+                    <AlertCircle className="w-6 h-6 text-action-dark" />
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Products Controls */}
-            <div className="bg-white p-6 rounded-xl shadow-lg">
+            <div className="bg-white p-6 rounded-lg shadow-card">
               <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-desi-brown">Products Management</h2>
                 <button
@@ -1695,7 +1732,7 @@ const saveSettings = async (e) => {
                     setAdditionalImageUrl('');
                     setShowProductModal(true);
                   }}
-                  className="bg-desi-gold text-desi-brown px-4 py-2 rounded-lg hover:bg-yellow-500 transition flex items-center space-x-2"
+                  className="bg-action text-white px-4 py-2 rounded-lg hover:bg-action-dark transition flex items-center space-x-2"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Product</span>
@@ -1710,14 +1747,14 @@ const saveSettings = async (e) => {
                     placeholder="Search products..."
                     value={productSearchTerm}
                     onChange={(e) => setProductSearchTerm(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                    className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                   />
                 </div>
                 <div>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                    className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                   >
                     <option value="">All Categories</option>
                     {filterCategories.map(category => (
@@ -1729,7 +1766,7 @@ const saveSettings = async (e) => {
                   <select
                     value={stockFilter}
                     onChange={(e) => setStockFilter(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                    className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                   >
                     <option value="">All Stock Levels</option>
                     <option value="in-stock">In Stock</option>
@@ -1743,42 +1780,42 @@ const saveSettings = async (e) => {
               {loadingProducts ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-desi-gold mx-auto"></div>
-                  <p className="text-gray-600 mt-2">Loading products...</p>
+                  <p className="text-ink-soft mt-2">Loading products...</p>
                 </div>
               ) : filteredProducts.length === 0 ? (
                 <div className="text-center py-8">
-                  <Hash className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">No products found</p>
+                  <Hash className="w-12 h-12 text-ink-mute mx-auto mb-2" />
+                  <p className="text-ink-soft">No products found</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-line">
+                    <thead className="bg-cream">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">
                           Product
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">
                           Category
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">
                           Price
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">
                           Stock
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-line">
                       {filteredProducts.map((product) => (
-                        <tr key={product._id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                        <tr key={product._id} className="hover:bg-cream">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               {product.image ? (
                                 <div className="relative mr-4">
@@ -1788,76 +1825,76 @@ const saveSettings = async (e) => {
                                     className="h-12 w-12 rounded-lg object-cover"
                                   />
                                   {product.images && product.images.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-desi-gold text-desi-brown text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                    <span className="absolute -top-1 -right-1 bg-action text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                                       +{product.images.length}
                                     </span>
                                   )}
                                 </div>
                               ) : (
-                                <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-4">
-                                  <Hash className="w-6 h-6 text-gray-500" />
+                                <div className="h-12 w-12 rounded-lg bg-sand flex items-center justify-center mr-4">
+                                  <Hash className="w-6 h-6 text-ink-mute" />
                                 </div>
                               )}
                               <div>
-                                <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                <div className="text-sm text-gray-500 truncate max-w-xs">
+                                <div className="text-sm font-medium text-ink">{product.name}</div>
+                                <div className="text-sm text-ink-mute truncate max-w-xs">
                                   {product.description}
                                 </div>
                                 {product.images && product.images.length > 0 && (
-                                  <div className="text-xs text-blue-600 mt-1">
+                                  <div className="text-xs text-brand mt-1">
                                     {product.images.length + 1} image{product.images.length + 1 !== 1 ? 's' : ''} total
                                   </div>
                                 )}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cream text-brand">
                               {product.category}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <div className="text-sm text-ink">
                               <div className="flex items-center space-x-2">
                                 <span className="font-medium">₹{product.price}</span>
                                 {product.originalPrice && product.originalPrice > product.price && (
-                                  <span className="text-xs text-gray-500 line-through">₹{product.originalPrice}</span>
+                                  <span className="text-xs text-ink-mute line-through">₹{product.originalPrice}</span>
                                 )}
                                 {product.discount && (
-                                  <span className="text-xs text-green-600">-{product.discount}%</span>
+                                  <span className="text-xs text-leaf">-{product.discount}%</span>
                                 )}
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <span className={`text-sm font-medium ${
-                                product.stock <= 0 ? 'text-red-600' :
-                                product.stock <= 10 ? 'text-yellow-600' :
-                                'text-green-600'
+                                product.stock <= 0 ? 'text-berry' :
+                                product.stock <= 10 ? 'text-action-dark' :
+                                'text-leaf'
                               }`}>
                                 {product.stock}
                               </span>
                               {product.stock <= 0 && (
-                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-berry-tint text-berry">
                                   Out of Stock
                                 </span>
                               )}
                               {product.stock > 0 && product.stock <= 10 && (
-                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-action-tint text-action-dark">
                                   Low Stock
                                 </span>
                               )}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              product.isActive !== false ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              product.isActive !== false ? 'bg-leaf-tint text-leaf' : 'bg-cream text-ink'
                             }`}>
                               {product.isActive !== false ? 'Active' : 'Inactive'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => openProductEditModal(product)}
@@ -1868,7 +1905,7 @@ const saveSettings = async (e) => {
                               </button>
                               <button
                                 onClick={() => handleDeleteProduct(product._id)}
-                                className="text-red-600 hover:text-red-900 p-1"
+                                className="text-berry hover:text-red-900 p-1"
                                 title="Delete Product"
                                 disabled={deletingProduct === product._id}
                               >
@@ -1898,7 +1935,7 @@ const saveSettings = async (e) => {
                 <h2 className="text-xl font-bold text-desi-brown">Contact Details</h2>
                 <button
                   onClick={() => setShowContactModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-ink-mute hover:text-ink-soft"
                 >
                   <XCircle className="w-6 h-6" />
                 </button>
@@ -1911,7 +1948,7 @@ const saveSettings = async (e) => {
                     <User className="w-5 h-5 mr-2" />
                     Contact Information
                   </h3>
-                  <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                  <div className="bg-cream p-4 rounded-lg space-y-2">
                     <p><strong>Name:</strong> {selectedContact.name}</p>
                     <p><strong>Email:</strong> {selectedContact.email}</p>
                     <p><strong>Phone:</strong> {selectedContact.phone}</p>
@@ -1923,8 +1960,8 @@ const saveSettings = async (e) => {
                 {/* Message */}
                 <div>
                   <h3 className="font-bold text-lg mb-4 text-desi-brown">Message</h3>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-gray-700 whitespace-pre-wrap">{selectedContact.message}</p>
+                  <div className="bg-cream p-4 rounded-lg">
+                    <p className="text-ink-soft whitespace-pre-wrap">{selectedContact.message}</p>
                   </div>
                 </div>
 
@@ -1940,11 +1977,11 @@ const saveSettings = async (e) => {
                         className={`p-3 rounded-lg border-2 transition ${
                           selectedContact.status === key
                             ? `${cfg.bgColor} ${cfg.borderColor} ${cfg.color}`
-                            : 'border-gray-200 hover:border-gray-300'
+                            : 'border-line hover:border-[#CDBBA4]'
                         } ${updatingStatus ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <div className="text-center">
-                          <div className={`text-sm font-medium ${selectedContact.status === key ? cfg.color : 'text-gray-700'}`}>
+                          <div className={`text-sm font-medium ${selectedContact.status === key ? cfg.color : 'text-ink-soft'}`}>
                             {cfg.label}
                           </div>
                         </div>
@@ -1960,7 +1997,7 @@ const saveSettings = async (e) => {
         {/* 🛍️ Product Add/Edit Modal */}
         {showProductModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-card max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between p-6 border-b">
                 <h2 className="text-xl font-bold text-desi-brown">
                   {editingProduct ? 'Edit Product' : 'Add New Product'}
@@ -1982,7 +2019,7 @@ const saveSettings = async (e) => {
                       isActive: true
                     });
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-ink-mute hover:text-ink-soft"
                 >
                   <XCircle className="w-6 h-6" />
                 </button>
@@ -1991,7 +2028,7 @@ const saveSettings = async (e) => {
               <form onSubmit={handleProductFormSubmit} className="p-6 space-y-6">
                 {/* Product Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-soft mb-2">
                     Product Name *
                   </label>
                   <input
@@ -1999,14 +2036,14 @@ const saveSettings = async (e) => {
                     required
                     value={productForm.name}
                     onChange={(e) => setProductForm(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                    className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                     placeholder="Enter product name"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-soft mb-2">
                     Description *
                   </label>
                   <textarea
@@ -2014,14 +2051,14 @@ const saveSettings = async (e) => {
                     rows={4}
                     value={productForm.description}
                     onChange={(e) => setProductForm(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent resize-none"
+                    className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent resize-none"
                     placeholder="Enter product description"
                   />
                 </div>
 
                 {/* Category */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-soft mb-2">
                     Category *
                   </label>
                   {isAddingCustomCategory ? (
@@ -2031,7 +2068,7 @@ const saveSettings = async (e) => {
                         required
                         value={customCategory}
                         onChange={(e) => setCustomCategory(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                        className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                         placeholder="Enter custom category"
                         autoFocus
                       />
@@ -2060,7 +2097,7 @@ const saveSettings = async (e) => {
                       required
                       value={productForm.category}
                       onChange={handleCategoryChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                     >
                       <option value="">Select a category</option>
                       {categories.map((category, index) => (
@@ -2077,11 +2114,11 @@ const saveSettings = async (e) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Price */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-ink-soft mb-2">
                       Price (₹) *
                     </label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ink-mute" />
                       <input
                         type="number"
                         required
@@ -2099,7 +2136,7 @@ const saveSettings = async (e) => {
                             };
                           });
                         }}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                         placeholder="0.00"
                       />
                     </div>
@@ -2107,7 +2144,7 @@ const saveSettings = async (e) => {
 
                   {/* Stock */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-ink-soft mb-2">
                       Stock Quantity *
                     </label>
                     <input
@@ -2116,7 +2153,7 @@ const saveSettings = async (e) => {
                       min="0"
                       value={productForm.stock}
                       onChange={(e) => setProductForm(prev => ({ ...prev, stock: e.target.value }))}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                      className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                       placeholder="0"
                     />
                   </div>
@@ -2124,21 +2161,21 @@ const saveSettings = async (e) => {
 
                 {/* Weight */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-soft mb-2">
                     Weight/Package Size
                   </label>
                   <input
                     type="text"
                     value={productForm.weight}
                     onChange={(e) => setProductForm(prev => ({ ...prev, weight: e.target.value }))}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                    className="w-full px-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                     placeholder="e.g., 250g, 500g, 1kg"
                   />
                 </div>
 
                 {/* Original Price & Discount Row */}
-                <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                  <p className="text-sm text-blue-800 mb-2">
+                <div className="bg-cream p-4 rounded-lg mb-4">
+                  <p className="text-sm text-brand mb-2">
                     <strong>💡 Smart Pricing:</strong> Enter original price and discount % to auto-calculate final price, 
                     or enter final price to auto-calculate discount %.
                   </p>
@@ -2146,11 +2183,11 @@ const saveSettings = async (e) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Original Price */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-ink-soft mb-2">
                       Original Price (₹)
                     </label>
                     <div className="relative">
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ink-mute" />
                       <input
                         type="number"
                         min="0"
@@ -2167,12 +2204,12 @@ const saveSettings = async (e) => {
                             };
                           });
                         }}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                         placeholder="0.00"
                       />
                     </div>
                     {productForm.originalPrice && productForm.price && parseFloat(productForm.price) < parseFloat(productForm.originalPrice) && (
-                      <p className="text-xs text-green-600 mt-1">
+                      <p className="text-xs text-leaf mt-1">
                         You Save: ₹{Math.round(parseFloat(productForm.originalPrice) - parseFloat(productForm.price))}
                         {productForm.discount && ` (${productForm.discount}% discount)`}
                       </p>
@@ -2181,11 +2218,11 @@ const saveSettings = async (e) => {
 
                   {/* Discount */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-ink-soft mb-2">
                       Discount (%)
                     </label>
                     <div className="relative">
-                      <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ink-mute" />
                       <input
                         type="number"
                         min="0"
@@ -2202,12 +2239,12 @@ const saveSettings = async (e) => {
                             };
                           });
                         }}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                         placeholder="0"
                       />
                     </div>
                     {productForm.originalPrice && productForm.discount && (
-                      <p className="text-xs text-gray-600 mt-1">
+                      <p className="text-xs text-ink-soft mt-1">
                         Calculated Price: ₹{calculateDiscountedPrice(productForm.originalPrice, productForm.discount)}
                         {productForm.discount && ` (${productForm.discount}% off)`}
                       </p>
@@ -2217,7 +2254,7 @@ const saveSettings = async (e) => {
 
                 {/* Image */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-soft mb-2">
                     Main Product Image
                   </label>
                   
@@ -2228,8 +2265,8 @@ const saveSettings = async (e) => {
                       onClick={() => setImageInputMode('url')}
                       className={`px-3 py-1 text-sm rounded-md ${
                         imageInputMode === 'url' 
-                          ? 'bg-desi-gold text-white' 
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          ? 'bg-action text-white' 
+                          : 'bg-sand text-ink-soft hover:bg-gray-300'
                       }`}
                     >
                       Image URL
@@ -2239,8 +2276,8 @@ const saveSettings = async (e) => {
                       onClick={() => setImageInputMode('upload')}
                       className={`px-3 py-1 text-sm rounded-md ${
                         imageInputMode === 'upload' 
-                          ? 'bg-desi-gold text-white' 
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          ? 'bg-action text-white' 
+                          : 'bg-sand text-ink-soft hover:bg-gray-300'
                       }`}
                     >
                       Upload Image
@@ -2250,16 +2287,16 @@ const saveSettings = async (e) => {
                   {imageInputMode === 'url' ? (
                     <div>
                       <div className="relative">
-                        <Upload className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Upload className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-ink-mute" />
                         <input
                           type="text"
                           value={productForm.image}
                           onChange={(e) => setProductForm(prev => ({ ...prev, image: e.target.value }))}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                          className="w-full pl-10 pr-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                           placeholder="https://example.com/image.jpg or /Product_Images/product.jpg"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-ink-mute mt-1">
                         Enter full URL (https://...) or relative path (/Product_Images/...)
                       </p>
                     </div>
@@ -2277,18 +2314,18 @@ const saveSettings = async (e) => {
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={uploadingImage}
-                          className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex items-center gap-2 px-4 py-2 bg-cream border border-[#CDBBA4] rounded-lg hover:bg-sand disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Upload className="w-4 h-4" />
                           {uploadingImage ? 'Uploading...' : 'Choose Image'}
                         </button>
                         {uploadingImage && (
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-ink-soft">
                             Please wait while uploading...
                           </div>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-ink-mute mt-1">
                         Upload JPG, PNG, or WebP images (max 5MB)
                       </p>
                     </div>
@@ -2297,11 +2334,11 @@ const saveSettings = async (e) => {
                   {/* Main Image Preview */}
                   {productForm.image && (
                     <div className="mt-3">
-                      <p className="text-xs text-gray-600 mb-2">Main Image Preview:</p>
+                      <p className="text-xs text-ink-soft mb-2">Main Image Preview:</p>
                       <img
                         src={getDisplayImageUrl(productForm.image)}
                         alt="Preview"
-                        className="h-24 w-24 rounded-lg object-cover border border-gray-200"
+                        className="h-24 w-24 rounded-lg object-cover border border-line"
                         onError={(e) => {
                           e.target.style.display = 'none';
                           e.target.nextSibling.style.display = 'flex';
@@ -2311,8 +2348,8 @@ const saveSettings = async (e) => {
                           e.target.nextSibling.style.display = 'none';
                         }}
                       />
-                      <div className="h-24 w-24 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center" style={{display: 'none'}}>
-                        <span className="text-xs text-gray-500">Invalid image</span>
+                      <div className="h-24 w-24 rounded-lg bg-cream border border-line flex items-center justify-center" style={{display: 'none'}}>
+                        <span className="text-xs text-ink-mute">Invalid image</span>
                       </div>
                     </div>
                   )}
@@ -2320,7 +2357,7 @@ const saveSettings = async (e) => {
 
                 {/* Additional Images */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-ink-soft mb-2">
                     Additional Images (Optional)
                   </label>
                   
@@ -2331,7 +2368,7 @@ const saveSettings = async (e) => {
                         type="text"
                         value={additionalImageUrl}
                         onChange={(e) => setAdditionalImageUrl(e.target.value)}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+                        className="flex-1 px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent"
                         placeholder="Enter image URL..."
                       />
                       <button
@@ -2341,7 +2378,7 @@ const saveSettings = async (e) => {
                           setAdditionalImageUrl('');
                         }}
                         disabled={!additionalImageUrl.trim()}
-                        className="px-4 py-2 bg-desi-gold text-white rounded-lg hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-action text-white rounded-lg hover:bg-action-dark disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Add
                       </button>
@@ -2362,12 +2399,12 @@ const saveSettings = async (e) => {
                       type="button"
                       onClick={() => multipleFileInputRef.current?.click()}
                       disabled={uploadingImage}
-                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-2 bg-cream border border-[#CDBBA4] rounded-lg hover:bg-sand disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Upload className="w-4 h-4" />
                       {uploadingImage ? 'Uploading...' : 'Upload Multiple Images'}
                     </button>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-ink-mute mt-1">
                       Select multiple images to upload at once
                     </p>
                   </div>
@@ -2375,14 +2412,14 @@ const saveSettings = async (e) => {
                   {/* Additional Images Grid */}
                   {productForm.images.length > 0 && (
                     <div className="mt-3">
-                      <p className="text-xs text-gray-600 mb-2">Additional Images:</p>
+                      <p className="text-xs text-ink-soft mb-2">Additional Images:</p>
                       <div className="grid grid-cols-4 gap-2">
                         {productForm.images.map((imageUrl, index) => (
                           <div key={index} className="relative group">
                             <img
                               src={getDisplayImageUrl(imageUrl)}
                               alt={`Additional ${index + 1}`}
-                              className="h-20 w-20 rounded-lg object-cover border border-gray-200"
+                              className="h-20 w-20 rounded-lg object-cover border border-line"
                             />
                             <button
                               type="button"
@@ -2405,9 +2442,9 @@ const saveSettings = async (e) => {
                     id="isActive"
                     checked={productForm.isActive}
                     onChange={(e) => setProductForm(prev => ({ ...prev, isActive: e.target.checked }))}
-                    className="h-4 w-4 text-desi-gold focus:ring-desi-gold border-gray-300 rounded"
+                    className="h-4 w-4 text-desi-gold focus:ring-desi-gold border-[#CDBBA4] rounded"
                   />
-                  <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+                  <label htmlFor="isActive" className="ml-2 block text-sm text-ink">
                     Product is active and visible to customers
                   </label>
                 </div>
@@ -2434,14 +2471,14 @@ const saveSettings = async (e) => {
                       });
                       setAdditionalImageUrl('');
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                    className="px-4 py-2 border border-[#CDBBA4] rounded-lg text-ink-soft hover:bg-cream transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={savingProduct}
-                    className="bg-desi-gold text-desi-brown px-6 py-2 rounded-lg hover:bg-yellow-500 transition flex items-center space-x-2 disabled:opacity-50"
+                    className="bg-action text-white px-6 py-2 rounded-lg hover:bg-action-dark transition flex items-center space-x-2 disabled:opacity-50"
                   >
                     {savingProduct ? (
                       <>
@@ -2467,7 +2504,7 @@ const saveSettings = async (e) => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-desi-brown">Promocodes Management</h2>
-                <p className="text-gray-600">Manage discount codes and promotional offers</p>
+                <p className="text-ink-soft">Manage discount codes and promotional offers</p>
               </div>
               <button
                 onClick={() => {
@@ -2475,7 +2512,7 @@ const saveSettings = async (e) => {
                   resetPromocodeForm();
                   setShowPromocodeModal(true);
                 }}
-                className="bg-desi-gold text-desi-brown px-4 py-2 rounded-lg hover:bg-yellow-500 transition flex items-center space-x-2"
+                className="bg-action text-white px-4 py-2 rounded-lg hover:bg-action-dark transition flex items-center space-x-2"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Promocode</span>
@@ -2485,13 +2522,13 @@ const saveSettings = async (e) => {
             {/* Search and Filter */}
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ink-mute w-4 h-4" />
                 <input
                   type="text"
                   placeholder="Search promocodes..."
                   value={promocodeSearchTerm}
                   onChange={(e) => setPromocodeSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-desi-gold"
+                  className="w-full pl-10 pr-4 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-desi-gold"
                 />
               </div>
             </div>
@@ -2501,68 +2538,68 @@ const saveSettings = async (e) => {
               {loadingPromocodes ? (
                 <div className="p-8 text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-desi-gold mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Loading promocodes...</p>
+                  <p className="mt-2 text-ink-soft">Loading promocodes...</p>
                 </div>
               ) : promocodes.length === 0 ? (
                 <div className="p-8 text-center">
-                  <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">No promocodes found</p>
+                  <Tag className="w-12 h-12 text-ink-mute mx-auto mb-4" />
+                  <p className="text-ink-soft">No promocodes found</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-line">
+                    <thead className="bg-cream">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid Until</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Code</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Description</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Discount</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Valid Until</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Usage</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-ink-mute uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white divide-y divide-line">
                       {promocodes
                         .filter(promocode => 
                           promocode.code.toLowerCase().includes(promocodeSearchTerm.toLowerCase()) ||
                           promocode.description.toLowerCase().includes(promocodeSearchTerm.toLowerCase())
                         )
                         .map((promocode) => (
-                          <tr key={promocode._id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
+                          <tr key={promocode._id} className="hover:bg-cream">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-medium">
+                                <div className="bg-cream text-brand px-2 py-1 rounded text-sm font-medium">
                                   {promocode.code}
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4">
-                              <div className="text-sm text-gray-900">{promocode.description}</div>
+                            <td className="px-4 py-4">
+                              <div className="text-sm text-ink">{promocode.description}</div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <div className="text-sm text-ink">
                                 {promocode.type === 'percentage' ? `${promocode.value}%` : `₹${promocode.value}`}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <div className="text-sm text-ink">
                                 {new Date(promocode.endDate).toLocaleDateString()}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                promocode.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                promocode.isActive ? 'bg-leaf-tint text-leaf' : 'bg-berry-tint text-berry'
                               }`}>
                                 {promocode.isActive ? 'Active' : 'Inactive'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <div className="text-sm text-ink">
                                 {promocode.usageCount || 0}/{promocode.usageLimit || '∞'}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                               <button
                                 onClick={() => {
                                   setSelectedPromocode(promocode);
@@ -2597,7 +2634,7 @@ const saveSettings = async (e) => {
                               </button>
                               <button
                                 onClick={() => deletePromocodeHandler(promocode._id)}
-                                className="text-red-600 hover:text-red-900"
+                                className="text-berry hover:text-red-900"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -2618,7 +2655,7 @@ const saveSettings = async (e) => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h2 className="text-xl font-bold text-desi-brown">Settings Management</h2>
-                <p className="text-gray-600">Configure pricing, shipping, and business settings</p>
+                <p className="text-ink-soft">Configure pricing, shipping, and business settings</p>
               </div>
             </div>
 
@@ -2626,13 +2663,13 @@ const saveSettings = async (e) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Consolidated Pricing & Tax Settings */}
               <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <DollarSign className="w-5 h-5 mr-2 text-green-600" />
+                <h3 className="text-lg font-semibold text-ink mb-4 flex items-center">
+                  <DollarSign className="w-5 h-5 mr-2 text-leaf" />
                   Pricing & Tax Configuration
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tax Percentage (GST %)</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">Tax Percentage (GST %)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -2643,13 +2680,13 @@ const saveSettings = async (e) => {
                         ...prev,
                         pricing: { ...prev.pricing, taxRate: Number(e.target.value) }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       placeholder="18.00"
                     />
-                    <p className="text-xs text-gray-500 mt-1">GST percentage applied to all orders</p>
+                    <p className="text-xs text-ink-mute mt-1">GST percentage applied to all orders</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">COD Charges (₹)</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">COD Charges (₹)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -2659,23 +2696,23 @@ const saveSettings = async (e) => {
                         ...prev,
                         pricing: { ...prev.pricing, codCharges: Number(e.target.value) }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       placeholder="25.00"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Additional charges for Cash on Delivery orders</p>
+                    <p className="text-xs text-ink-mute mt-1">Additional charges for Cash on Delivery orders</p>
                   </div>
                 </div>
               </div>
 
               {/* Business Settings */}
               <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Settings className="w-5 h-5 mr-2 text-blue-600" />
+                <h3 className="text-lg font-semibold text-ink mb-4 flex items-center">
+                  <Settings className="w-5 h-5 mr-2 text-brand" />
                   Business Information
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">Company Name</label>
                     <input
                       type="text"
                       value={settingsForm.business?.companyName || ''}
@@ -2683,11 +2720,11 @@ const saveSettings = async (e) => {
                         ...prev,
                         business: { ...prev.business, companyName: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">Email</label>
                     <input
                       type="email"
                       value={settingsForm.business?.email || ''}
@@ -2695,11 +2732,11 @@ const saveSettings = async (e) => {
                         ...prev,
                         business: { ...prev.business, email: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">Phone</label>
                     <input
                       type="tel"
                       value={settingsForm.business?.phone || ''}
@@ -2707,11 +2744,11 @@ const saveSettings = async (e) => {
                         ...prev,
                         business: { ...prev.business, phone: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">GST Number</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">GST Number</label>
                     <input
                       type="text"
                       value={settingsForm.business?.gstNumber || ''}
@@ -2719,7 +2756,7 @@ const saveSettings = async (e) => {
                         ...prev,
                         business: { ...prev.business, gstNumber: e.target.value }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                     />
                   </div>
                 </div>
@@ -2730,13 +2767,13 @@ const saveSettings = async (e) => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Shipping Configuration */}
               <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <h3 className="text-lg font-semibold text-ink mb-4 flex items-center">
                   <Package className="w-5 h-5 mr-2 text-purple-600" />
                   Shipping Configuration
                 </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-ink-soft mb-1">
                       Shipping Charge (₹)
                     </label>
                     <input
@@ -2756,14 +2793,14 @@ const saveSettings = async (e) => {
                           }
                         }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       placeholder="99.00"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Standard shipping fee charged to customers</p>
+                    <p className="text-xs text-ink-mute mt-1">Standard shipping fee charged to customers</p>
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-ink-soft mb-1">
                       Free Shipping Threshold (₹)
                     </label>
                     <input
@@ -2783,10 +2820,10 @@ const saveSettings = async (e) => {
                           }
                         }
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       placeholder="500.00"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Order amount above which shipping becomes free</p>
+                    <p className="text-xs text-ink-mute mt-1">Order amount above which shipping becomes free</p>
                   </div>
 
                   <div>
@@ -2807,11 +2844,11 @@ const saveSettings = async (e) => {
                             }
                           }
                         }))}
-                        className="rounded border-gray-300 text-desi-gold focus:ring-desi-gold"
+                        className="rounded border-[#CDBBA4] text-desi-gold focus:ring-desi-gold"
                       />
-                      <span className="text-sm font-medium text-gray-700">Enable Free Shipping</span>
+                      <span className="text-sm font-medium text-ink-soft">Enable Free Shipping</span>
                     </label>
-                    <p className="text-xs text-gray-500 ml-6">Allow customers to get free shipping when they reach the threshold</p>
+                    <p className="text-xs text-ink-mute ml-6">Allow customers to get free shipping when they reach the threshold</p>
                   </div>
                 </div>
               </div>
@@ -2821,7 +2858,7 @@ const saveSettings = async (e) => {
             <div className="flex justify-end">
               <button
                 onClick={saveSettings}
-                className="bg-desi-gold text-desi-brown px-6 py-2 rounded-lg hover:bg-yellow-500 transition flex items-center space-x-2"
+                className="bg-action text-white px-6 py-2 rounded-lg hover:bg-action-dark transition flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Settings</span>
@@ -2836,7 +2873,7 @@ const saveSettings = async (e) => {
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-ink">
                     {selectedPromocode ? 'Edit Promocode' : 'Add New Promocode'}
                   </h3>
                   <button
@@ -2845,7 +2882,7 @@ const saveSettings = async (e) => {
                       setSelectedPromocode(null);
                       resetPromocodeForm();
                     }}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-ink-mute hover:text-ink-soft"
                   >
                     <XCircle className="w-6 h-6" />
                   </button>
@@ -2854,23 +2891,23 @@ const saveSettings = async (e) => {
                 <form onSubmit={addPromocode} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Promocode *</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Promocode *</label>
                       <input
                         type="text"
                         required
                         value={promocodeForm.code}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         placeholder="SAVE20"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type *</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Discount Type *</label>
                       <select
                         required
                         value={promocodeForm.discountType}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, discountType: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       >
                         <option value="percentage">Percentage (%)</option>
                         <option value="fixed">Fixed Amount (₹)</option>
@@ -2879,12 +2916,12 @@ const saveSettings = async (e) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">Description *</label>
                     <textarea
                       required
                       value={promocodeForm.description}
                       onChange={(e) => setPromocodeForm(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       rows="2"
                       placeholder="Get 20% off on all orders above ₹500"
                     />
@@ -2892,7 +2929,7 @@ const saveSettings = async (e) => {
 
                   {/* Application Type */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Apply To *</label>
+                    <label className="block text-sm font-medium text-ink-soft mb-1">Apply To *</label>
                     <select
                       required
                       value={promocodeForm.applicationType}
@@ -2905,7 +2942,7 @@ const saveSettings = async (e) => {
                           applicableCategories: [] // Reset when changing type
                         }));
                       }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                      className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                     >
                       <option value="all">Site-wide (All Products)</option>
                       <option value="product">Specific Products</option>
@@ -2916,12 +2953,12 @@ const saveSettings = async (e) => {
                   {/* Product Selection - Show only when applicationType is 'product' */}
                   {promocodeForm.applicationType === 'product' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Products *</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-2">Select Products *</label>
                       
                       {/* Selected Products Display */}
                       {promocodeForm.applicableProducts.length > 0 && (
                         <div className="mb-3">
-                          <p className="text-sm text-green-600 font-medium mb-2">
+                          <p className="text-sm text-leaf font-medium mb-2">
                             ✅ {promocodeForm.applicableProducts.length} product(s) selected:
                           </p>
                           <div className="flex flex-wrap gap-2 mb-3">
@@ -2938,7 +2975,7 @@ const saveSettings = async (e) => {
                                         applicableProducts: prev.applicableProducts.filter(id => id !== productId)
                                       }));
                                     }}
-                                    className="text-red-500 hover:text-red-700"
+                                    className="text-berry hover:text-berry"
                                   >
                                     ×
                                   </button>
@@ -2961,7 +2998,7 @@ const saveSettings = async (e) => {
                               }));
                             }
                           }}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                          className="flex-1 px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         >
                           <option value="">Choose a product to add...</option>
                           {products && products.length > 0 ? (
@@ -2979,11 +3016,11 @@ const saveSettings = async (e) => {
                       </div>
                       
                       {promocodeForm.applicableProducts.length === 0 && (
-                        <p className="text-xs text-red-500 mt-1">
+                        <p className="text-xs text-berry mt-1">
                           Please select at least one product
                         </p>
                       )}
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-ink-mute mt-1">
                         {products?.length || 0} products available
                       </p>
                     </div>
@@ -2992,12 +3029,12 @@ const saveSettings = async (e) => {
                   {/* Category Selection - Show only when applicationType is 'category' */}
                   {promocodeForm.applicationType === 'category' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Select Categories *</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-2">Select Categories *</label>
                       
                       {/* Selected Categories Display */}
                       {promocodeForm.applicableCategories.length > 0 && (
                         <div className="mb-3">
-                          <p className="text-sm text-green-600 font-medium mb-2">
+                          <p className="text-sm text-leaf font-medium mb-2">
                             ✅ {promocodeForm.applicableCategories.length} categor{promocodeForm.applicableCategories.length === 1 ? 'y' : 'ies'} selected:
                           </p>
                           <div className="flex flex-wrap gap-2 mb-3">
@@ -3012,7 +3049,7 @@ const saveSettings = async (e) => {
                                       applicableCategories: prev.applicableCategories.filter(cat => cat !== category)
                                     }));
                                   }}
-                                  className="text-red-500 hover:text-red-700"
+                                  className="text-berry hover:text-berry"
                                 >
                                   ×
                                 </button>
@@ -3034,7 +3071,7 @@ const saveSettings = async (e) => {
                               }));
                             }
                           }}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                          className="flex-1 px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         >
                           <option value="">Choose a category to add...</option>
                           {categories && categories.length > 0 ? (
@@ -3052,11 +3089,11 @@ const saveSettings = async (e) => {
                       </div>
                       
                       {promocodeForm.applicableCategories.length === 0 && (
-                        <p className="text-xs text-red-500 mt-1">
+                        <p className="text-xs text-berry mt-1">
                           Please select at least one category
                         </p>
                       )}
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-ink-mute mt-1">
                         {categories?.length || 0} categories available
                       </p>
                     </div>
@@ -3064,7 +3101,7 @@ const saveSettings = async (e) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Discount Value *</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Discount Value *</label>
                       <input
                         type="number"
                         required
@@ -3072,29 +3109,29 @@ const saveSettings = async (e) => {
                         step="0.01"
                         value={promocodeForm.discountValue}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, discountValue: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         placeholder="20"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Min Order Value (₹)</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Min Order Value (₹)</label>
                       <input
                         type="number"
                         min="0"
                         value={promocodeForm.minOrderValue}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, minOrderValue: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         placeholder="500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Max Discount (₹)</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Max Discount (₹)</label>
                       <input
                         type="number"
                         min="0"
                         value={promocodeForm.maxDiscountAmount}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, maxDiscountAmount: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         placeholder="200"
                       />
                     </div>
@@ -3102,47 +3139,47 @@ const saveSettings = async (e) => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Valid From *</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Valid From *</label>
                       <input
                         type="date"
                         required
                         value={promocodeForm.validFrom}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, validFrom: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until *</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Valid Until *</label>
                       <input
                         type="date"
                         required
                         value={promocodeForm.validUntil}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, validUntil: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Total Usage Limit</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Total Usage Limit</label>
                       <input
                         type="number"
                         min="1"
                         value={promocodeForm.usageLimit}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, usageLimit: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         placeholder="100"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Per User Limit</label>
+                      <label className="block text-sm font-medium text-ink-soft mb-1">Per User Limit</label>
                       <input
                         type="number"
                         min="1"
                         value={promocodeForm.userUsageLimit}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, userUsageLimit: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold"
+                        className="w-full px-3 py-2 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold"
                         placeholder="1"
                       />
                     </div>
@@ -3154,9 +3191,9 @@ const saveSettings = async (e) => {
                         type="checkbox"
                         checked={promocodeForm.isActive}
                         onChange={(e) => setPromocodeForm(prev => ({ ...prev, isActive: e.target.checked }))}
-                        className="rounded border-gray-300 text-desi-gold focus:ring-desi-gold"
+                        className="rounded border-[#CDBBA4] text-desi-gold focus:ring-desi-gold"
                       />
-                      <span className="text-sm font-medium text-gray-700">Active</span>
+                      <span className="text-sm font-medium text-ink-soft">Active</span>
                     </label>
                   </div>
 
@@ -3168,13 +3205,13 @@ const saveSettings = async (e) => {
                         setSelectedPromocode(null);
                         resetPromocodeForm();
                       }}
-                      className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+                      className="px-4 py-2 text-ink-soft bg-sand rounded-lg hover:bg-gray-300 transition"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="bg-desi-gold text-desi-brown px-6 py-2 rounded-lg hover:bg-yellow-500 transition flex items-center space-x-2"
+                      className="bg-action text-white px-6 py-2 rounded-lg hover:bg-action-dark transition flex items-center space-x-2"
                     >
                       <Save className="w-4 h-4" />
                       <span>{selectedPromocode ? 'Update Promocode' : 'Create Promocode'}</span>

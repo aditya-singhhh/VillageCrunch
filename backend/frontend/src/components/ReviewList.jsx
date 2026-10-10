@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, ThumbsUp, Camera, ChevronDown, Filter } from 'lucide-react';
+import { Star, ThumbsUp, Camera, ChevronDown, Filter, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -124,19 +124,19 @@ const ReviewList = ({ productId, onWriteReview }) => {
   return (
     <div className="space-y-6">
       {/* Review Statistics */}
-      {stats && (
-        <div className="bg-gradient-to-r from-desi-cream to-yellow-50 rounded-xl p-6 border border-desi-gold/20">
+      {stats && stats.total > 0 && (
+        <div className="bg-cream rounded-lg p-5 sm:p-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <div className="flex items-center space-x-4 mb-4">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-desi-brown">{stats.average}</div>
-                  <div className="flex text-desi-gold justify-center mb-1">
+                  <div className="text-4xl font-bold text-ink">{stats.average}</div>
+                  <div className="flex text-gold justify-center mb-1">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className={`w-5 h-5 ${i < Math.floor(stats.average) ? 'fill-current' : ''}`} />
                     ))}
                   </div>
-                  <div className="text-sm text-gray-600">{stats.total} reviews</div>
+                  <div className="text-sm text-ink-soft">{stats.total} reviews</div>
                 </div>
               </div>
             </div>
@@ -149,13 +149,13 @@ const ReviewList = ({ productId, onWriteReview }) => {
                 return (
                   <div key={rating} className="flex items-center space-x-3">
                     <span className="text-sm font-medium w-8">{rating}★</span>
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div className="flex-1 bg-sand rounded-full h-2">
                       <div 
-                        className="bg-desi-gold h-2 rounded-full transition-all duration-300"
+                        className="bg-gold h-2 rounded-full transition-all duration-300"
                         style={{ width: `${percentage}%` }}
                       ></div>
                     </div>
-                    <span className="text-sm text-gray-600 w-8">{count}</span>
+                    <span className="text-sm text-ink-soft w-8">{count}</span>
                   </div>
                 );
               })}
@@ -166,29 +166,32 @@ const ReviewList = ({ productId, onWriteReview }) => {
 
       {/* Sort and Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h3 className="text-xl font-bold text-gray-900">
-          Customer Reviews {stats && `(${stats.total})`}
+        <h3 className="text-xl font-display font-semibold text-ink">
+          Customer reviews {stats && stats.total > 0 && `(${stats.total})`}
         </h3>
         
-        <div className="flex items-center space-x-3">
-          <Filter className="w-5 h-5 text-gray-500" />
+        <div className="flex items-center gap-3">
+          {reviews.length > 0 && (<>
+          <Filter className="w-5 h-5 text-ink-mute" aria-hidden="true" />
           <select 
             value={sortBy} 
             onChange={(e) => setSortBy(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-desi-gold focus:border-transparent"
+            aria-label="Sort reviews"
+            className="input-field h-11 w-auto text-sm py-0"
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="helpful">Most Helpful</option>
             <option value="rating">Highest Rating</option>
           </select>
+          </>)}
           
-          {onWriteReview && (
+          {onWriteReview && reviews.length > 0 && (
             <button
               onClick={onWriteReview}
-              className="bg-desi-gold text-desi-brown px-4 py-2 rounded-lg hover:bg-yellow-500 transition font-semibold text-sm"
+              className="btn-primary btn-sm"
             >
-              Write Review
+              Write review
             </button>
           )}
         </div>
@@ -196,17 +199,13 @@ const ReviewList = ({ productId, onWriteReview }) => {
 
       {/* Reviews List */}
       {reviews.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-xl">
-          <Star className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <h4 className="text-lg font-semibold text-gray-700 mb-2">No reviews yet</h4>
-          <p className="text-gray-600 mb-6">Be the first to share your experience!</p>
+        <div className="text-center py-6 bg-cream rounded-lg px-4">
+          <p className="font-semibold text-ink">No reviews yet</p>
+          <p className="text-sm text-ink-soft mt-1">
+            {onWriteReview ? 'Be the first to share your experience.' : 'Be the first to review after you order.'}
+          </p>
           {onWriteReview && (
-            <button
-              onClick={onWriteReview}
-              className="bg-desi-gold text-desi-brown px-6 py-3 rounded-lg hover:bg-yellow-500 transition font-semibold"
-            >
-              Write the First Review
-            </button>
+            <button onClick={onWriteReview} className="btn-primary mt-4">Write the first review</button>
           )}
         </div>
       ) : (
@@ -219,35 +218,35 @@ const ReviewList = ({ productId, onWriteReview }) => {
               : review.comment.substring(0, 200) + '...';
 
             return (
-              <div key={review._id} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <div key={review._id} className="bg-white border border-line rounded-lg p-4 sm:p-6">
                 {/* Review Header */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-desi-gold to-yellow-500 rounded-full flex items-center justify-center">
-                      <span className="text-desi-brown font-bold text-lg">
+                    <div className="w-12 h-12 bg-cream rounded-full flex items-center justify-center">
+                      <span className="text-brand font-bold text-lg">
                         {review.name?.charAt(0).toUpperCase() || 'U'}
                       </span>
                     </div>
                     
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h4 className="font-semibold text-gray-900">{review.name || 'Anonymous'}</h4>
+                        <h4 className="font-semibold text-ink">{review.name || 'Anonymous'}</h4>
                         {review.verified && (
-                          <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full font-medium">
+                          <span className="bg-leaf-tint text-leaf text-xs px-2 py-1 rounded-full font-medium">
                             ✓ Verified Purchase
                           </span>
                         )}
                       </div>
                       
                       <div className="flex items-center space-x-3 mt-1">
-                        <div className="flex text-desi-gold">
+                        <div className="flex text-gold">
                           {[...Array(5)].map((_, i) => (
                             <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-current' : ''}`} />
                           ))}
                         </div>
-                        <span className="text-sm text-gray-600">{formatDate(review.createdAt)}</span>
+                        <span className="text-sm text-ink-soft">{formatDate(review.createdAt)}</span>
                         {review.updatedAt !== review.createdAt && (
-                          <span className="text-xs text-gray-500">(edited)</span>
+                          <span className="text-xs text-ink-mute">(edited)</span>
                         )}
                       </div>
                     </div>
@@ -257,13 +256,13 @@ const ReviewList = ({ productId, onWriteReview }) => {
                 {/* Review Content */}
                 {review.comment && (
                   <div className="mb-4">
-                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    <p className="text-ink-soft leading-relaxed whitespace-pre-wrap">
                       {displayComment}
                     </p>
                     {isLongComment && (
                       <button
                         onClick={() => toggleReviewExpansion(review._id)}
-                        className="text-desi-gold hover:text-yellow-600 text-sm font-medium mt-2 flex items-center space-x-1"
+                        className="text-action hover:text-action-dark text-sm font-medium mt-2 min-h-[44px] flex items-center space-x-1"
                       >
                         <span>{isExpanded ? 'Show Less' : 'Read More'}</span>
                         <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
@@ -276,8 +275,8 @@ const ReviewList = ({ productId, onWriteReview }) => {
                 {review.images && review.images.length > 0 && (
                   <div className="mb-4">
                     <div className="flex items-center space-x-2 mb-3">
-                      <Camera className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-700">Customer Photos</span>
+                      <Camera className="w-4 h-4 text-ink-mute" />
+                      <span className="text-sm font-medium text-ink-soft">Customer Photos</span>
                     </div>
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       {review.images.slice(0, 5).map((image, index) => (
@@ -305,15 +304,15 @@ const ReviewList = ({ productId, onWriteReview }) => {
                 )}
 
                 {/* Review Actions */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between pt-4 border-t border-line">
                   <div className="flex items-center space-x-4">
                     <button
                       onClick={() => handleHelpfulVote(review._id, !isReviewHelpfulByUser(review))}
                       disabled={!user}
-                      className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg transition text-sm font-medium ${
+                      className={`flex items-center space-x-2 px-3 min-h-[44px] rounded-md transition text-sm font-medium ${
                         isReviewHelpfulByUser(review)
-                          ? 'bg-desi-gold text-desi-brown'
-                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-action-tint text-action-dark'
+                          : 'bg-cream text-ink-soft hover:bg-sand'
                       } ${!user ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       <ThumbsUp className="w-4 h-4" />
@@ -322,11 +321,11 @@ const ReviewList = ({ productId, onWriteReview }) => {
                     </button>
                     
                     {!user && (
-                      <span className="text-xs text-gray-500">Login to vote</span>
+                      <span className="text-xs text-ink-mute">Login to vote</span>
                     )}
                   </div>
                   
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-ink-mute">
                     Review #{review._id.slice(-6)}
                   </div>
                 </div>
@@ -342,19 +341,19 @@ const ReviewList = ({ productId, onWriteReview }) => {
           <button
             onClick={() => fetchReviews(pagination.current - 1)}
             disabled={pagination.current === 1}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+            className="btn-secondary btn-sm"
           >
             Previous
           </button>
           
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-ink-soft">
             Page {pagination.current} of {pagination.pages}
           </span>
           
           <button
             onClick={() => fetchReviews(pagination.current + 1)}
             disabled={pagination.current === pagination.pages}
-            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+            className="btn-secondary btn-sm"
           >
             Next
           </button>

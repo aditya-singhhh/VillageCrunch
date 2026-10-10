@@ -3,12 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getProduct, getProducts, createReview, getUserOrders, toggleWishlist, getWishlist } from '../utils/api';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { Star, ShoppingCart, ArrowLeft, Heart, Truck, Shield, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Star, ShoppingCart, Heart, Leaf, RefreshCw, CreditCard, ChevronLeft, ChevronRight, ChevronDown, Minus, Plus, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ReviewForm from '../components/ReviewForm';
 import ReviewList from '../components/ReviewList';
 import SEOHead from '../components/SEOHead';
 import AIProductRecommendations from '../components/AIProductRecommendations';
+import ProductCard from '../components/ProductCard';
+import useStoreSettings from '../hooks/useStoreSettings';
+import { formatINR, formatCategory, discountPercent, unitPrice, averageRating } from '../utils/format';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -33,6 +37,9 @@ const ProductDetail = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [descOpen, setDescOpen] = useState(false);
+  const { settings } = useStoreSettings();
 
   useEffect(() => {
     fetchProduct();
@@ -206,6 +213,8 @@ const ProductDetail = () => {
       addToCart(product);
     }
     toast.success('Added to cart', { duration: 1500 });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1500);
   };
 
   const handleToggleWishlist = async () => {
@@ -233,7 +242,7 @@ const ProductDetail = () => {
   };
 
   const handleQuantityChange = (newQuantity) => {
-    if (newQuantity >= 1 && newQuantity <= product.stock) {
+    if (newQuantity >= 1 && newQuantity <= Math.min(product.stock, 10)) {
       setQuantity(newQuantity);
     }
   };
@@ -321,8 +330,17 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-desi-gold"></div>
+      <div className="container-page py-6" aria-busy="true" aria-label="Loading product">
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="aspect-square skeleton" />
+          <div className="space-y-4">
+            <div className="h-4 skeleton w-1/3" />
+            <div className="h-8 skeleton w-3/4" />
+            <div className="h-8 skeleton w-1/3" />
+            <div className="h-24 skeleton" />
+            <div className="h-12 skeleton" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -346,6 +364,11 @@ const ProductDetail = () => {
     });
   }
   
+  // Drop duplicate entries (main image is often repeated in `images`)
+  const uniqueImages = images.filter((img, i) => images.indexOf(img) === i);
+  images.length = 0;
+  images.push(...uniqueImages);
+
   // If no images at all, use a placeholder
   if (images.length === 0) {
     images.push('/placeholder-product.jpg');
@@ -356,8 +379,38 @@ const ProductDetail = () => {
     .slice(0, 4);
   const isMasalaProduct = product.category === 'masala';
 
+  const avg = averageRating(product.reviews);
+  const reviewCount = product.reviews?.length || 0;
+  const discount = discountPercent(product.price, product.originalPrice);
+  const perUnit = unitPrice(product.price, product.weight);
+  const outOfStock = product.stock === 0;
+  const maxQty = Math.max(1, Math.min(product.stock || 1, 10));
+  const taxRate = settings?.pricing?.taxRate;
+  const canBuy = !isMasalaProduct && !outOfStock;
+  const longDesc = (product.description || '').length > 160;
+
+  const stepper = (
+    <div className="inline-flex items-center border border-[#CDBBA4] rounded-md bg-white flex-shrink-0" role="group" aria-label="Quantity">
+      <button
+        onClick={() => handleQuantityChange(quantity - 1)}
+        disabled={quantity <= 1}
+        aria-label="Decrease quantity"
+        className="w-11 h-12 inline-flex items-center justify-center text-ink disabled:text-sand"
+      ><Minus className="w-4 h-4" /></button>
+      <span className="w-8 text-center font-semibold tabular-nums" aria-live="polite">{quantity}</span>
+      <button
+        onClick={() => handleQuantityChange(quantity + 1)}
+        disabled={quantity >= maxQty}
+        aria-label="Increase quantity"
+        className="w-11 h-12 inline-flex items-center justify-center text-ink disabled:text-sand"
+      ><Plus className="w-4 h-4" /></button>
+    </div>
+  );
+
+  const addLabel = added ? 'Added' : `Add to cart \u00b7 ${formatINR(product.price * quantity)}`;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="pb-6 md:pb-12">
       <SEOHead 
         title={`${product.name} - Buy Online at VillageCrunch`}
         description={`${product.description || `Buy premium ${product.name} online at VillageCrunch`}. Fresh, natural, and authentic quality. Price: ₹${product.price}. Fast delivery across India.`}
@@ -373,7 +426,7 @@ const ProductDetail = () => {
           category: product.category,
           inStock: product.inStock,
           reviews: product.reviews,
-          averageRating: product.reviews?.length > 0 ? calculateAverageRating(product.reviews) : 5,
+          averageRating: product.reviews?.length > 0 ? (averageRating(product.reviews) || 0).toFixed(1) : 5,
           _id: product._id
         }}
         breadcrumbs={[
@@ -384,371 +437,315 @@ const ProductDetail = () => {
         ]}
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-desi-brown hover:text-desi-gold mb-6 transition"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          Back to Products
-        </button>
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="grid md:grid-cols-2 gap-8 p-8">
-            {/* Product Images */}
-            <div>
-              {/* Main Image with Navigation */}
-              <div 
-                className="relative mb-4 group"
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onMouseEnter={() => setIsAutoPlaying(false)}
-                onMouseLeave={() => {
-                  if (product && images.length > 1) {
-                    setIsAutoPlaying(true);
-                  }
-                }}
-              >
+      <div className="container-page pt-4 md:pt-6">
+        {/* Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="text-sm text-ink-soft mb-3 md:mb-5">
+          <ol className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+            <li><Link to="/" className="hover:text-action inline-flex items-center min-h-[32px]">Home</Link></li>
+            <li aria-hidden="true">/</li>
+            <li><Link to={`/products?category=${product.category}`} className="hover:text-action inline-flex items-center min-h-[32px]">{formatCategory(product.category)}</Link></li>
+            <li aria-hidden="true" className="hidden sm:inline">/</li>
+            <li className="hidden sm:inline text-ink truncate max-w-[24ch]" aria-current="page">{product.name}</li>
+          </ol>
+        </nav>
+
+        <div className="grid md:grid-cols-[55fr_45fr] gap-6 md:gap-10 items-start">
+          {/* Gallery */}
+          <div className="md:flex md:gap-4 md:flex-row-reverse">
+            <div
+              className="relative flex-1 group"
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              onMouseEnter={() => setIsAutoPlaying(false)}
+              onMouseLeave={() => {
+                if (product && images.length > 1) {
+                  setIsAutoPlaying(true);
+                }
+              }}
+            >
+              <div className="aspect-square bg-cream rounded-lg overflow-hidden">
                 <img
                   src={images[selectedImage]}
                   alt={product.name}
-                  className="w-full h-96 object-cover rounded-xl select-none"
+                  width="800"
+                  height="800"
+                  fetchpriority="high"
+                  decoding="async"
+                  className={`w-full h-full object-cover select-none ${outOfStock ? 'opacity-60' : ''}`}
                   onError={(e) => {
                     e.target.src = '/placeholder-product.jpg';
                   }}
                   draggable={false}
                 />
-                
-                {/* Navigation Arrows - show on hover and only if multiple images */}
-                {images.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => setSelectedImage(prev => prev === 0 ? images.length - 1 : prev - 1)}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all hover:scale-110 opacity-0 group-hover:opacity-100 duration-300"
-                      aria-label="Previous image"
-                    >
-                      <ChevronLeft className="w-6 h-6 text-gray-700" />
-                    </button>
-                    <button
-                      onClick={() => setSelectedImage(prev => prev === images.length - 1 ? 0 : prev + 1)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all hover:scale-110 opacity-0 group-hover:opacity-100 duration-300"
-                      aria-label="Next image"
-                    >
-                      <ChevronRight className="w-6 h-6 text-gray-700" />
-                    </button>
-                    
-                    {/* Image Counter */}
-                    <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium opacity-0 group-hover:opacity-100 duration-300">
-                      {selectedImage + 1} / {images.length}
-                    </div>
-                    
-                    {/* Image Indicators */}
-                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                      {images.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setSelectedImage(index)}
-                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                            selectedImage === index ? 'bg-white scale-110' : 'bg-white/50 hover:bg-white/75'
-                          }`}
-                          aria-label={`Go to image ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
               </div>
-              
-              {/* Thumbnail Grid */}
-              {images.length > 1 && (
-                <div className="flex space-x-2 overflow-x-auto pb-2">
-                  {images.map((img, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 overflow-hidden transition-all hover:scale-105 duration-200 ${
-                        selectedImage === index 
-                          ? 'border-desi-gold ring-2 ring-desi-gold/20 shadow-lg' 
-                          : 'border-gray-200 hover:border-desi-gold/50'
-                      }`}
-                    >
-                      <img 
-                        src={img} 
-                        alt={`${product.name} ${index + 1}`} 
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.src = '/placeholder-product.jpg';
-                        }}
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+              {discount > 0 && canBuy && <span className="badge bg-leaf absolute top-3 left-3 text-sm px-2.5 py-1">Save {discount}%</span>}
 
-            {/* Product Info */}
-            <div className="space-y-6">
-              <div>
-                <span className="inline-block bg-desi-gold text-desi-brown px-3 py-1 rounded-full text-sm font-semibold mb-2">
-                  {product.category}
-                </span>
-                <h1 className="text-3xl font-bold text-gray-900">{product.name}</h1>
-                
-                {/* Rating */}
-                <div className="flex items-center mt-2">
-                  <div className="flex text-desi-gold">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-5 h-5 ${i < Math.floor(calculateAverageRating(product.reviews)) ? 'fill-current' : ''}`}
-                      />
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImage(prev => prev === 0 ? images.length - 1 : prev - 1)}
+                    className="hidden md:inline-flex absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-card"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft className="w-6 h-6 text-ink" />
+                  </button>
+                  <button
+                    onClick={() => setSelectedImage(prev => prev === images.length - 1 ? 0 : prev + 1)}
+                    className="hidden md:inline-flex absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-card"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight className="w-6 h-6 text-ink" />
+                  </button>
+                  <div className="md:hidden absolute bottom-2 left-1/2 -translate-x-1/2 flex" role="group" aria-label="Choose image">
+                    {images.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className="w-6 h-6 inline-flex items-center justify-center"
+                        aria-label={`Go to image ${index + 1}`}
+                        aria-current={selectedImage === index}
+                      >
+                        <span className={`w-2.5 h-2.5 rounded-full ${selectedImage === index ? 'bg-brand' : 'bg-brand/30'}`} />
+                      </button>
                     ))}
                   </div>
-                  <span className="ml-2 text-gray-600">
-                    {product.reviews && product.reviews.length > 0 
-                      ? `(${calculateAverageRating(product.reviews)})` 
-                      : '(No ratings yet)'
-                    }
-                  </span>
-                  {product.reviews && product.reviews.length > 0 && (
-                    <span className="ml-2 text-gray-500">• {product.reviews.length} review{product.reviews.length !== 1 ? 's' : ''}</span>
-                  )}
-                </div>
-              </div>
+                </>
+              )}
+            </div>
 
-              {/* Price */}
-              <div className="flex items-center space-x-4">
-                <span className="text-4xl font-bold text-desi-brown">₹{product.price}</span>
-                {product.originalPrice && (
+            {images.length > 1 && (
+              <div className="hidden md:flex md:flex-col gap-2 mt-0">
+                {images.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    aria-label={`Show image ${index + 1}`}
+                    className={`flex-shrink-0 w-[72px] h-[72px] rounded-md border-2 overflow-hidden bg-cream ${
+                      selectedImage === index ? 'border-action' : 'border-line hover:border-sand'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt=""
+                      width="72" height="72" loading="lazy" decoding="async"
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.target.src = '/placeholder-product.jpg'; }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Buy box */}
+          <div className="md:sticky md:top-24">
+            <p className="eyebrow">{formatCategory(product.category)}</p>
+            <h1 className="mt-1 font-display font-bold text-2xl leading-[30px] md:text-[32px] md:leading-[38px] text-ink">{product.name}</h1>
+
+            {reviewCount > 0 && (
+              <a href="#reviews" className="mt-2 inline-flex items-center gap-1.5 text-sm text-ink-soft hover:text-action min-h-[32px]">
+                <Star className="w-4 h-4 text-gold fill-current" aria-hidden="true" />
+                <span className="font-semibold text-ink">{avg.toFixed(1)}</span>
+                <span>({reviewCount} review{reviewCount !== 1 ? 's' : ''})</span>
+              </a>
+            )}
+
+            {/* Price */}
+            <div className="mt-4">
+              <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1">
+                <span className="text-[28px] md:text-[32px] leading-9 font-semibold text-ink tabular-nums">{formatINR(product.price)}</span>
+                {product.originalPrice > product.price && (
                   <>
-                    <span className="text-xl text-gray-500 line-through">₹{product.originalPrice}</span>
-                    <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-sm font-semibold">
-                      {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                    </span>
+                    <span className="text-lg text-ink-mute line-through tabular-nums">{formatINR(product.originalPrice)}</span>
+                    <span className="text-sm font-semibold text-leaf">Save {formatINR(product.originalPrice - product.price)} ({discount}%)</span>
                   </>
                 )}
               </div>
-
-              {/* Promocode Info */}
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center space-x-2 text-green-700">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 0a1 1 0 100 2h.01a1 1 0 100-2H9z" clipRule="evenodd" />
-                  </svg>
-                  <span className="font-semibold">🎉 Promotional Offers Available!</span>
-                </div>
-                <p className="text-sm text-gray-600 mt-2">
-                  Apply promocodes during checkout to get additional discounts on this product.
-                  <span className="block mt-1 text-green-600 font-medium">
-                    ✨ Check cart for available promocodes and save more!
-                  </span>
-                </p>
-              </div>
-
-              {/* Description */}
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Description</h3>
-                <p className="text-gray-700 leading-relaxed">{product.description}</p>
-              </div>
-
-              {/* Weight & Stock */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-gray-600">Weight:</span>
-                  <span className="ml-2 font-semibold">{product.weight}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Availability:</span>
-                  <span className={`ml-2 font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Quantity Selector */}
-              {product.stock > 0 && !isMasalaProduct && (
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-700 font-medium">Quantity:</span>
-                  <div className="flex items-center border border-gray-300 rounded-lg">
-                    <button
-                      onClick={() => handleQuantityChange(quantity - 1)}
-                      disabled={quantity <= 1}
-                      className="px-3 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
-                    >
-                      -
-                    </button>
-                    <span className="px-4 py-2 font-semibold">{quantity}</span>
-                    <button
-                      onClick={() => handleQuantityChange(quantity + 1)}
-                      disabled={quantity >= product.stock}
-                      className="px-3 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Add to Cart and Wishlist Buttons */}
-              <div className="flex space-x-4">
-                {isMasalaProduct ? (
-                  <div className="flex-1 rounded-xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm font-semibold text-amber-800">
-                    Coming soon. This masala item is not available for purchase yet.
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={product.stock === 0}
-                    className={`flex-1 py-4 px-6 rounded-xl font-semibold flex items-center justify-center space-x-3 transition-all ${
-                      product.stock === 0
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-desi-gold text-desi-brown hover:bg-yellow-500 transform hover:scale-105'
-                    }`}
-                  >
-                    <ShoppingCart className="w-6 h-6" />
-                    <span>{product.stock === 0 ? 'Out of Stock' : `Add ${quantity} to Cart`}</span>
-                  </button>
-                )}
-                
-                {user && product._id && (
-                  <button
-                    onClick={handleToggleWishlist}
-                    disabled={isTogglingWishlist}
-                    className={`px-6 py-4 rounded-xl border-2 transition-all transform hover:scale-105 disabled:opacity-50 ${
-                      isInWishlist
-                        ? 'bg-red-50 border-red-300 text-red-600 hover:bg-red-100'
-                        : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-100'
-                    }`}
-                    title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-                  >
-                    {isTogglingWishlist ? (
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-current"></div>
-                    ) : (
-                      <Heart 
-                        className={`w-6 h-6 ${isInWishlist ? 'fill-current' : ''}`} 
-                      />
-                    )}
-                  </button>
-                )}
-              </div>
-
-              {/* Features */}
-              <div className="grid grid-cols-3 gap-4 pt-6 border-t">
-                <div className="text-center">
-                  <Truck className="w-8 h-8 text-desi-gold mx-auto mb-2" />
-                  <span className="text-sm text-gray-600">Free Delivery</span>
-                </div>
-                <div className="text-center">
-                  <Shield className="w-8 h-8 text-desi-gold mx-auto mb-2" />
-                  <span className="text-sm text-gray-600">Quality Assured</span>
-                </div>
-                <div className="text-center">
-                  <RefreshCw className="w-8 h-8 text-desi-gold mx-auto mb-2" />
-                  <span className="text-sm text-gray-600">Easy Returns</span>
-                </div>
-              </div>
+              <p className="text-sm text-ink-mute mt-1">
+                {perUnit && <span>{perUnit}</span>}
+                {perUnit && taxRate > 0 && <span> &middot; </span>}
+                {taxRate > 0 && <span>GST ({taxRate}%) is added at checkout</span>}
+              </p>
             </div>
-          </div>
 
-          {/* Enhanced Reviews Section */}
-          <div className="border-t bg-gradient-to-br from-gray-50 to-white p-8">
-            {/* Review Form Modal */}
-            {showReviewForm && (
-              <div className="mb-8">
-                <ReviewForm
-                  product={product}
-                  existingReview={product?.reviews?.find(review => {
-                    const reviewUserId = review.user._id || review.user;
-                    return reviewUserId === user?._id;
-                  })}
-                  onSubmit={handleEnhancedReviewSubmit}
-                  onCancel={() => setShowReviewForm(false)}
-                  isSubmitting={isSubmittingReview}
-                />
+            {/* Weight + stock */}
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              {product.weight && (
+                <span className="inline-flex items-center h-10 px-4 rounded-md border-2 border-brand bg-action-tint text-brand text-sm font-semibold">{product.weight}</span>
+              )}
+              <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${outOfStock ? 'text-berry' : 'text-leaf'}`}>
+                {outOfStock ? 'Out of stock' : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
+              </span>
+            </div>
+
+            {/* Description */}
+            {product.description && (
+              <div className="mt-4">
+                <p className={`text-ink-soft leading-relaxed ${!descOpen && longDesc ? 'line-clamp-3' : ''}`}>{product.description}</p>
+                {longDesc && (
+                  <button onClick={() => setDescOpen((v) => !v)} className="text-sm font-medium text-action hover:underline min-h-[44px]" aria-expanded={descOpen}>
+                    {descOpen ? 'Show less' : 'Read more'}
+                  </button>
+                )}
               </div>
             )}
 
-            {/* Enhanced Reviews List with Pagination and Sorting */}
-            <ReviewList 
-              productId={product._id}
-              onWriteReview={canReview ? () => setShowReviewForm(true) : null}
-            />
+            {/* Desktop buy row */}
+            <div className="hidden md:block mt-5">
+              {isMasalaProduct ? (
+                <div className="rounded-md bg-cream px-5 py-4 text-sm font-medium text-ink-soft">
+                  Coming soon. This masala item is not available for purchase yet.
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  {canBuy && stepper}
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={outOfStock}
+                    className="btn-primary flex-1"
+                  >
+                    {outOfStock ? 'Out of stock' : (<><ShoppingCart className="w-5 h-5" aria-hidden="true" /> {addLabel}</>)}
+                  </button>
+                  {user && product._id && (
+                    <button
+                      onClick={handleToggleWishlist}
+                      disabled={isTogglingWishlist}
+                      className={`w-12 h-12 rounded-md border-[1.5px] inline-flex items-center justify-center disabled:opacity-50 ${
+                        isInWishlist ? 'bg-berry-tint border-berry text-berry' : 'bg-white border-brand text-brand hover:bg-cream'
+                      }`}
+                      aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                      aria-pressed={isInWishlist}
+                    >
+                      <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile wishlist */}
+            {user && product._id && (
+              <button
+                onClick={handleToggleWishlist}
+                disabled={isTogglingWishlist}
+                className="md:hidden mt-3 inline-flex items-center gap-2 min-h-[44px] text-sm font-medium text-brand disabled:opacity-50"
+                aria-pressed={isInWishlist}
+              >
+                <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current text-berry' : ''}`} />
+                {isInWishlist ? 'Saved to wishlist' : 'Save to wishlist'}
+              </button>
+            )}
+
+            {/* Trust strip */}
+            <ul className="mt-5 grid grid-cols-3 gap-2 border-y border-line py-4 text-center">
+              <li className="flex flex-col items-center gap-1.5 text-[13px] leading-4 text-ink-soft">
+                <Leaf className="w-6 h-6 text-leaf" strokeWidth={1.75} aria-hidden="true" />
+                Packed fresh
+              </li>
+              <li>
+                <Link to="/returns-policy" className="flex flex-col items-center gap-1.5 text-[13px] leading-4 text-ink-soft hover:text-action">
+                  <RefreshCw className="w-6 h-6 text-leaf" strokeWidth={1.75} aria-hidden="true" />
+                  Easy returns
+                </Link>
+              </li>
+              <li className="flex flex-col items-center gap-1.5 text-[13px] leading-4 text-ink-soft">
+                <CreditCard className="w-6 h-6 text-leaf" strokeWidth={1.75} aria-hidden="true" />
+                UPI, card or COD
+              </li>
+            </ul>
+
+            {/* Accordions */}
+            <div className="mt-2 divide-y divide-line">
+              {product.benefits?.length > 0 && (
+                <details className="group" open>
+                  <summary className="flex items-center justify-between min-h-[52px] cursor-pointer list-none font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                    Benefits <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" aria-hidden="true" />
+                  </summary>
+                  <ul className="pb-4 space-y-2">
+                    {product.benefits.map((benefit, index) => (
+                      <li key={index} className="flex items-start gap-2.5 text-ink-soft">
+                        <Check className="w-4 h-4 mt-1 text-leaf flex-shrink-0" aria-hidden="true" />
+                        {benefit}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+              {product.ingredients?.length > 0 && (
+                <details className="group">
+                  <summary className="flex items-center justify-between min-h-[52px] cursor-pointer list-none font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                    Ingredients <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" aria-hidden="true" />
+                  </summary>
+                  <p className="pb-4 text-ink-soft">{product.ingredients.join(', ')}</p>
+                </details>
+              )}
+              <details className="group">
+                <summary className="flex items-center justify-between min-h-[52px] cursor-pointer list-none font-semibold text-ink [&::-webkit-details-marker]:hidden">
+                  Shipping &amp; returns <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" aria-hidden="true" />
+                </summary>
+                <p className="pb-4 text-ink-soft">
+                  Read our <Link to="/shipping-policy" className="text-action underline underline-offset-2">shipping policy</Link> and{' '}
+                  <Link to="/returns-policy" className="text-action underline underline-offset-2">returns &amp; refunds policy</Link>.
+                </p>
+              </details>
+            </div>
           </div>
+        </div>
 
-          {/* Benefits & Ingredients */}
-          {(product.benefits || product.ingredients) && (
-            <div className="border-t bg-gray-50 p-8">
-              <div className="grid md:grid-cols-2 gap-8">
-                {product.benefits && (
-                  <div>
-                    <h3 className="text-xl font-bold text-desi-brown mb-4">Benefits</h3>
-                    <ul className="space-y-2">
-                      {product.benefits.map((benefit, index) => (
-                        <li key={index} className="flex items-center text-gray-700">
-                          <span className="w-2 h-2 bg-desi-gold rounded-full mr-3"></span>
-                          {benefit}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {product.ingredients && (
-                  <div>
-                    <h3 className="text-xl font-bold text-desi-brown mb-4">Ingredients</h3>
-                    <ul className="space-y-2">
-                      {product.ingredients.map((ingredient, index) => (
-                        <li key={index} className="flex items-center text-gray-700">
-                          <span className="w-2 h-2 bg-desi-gold rounded-full mr-3"></span>
-                          {ingredient}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+        {/* Reviews */}
+        <section id="reviews" className="mt-10 md:mt-14 scroll-mt-24" aria-label="Customer reviews">
+          {showReviewForm && (
+            <div className="mb-8">
+              <ReviewForm
+                product={product}
+                existingReview={product?.reviews?.find(review => {
+                  const reviewUserId = review.user._id || review.user;
+                  return reviewUserId === user?._id;
+                })}
+                onSubmit={handleEnhancedReviewSubmit}
+                onCancel={() => setShowReviewForm(false)}
+                isSubmitting={isSubmittingReview}
+              />
             </div>
           )}
-        </div>
+          <ReviewList
+            productId={product._id}
+            onWriteReview={canReview ? () => setShowReviewForm(true) : null}
+          />
+        </section>
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (
-          <div className="mt-12">
-            <h2 className="text-2xl font-bold text-desi-brown mb-6">Related Products</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((relatedProduct) => {
-                const relatedId = relatedProduct._id || relatedProduct.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-                return (
-                  <div
-                    key={relatedId}
-                    onClick={() => navigate(`/product/${relatedId}`)}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden cursor-pointer hover:shadow-xl transition-all transform hover:scale-105"
-                  >
-                    <img
-                      src={relatedProduct.image}
-                      alt={relatedProduct.name}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2">{relatedProduct.name}</h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-desi-brown">₹{relatedProduct.price}</span>
-                        {relatedProduct.originalPrice && (
-                          <span className="text-sm text-gray-500 line-through">₹{relatedProduct.originalPrice}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+          <section className="mt-10 md:mt-14" aria-label="Related products">
+            <h2 className="section-title !mb-4">More {formatCategory(product.category).toLowerCase()}</h2>
+            <div className="flex gap-3 overflow-x-auto snap-x scroll-pl-4 scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible pb-1">
+              {relatedProducts.map((rp) => (
+                <div key={rp._id || rp.name} className="flex-none w-44 snap-start md:w-auto">
+                  <ProductCard product={rp} compact />
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* AI-Powered Recommendations */}
         {product && <AIProductRecommendations currentProduct={product} limit={4} />}
+      </div>
+
+      {/* Sticky buy bar (mobile) */}
+      <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line shadow-raised p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+        {isMasalaProduct ? (
+          <p className="text-sm font-medium text-ink-soft text-center py-3">Coming soon. Not available for purchase yet.</p>
+        ) : (
+          <div className="flex items-center gap-3">
+            {canBuy && stepper}
+            <button onClick={handleAddToCart} disabled={outOfStock} className="btn-primary flex-1 px-3">
+              {outOfStock ? 'Out of stock' : addLabel}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
