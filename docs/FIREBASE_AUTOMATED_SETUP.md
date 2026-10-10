@@ -21,7 +21,8 @@ You do 6 small things in your browser. GitHub Actions does everything else.
 Your site appears at `https://<project-id>.web.app`. Then run the workflow again with
 `create-admin` to get your admin login.
 
-After that every push to `main` redeploys automatically (tests must pass first).
+To make every push to `main` redeploy automatically (tests must pass first), add the variable
+`AUTO_DEPLOY` = `true` once the first manual run has succeeded.
 
 Moving your old MongoDB data and adding your own domain: see `docs/FIREBASE_DEPLOYMENT.md`
 sections 6 and 7. Delete the `GCP_SA_KEY` secret and the key when you no longer need it.

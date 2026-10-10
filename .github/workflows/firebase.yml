@@ -27,6 +27,9 @@ env:
 
 jobs:
   run:
+    # Pushes to main only auto-deploy once you set the repository variable AUTO_DEPLOY=true
+    # (after the first successful manual bootstrap-and-deploy).
+    if: github.event_name == 'workflow_dispatch' || vars.AUTO_DEPLOY == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
