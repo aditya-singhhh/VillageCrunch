@@ -140,6 +140,29 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
                 />
                 <FolkBorder className="absolute bottom-0 left-0 opacity-70" />
               </>
+            ) : s.art === 'packs' ? (
+              <div className="absolute right-0 top-0 h-full w-[46%] md:w-[48%] flex items-center justify-center" aria-hidden="true">
+                <span className="absolute w-[78%] aspect-square max-h-[92%] rounded-full bg-white/10 ring-1 ring-white/25" />
+                <span className="absolute w-[56%] aspect-square max-h-[68%] rounded-full bg-white/10" />
+                {s.packs.length === 1 ? (
+                  <img src={`/packaging/${s.packs[0]}-front.webp`} alt="" width="300" height="400" loading="lazy" decoding="async" draggable="false"
+                    className="relative h-[84%] w-auto rotate-[5deg] drop-shadow-[0_14px_18px_rgba(0,0,0,.45)]" />
+                ) : (
+                  <div className="relative h-[78%] sm:h-[70%] sm:mr-6 md:mr-10 flex items-end justify-center">
+                    {s.packs.map((k, n) => (
+                      <img key={k} src={`/packaging/${k}-front.webp`} alt="" width="300" height="400" loading="lazy" decoding="async" draggable="false"
+                        className={`h-full w-auto drop-shadow-[0_12px_16px_rgba(0,0,0,.45)] ${n === 0 ? 'hidden sm:block -rotate-6 translate-x-3 md:translate-x-5' : n === 1 ? 'z-10 sm:scale-110 sm:-mx-3 md:-mx-4' : 'hidden sm:block rotate-6 -translate-x-3 md:-translate-x-5'}`} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : s.art === 'arch' ? (
+              <>
+                <FolkBorder className="absolute top-0 left-0 opacity-40 rotate-180" />
+                <div className="absolute right-2 sm:right-4 md:right-14 bottom-0 h-[74%] sm:h-[86%] aspect-[4/5] rounded-t-[999px] overflow-hidden border-[3px] border-white/80 shadow-xl" aria-hidden="true">
+                  <img src={s.image} alt="" width="480" height="600" loading="lazy" decoding="async" draggable="false" className="w-full h-full object-cover" />
+                </div>
+              </>
             ) : (
             <img
               src={s.image}
@@ -199,7 +222,7 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
                 aria-current={i === index ? 'true' : undefined}
                 className="h-6 px-1 inline-flex items-center"
               >
-                <span className={`block h-2 rounded-full transition-all ${i === index ? 'w-6 bg-white shadow' : 'w-2 bg-white/60'}`} />
+                <span className={`block h-2 rounded-full transition-all ${i === index ? (slides[index]?.dark === false ? 'w-6 bg-ink shadow' : 'w-6 bg-white shadow') : (slides[index]?.dark === false ? 'w-2 bg-ink/35' : 'w-2 bg-white/60')}`} />
               </button>
             ))}
             <button
