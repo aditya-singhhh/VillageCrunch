@@ -186,8 +186,11 @@
     "image": "/packaging/thekua-classic.jpg",
     "images": [
       "/packaging/thekua-classic.jpg",
-      "/packaging/thekua-classic-card.jpg",
-      "/packaging/classic-back.webp"
+      "/packaging/listing/classic-benefits.jpg",
+      "/packaging/listing/classic-inside.jpg",
+      "/packaging/listing/classic-label.jpg",
+      "/packaging/listing/classic-gift.jpg",
+      "/packaging/listing/range.jpg"
     ],
     "benefits": [
       "Made with natural jaggery",
@@ -204,7 +207,7 @@
       "Cardamom",
       "Sugar"
     ],
-    "description": "Our everyday Bihari thekua, fried crisp and fragrant with cardamom. Packed in a 400 g kraft pouch. Contains wheat.",
+    "description": "Our everyday Bihari thekua, fried crisp and fragrant with cardamom. Packed in a 400 g pouch. Contains wheat.",
     "isActive": true
   },
   {
@@ -220,8 +223,11 @@
     "image": "/packaging/thekua-jaggery.jpg",
     "images": [
       "/packaging/thekua-jaggery.jpg",
-      "/packaging/thekua-jaggery-card.jpg",
-      "/packaging/jaggery-back.webp"
+      "/packaging/listing/jaggery-benefits.jpg",
+      "/packaging/listing/jaggery-inside.jpg",
+      "/packaging/listing/jaggery-label.jpg",
+      "/packaging/listing/jaggery-gift.jpg",
+      "/packaging/listing/range.jpg"
     ],
     "benefits": [
       "Made with pure jaggery",
@@ -238,7 +244,7 @@
       "Sunflower Oil",
       "Jaggery"
     ],
-    "description": "Bihari thekua sweetened with jaggery instead of refined sugar. Packed in a 400 g kraft pouch. Contains wheat.",
+    "description": "Bihari thekua sweetened with jaggery instead of refined sugar. Packed in a 400 g pouch. Contains wheat.",
     "isActive": true
   },
   {
@@ -397,13 +403,16 @@
     "image": "/packaging/thekua-premium.jpg",
     "images": [
       "/packaging/thekua-premium.jpg",
-      "/packaging/thekua-premium-card.jpg",
-      "/packaging/premium-back.webp"
+      "/packaging/listing/premium-benefits.jpg",
+      "/packaging/listing/premium-inside.jpg",
+      "/packaging/listing/premium-label.jpg",
+      "/packaging/listing/premium-gift.jpg",
+      "/packaging/listing/range.jpg"
     ],
     "benefits": [
       "Made with 100% sudh desi ghee",
       "Traditional Bihari recipe",
-      "Kraft pouch, 400 g",
+      "400 g pouch",
       "Perfect for gifting"
     ],
     "ingredients": [
@@ -413,7 +422,7 @@
       "Jaggery",
       "Cardamom"
     ],
-    "description": "Our richest thekua, made with sudh desi ghee and packed in a premium 400 g kraft pouch. Contains wheat.",
+    "description": "Our richest thekua, made with sudh desi ghee and packed in a 400 g pouch. Contains wheat.",
     "isActive": true
   }
 ]
