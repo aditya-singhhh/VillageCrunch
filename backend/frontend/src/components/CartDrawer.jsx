@@ -1,42 +1,31 @@
-import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatINR } from '../utils/format';
+import useOverlay from '../hooks/useOverlay';
 
 /** Desktop mini-cart. Reads from CartContext only; no API changes. */
 const CartDrawer = ({ open, onClose }) => {
   const { cartItems, updateQuantity, removeFromCart, getCartTotal } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const ref = useRef(null);
-
-  useEffect(() => {
-    if (!open) return undefined;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    ref.current?.querySelector('button')?.focus();
-    const onKey = (e) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open, onClose]);
+  const ref = useOverlay(open, onClose);
 
   if (!open) return null;
   const idOf = (item) => (user ? item._id : item.cartItemId);
 
-  return (
-    <div className="fixed inset-0 z-[60] hidden md:block">
+  return createPortal(
+    <div className="fixed inset-0 z-[80] hidden md:block">
       <div className="absolute inset-0 bg-ink/40 animate-fade-in" onClick={onClose} aria-hidden="true" />
       <aside
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
-        className="absolute right-0 top-0 bottom-0 w-[420px] max-w-full bg-white shadow-raised flex flex-col animate-drawer-right"
+        tabIndex={-1}
+        className="absolute right-0 top-0 bottom-0 w-[420px] max-w-full bg-white shadow-raised flex flex-col animate-drawer-right outline-none"
       >
         <div className="flex items-center justify-between h-16 px-5 border-b border-line">
           <h2 className="font-display text-xl font-semibold">Your cart</h2>
@@ -98,7 +87,8 @@ const CartDrawer = ({ open, onClose }) => {
           </>
         )}
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 };
 
