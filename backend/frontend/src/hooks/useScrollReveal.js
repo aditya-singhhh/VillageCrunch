@@ -10,11 +10,14 @@ import { useEffect, useRef, useState } from 'react';
 export const useScrollReveal = (options = {}) => {
   const { threshold = 0.1, rootMargin = '0px' } = options;
   const ref = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const unsupported = typeof window === 'undefined' || !('IntersectionObserver' in window) ||
+    (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  // Content must never stay hidden: default to visible when we cannot observe.
+  const [isVisible, setIsVisible] = useState(unsupported);
 
   useEffect(() => {
     const element = ref.current;
-    if (!element) return;
+    if (!element || unsupported) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
