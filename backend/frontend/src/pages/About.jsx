@@ -18,7 +18,7 @@ const About = () => {
       
       {/* Hero Section */}
       <div className="bg-brand text-white py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10 text-center">
           <h1 className="text-[34px] leading-[38px] md:text-[48px] md:leading-[54px] font-display font-bold mb-6">About VillageCrunch</h1>
           <p className="text-xl max-w-3xl mx-auto opacity-90">
             Bringing the authentic taste of Bihar to your doorstep with premium quality 
@@ -29,7 +29,7 @@ const About = () => {
 
       {/* Our Story */}
       <section className="py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-2xl md:text-[32px] md:leading-[38px] font-display font-semibold text-desi-brown mb-6">Our Story</h2>
@@ -66,7 +66,7 @@ const About = () => {
 
       {/* Values */}
       <section className="py-12 md:py-20 bg-desi-cream">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
           <h2 className="text-2xl md:text-[32px] md:leading-[38px] font-display font-semibold text-desi-brown mb-12 text-center">Our Values</h2>
           
           <div className="grid md:grid-cols-4 gap-8">
@@ -115,7 +115,7 @@ const About = () => {
 
       {/* Why Choose Us */}
       <section className="py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
           <h2 className="text-2xl md:text-[32px] md:leading-[38px] font-display font-semibold text-desi-brown mb-12 text-center">Why Choose Us?</h2>
           
           <div className="grid md:grid-cols-3 gap-8">

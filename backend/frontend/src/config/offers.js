@@ -16,6 +16,9 @@
  *   image     a photo from /public (for example '/Product_Images/MixDry.jpg')
  *   bg        background CSS gradient (any valid CSS background value)
  *   dark      true  = light text on a dark background, false = dark text on a light background
+ *   art       OPTIONAL: 'chhath' draws the built-in Chhath illustration instead of a photo
+ *   from      OPTIONAL: first day this slide shows, as 'YYYY-MM-DD'
+ *   until     OPTIONAL: last day this slide shows (it disappears by itself afterwards)
  *   needs     OPTIONAL: slide is hidden unless these are available.
  *               'threshold' = a free-delivery minimum is set in Settings
  *               'discount'  = at least one product has an original price higher than its price
@@ -25,6 +28,30 @@
  * Slides appear in this order. Keep 3 to 5 slides.
  */
 export const OFFER_SLIDES = [
+  {
+    id: 'chhath',
+    headline: 'Chhath Puja ki Shubhkamnayein',
+    sub: 'Festive snacks from Bihar, to your door',
+    cta: 'Shop festive offers',
+    to: '/products?sort=discount',
+    art: 'chhath',
+    bg: 'linear-gradient(110deg,#5E1409 0%,#9A2F10 55%,#C2410C 100%)',
+    dark: true,
+    from: '2026-10-10',
+    until: '2026-11-17',
+  },
+  {
+    id: 'chhath-gift',
+    headline: 'Send love home this Chhath',
+    sub: 'Thekua and dry fruits for family',
+    cta: 'Shop thekua',
+    to: '/products?category=thekua',
+    art: 'chhath',
+    bg: 'linear-gradient(110deg,#7C1D12 0%,#B4380F 60%,#D9561A 100%)',
+    dark: true,
+    from: '2026-10-10',
+    until: '2026-11-12',
+  },
   {
     id: 'free-delivery',
     headline: 'Free delivery above {threshold}',

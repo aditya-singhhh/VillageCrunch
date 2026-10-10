@@ -232,7 +232,7 @@ const Products = () => {
           )}
 
           {loading ? (
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4" aria-busy="true" aria-label="Loading products">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5" aria-busy="true" aria-label="Loading products">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-white rounded-lg border border-line overflow-hidden">
                   <div className="aspect-square skeleton rounded-none"></div>
@@ -245,7 +245,7 @@ const Products = () => {
               ))}
             </div>
           ) : visible.length > 0 ? (
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {visible.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}

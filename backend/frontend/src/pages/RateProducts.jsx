@@ -127,7 +127,7 @@ const RateProducts = () => {
 
   return (
     <div className="bg-paper py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="mb-8">
           <h1 className="text-3xl font-display font-bold text-ink mb-4 flex items-center">
             <Star className="w-8 h-8 text-desi-gold mr-3" />

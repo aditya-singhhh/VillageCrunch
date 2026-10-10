@@ -3,7 +3,7 @@ import { Users, Heart } from 'lucide-react';
 const FoundersSection = ({ showQuote = true, compact = false }) => {
   return (
     <section className={`${compact ? 'py-12' : 'py-20'} bg-white`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="text-center mb-16">
           <h2 className={`${compact ? 'text-3xl' : 'text-4xl'} font-bold text-desi-brown mb-4`}>
             Meet Our Founders

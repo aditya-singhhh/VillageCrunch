@@ -78,7 +78,7 @@
   .badge { @apply inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-semibold text-white; }
 
   /* ---------- Layout helpers ---------- */
-  .container-page { @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8; }
+  .container-page { @apply max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10; }
   .page-title { @apply font-display font-bold text-ink text-[28px] leading-[34px] md:text-[40px] md:leading-[46px]; }
   .section-title { @apply font-display font-semibold text-ink text-2xl md:text-[32px] md:leading-[38px] mb-6; }
   .eyebrow { @apply text-xs font-semibold uppercase tracking-[.14em] text-action-dark; }

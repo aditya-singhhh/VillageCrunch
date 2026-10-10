@@ -1035,7 +1035,7 @@ const saveSettings = async (e) => {
 
   return (
     <div className="bg-paper py-6 md:py-8 max-w-full overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
         <h1 className="page-title mb-1">Admin dashboard</h1>
         <p className="text-ink-soft mb-6">Manage orders and customer inquiries</p>
 

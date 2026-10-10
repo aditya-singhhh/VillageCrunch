@@ -97,7 +97,7 @@ const Navbar = () => {
       >
         Skip to content
       </a>
-      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+      <div className="max-w-[1560px] mx-auto px-2 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between h-14 md:h-[72px] gap-2">
           {/* Mobile: hamburger */}
           <button

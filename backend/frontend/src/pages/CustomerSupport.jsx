@@ -134,7 +134,7 @@ const CustomerSupport = () => {
 
   return (
     <div className="bg-paper pt-20 pb-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="bg-white rounded-lg shadow-card overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-3 h-[calc(100vh-12rem)]">
             {/* Tickets List */}

@@ -77,7 +77,7 @@ const ContactUs = () => {
         ]}
       />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-2xl md:text-[32px] md:leading-[38px] font-display font-semibold text-desi-brown mb-4">Contact Us</h1>
