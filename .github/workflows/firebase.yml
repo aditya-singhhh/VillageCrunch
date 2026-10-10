@@ -12,7 +12,7 @@ on:
       action:
         description: What to run
         type: choice
-        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin]
+        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate]
         default: bootstrap-and-deploy
 
 concurrency:
@@ -73,6 +73,24 @@ jobs:
             echo "::error title=Deploy failed::$(cat /tmp/tail.txt)"
             exit 1
           }
+
+      - name: Migrate data from MongoDB (dry run checks only, writes nothing)
+        if: github.event_name == 'workflow_dispatch' && (inputs.action == 'migrate-dry-run' || inputs.action == 'migrate')
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          DRY: ${{ inputs.action == 'migrate-dry-run' && '--dry-run' || '' }}
+        run: |
+          [ -n "$MONGODB_URI" ] || { echo "::error::Add the repository SECRET MONGODB_URI"; exit 1; }
+          cd backend && npm ci
+          set -o pipefail
+          node scripts/migrateMongoToFirestore.js $DRY 2>&1 | tee /tmp/migrate.log || {
+            tail -n 25 /tmp/migrate.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > /tmp/tail.txt
+            echo "::error title=Migration failed::$(cat /tmp/tail.txt)"
+            exit 1
+          }
+          tail -n 25 /tmp/migrate.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > /tmp/tail.txt
+          echo "::warning title=Migration summary::$(cat /tmp/tail.txt)"
 
       - name: Create admin
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'create-admin'
