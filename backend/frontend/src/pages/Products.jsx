@@ -1,87 +1,101 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
 import SEOHead from '../components/SEOHead';
-import { getProducts, getAllProducts } from '../utils/api';
-import { formatCategory } from '../utils/format';
+import FilterPanel, { SORT_OPTIONS, describePrice } from '../components/FilterPanel';
+import FilterSheet from '../components/FilterSheet';
+import { getProducts } from '../utils/api';
+import { formatCategory, discountPercent } from '../utils/format';
+
+const num = (v) => (v === '' || v == null ? null : Number(v));
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [all, setAll] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
-  const [sortBy, setSortBy] = useState('featured');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [sheetOpen, setSheetOpen] = useState(false);
 
-  // Fetch all products to extract categories
+  // All filter state lives in the URL, so it survives reload, back/forward and sharing
+  const filters = useMemo(() => ({
+    categories: (searchParams.get('category') || '').split(',').filter(Boolean),
+    min: searchParams.get('min') || '',
+    max: searchParams.get('max') || '',
+    sort: SORT_OPTIONS.some((o) => o.value === searchParams.get('sort')) ? searchParams.get('sort') : 'featured',
+    stock: searchParams.get('stock') === '1',
+  }), [searchParams]);
+  const urlSearch = searchParams.get('search') || '';
+  const [searchInput, setSearchInput] = useState(urlSearch);
+  const pushedSearch = useRef(urlSearch);
+
+  const update = (patch, { replace = false } = {}) => {
+    const next = { ...filters, search: urlSearch, ...patch };
+    const q = {};
+    if (next.categories.length) q.category = next.categories.join(',');
+    if (next.min !== '') q.min = next.min;
+    if (next.max !== '') q.max = next.max;
+    if (next.sort !== 'featured') q.sort = next.sort;
+    if (next.stock) q.stock = '1';
+    if (next.search) q.search = next.search;
+    setSearchParams(q, { replace: replace || 'min' in patch || 'max' in patch || 'search' in patch });
+  };
+  const clearAll = () => { setSearchInput(''); pushedSearch.current = ''; setSearchParams({}); };
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getAllProducts();
-        const allProducts = data.products || data || [];
-        const uniqueCategories = [...new Set(allProducts.map(product => product.category).filter(Boolean))];
-        setCategories(uniqueCategories.sort());
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-
-    fetchCategories();
+    let alive = true;
+    getProducts()
+      .then((data) => { if (alive) setAll(Array.isArray(data) ? data : data.products || []); })
+      .catch((error) => console.error('Error fetching products:', error))
+      .finally(() => alive && setLoading(false));
+    return () => { alive = false; };
   }, []);
 
-  // Fetch products from API
+  // Search box: debounce into the URL; follow URL changes made elsewhere (header search, back button)
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const params = {};
-        if (selectedCategory !== 'all') params.category = selectedCategory;
-        if (searchTerm.trim()) params.search = searchTerm;
-
-        const data = await getProducts(params);
-        setProducts(data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, [selectedCategory, searchTerm]);
-
-  const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
-    const next = {};
-    if (category !== 'all') next.category = category;
-    if (searchInput.trim()) next.search = searchInput.trim();
-    setSearchParams(next);
-  };
-
-  // Debounce the search box (300ms)
-  useEffect(() => {
-    const t = setTimeout(() => setSearchTerm(searchInput), 300);
+    const t = setTimeout(() => {
+      if (searchInput.trim() !== urlSearch) { pushedSearch.current = searchInput.trim(); update({ search: searchInput.trim() }); }
+    }, 300);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchInput]);
-
-  // Keep state in sync when the URL changes (header search, footer links, back button)
-  const urlCategory = searchParams.get('category') || 'all';
-  const urlSearch = searchParams.get('search') || '';
   useEffect(() => {
-    setSelectedCategory(urlCategory);
-    setSearchInput(urlSearch);
-    setSearchTerm(urlSearch);
-  }, [urlCategory, urlSearch]);
+    if (urlSearch !== pushedSearch.current) { pushedSearch.current = urlSearch; setSearchInput(urlSearch); }
+  }, [urlSearch]);
 
-  const sortedProducts = useMemo(() => {
-    const list = [...products];
-    if (sortBy === 'price-asc') list.sort((a, b) => a.price - b.price);
-    else if (sortBy === 'price-desc') list.sort((a, b) => b.price - a.price);
+  const categories = useMemo(() => [...new Set(all.map((p) => p.category).filter(Boolean))].sort(), [all]);
+  const counts = useMemo(() => all.reduce((m, p) => ({ ...m, [p.category]: (m[p.category] || 0) + 1 }), {}), [all]);
+
+  const visible = useMemo(() => {
+    const term = urlSearch.trim().toLowerCase();
+    const min = num(filters.min);
+    const max = num(filters.max);
+    let list = all.filter((p) => {
+      if (term && !`${p.name} ${p.description || ''}`.toLowerCase().includes(term)) return false;
+      if (filters.categories.length && !filters.categories.includes(p.category)) return false;
+      if (min != null && p.price < min) return false;
+      if (max != null && p.price > max) return false;
+      if (filters.stock && !(p.stock > 0)) return false;
+      return true;
+    });
+    list = [...list];
+    if (filters.sort === 'price-asc') list.sort((a, b) => a.price - b.price);
+    else if (filters.sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+    else if (filters.sort === 'discount') list.sort((a, b) => discountPercent(b.price, b.originalPrice) - discountPercent(a.price, a.originalPrice));
     return list;
-  }, [products, sortBy]);
+  }, [all, filters, urlSearch]);
+
+  const selectedCategory = filters.categories.length === 1 ? filters.categories[0] : 'all';
+  const searchTerm = urlSearch;
+
+  // Active filter chips
+  const active = [];
+  filters.categories.forEach((c) => active.push({ key: `c-${c}`, label: formatCategory(c), remove: () => update({ categories: filters.categories.filter((x) => x !== c) }) }));
+  if (filters.min || filters.max) active.push({ key: 'price', label: describePrice(filters.min, filters.max), remove: () => update({ min: '', max: '' }) });
+  if (filters.stock) active.push({ key: 'stock', label: 'In stock', remove: () => update({ stock: false }) });
+  if (searchTerm) active.push({ key: 'q', label: `"${searchTerm}"`, remove: () => { setSearchInput(''); pushedSearch.current = ''; update({ search: '' }); } });
+  const activeCount = active.length + (filters.sort !== 'featured' ? 1 : 0);
+
+  const panelProps = { filters, onChange: (patch) => update(patch), categories, counts };
 
   // Dynamic SEO based on category and search
   const getSEOData = () => {
@@ -117,9 +131,11 @@ const Products = () => {
 
   const seoData = getSEOData();
 
+  const title = selectedCategory !== 'all' ? formatCategory(selectedCategory) : 'Shop all';
+
   return (
     <div className="pb-10">
-      <SEOHead 
+      <SEOHead
         title={seoData.title}
         description={seoData.description}
         keywords={seoData.keywords}
@@ -129,20 +145,59 @@ const Products = () => {
         breadcrumbs={[
           { name: 'Home', url: '/' },
           { name: 'Products', url: '/products' },
-          ...(selectedCategory && selectedCategory !== 'all' ? [{ name: selectedCategory, url: `/products?category=${selectedCategory}` }] : [])
+          ...(selectedCategory !== 'all' ? [{ name: selectedCategory, url: `/products?category=${selectedCategory}` }] : [])
         ]}
       />
-      
-      {/* Heading */}
-      <div className="container-page pt-6 md:pt-10">
-        <h1 className="page-title">{selectedCategory !== 'all' ? formatCategory(selectedCategory) : 'Shop all products'}</h1>
-        <p className="mt-1 text-ink-soft">Dry fruits, makhana and thekua, packed fresh and sent across India.</p>
+
+      <div className="container-page pt-5 md:pt-8 flex items-end justify-between gap-4">
+        <h1 className="page-title">{title}</h1>
+        <p className="text-sm text-ink-soft pb-1" aria-live="polite">{loading ? '' : `${visible.length} item${visible.length === 1 ? '' : 's'}`}</p>
       </div>
 
-      {/* Search + category chips */}
-      <div className="sticky top-14 md:top-[72px] z-30 bg-paper/95 backdrop-blur border-b border-line mt-4">
-        <div className="container-page py-3 space-y-3 md:space-y-0 md:flex md:items-center md:gap-4">
-          <form onSubmit={(e) => e.preventDefault()} role="search" className="relative md:w-72 md:order-2 md:ml-auto flex-shrink-0">
+      {/* Mobile / tablet toolbar */}
+      <div className="lg:hidden sticky top-14 md:top-[72px] z-30 bg-paper/95 backdrop-blur border-b border-line mt-4">
+        <div className="container-page py-2.5 flex items-center gap-2">
+          <button
+            onClick={() => setSheetOpen(true)}
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-full bg-white border border-line text-sm font-semibold text-ink flex-shrink-0"
+            aria-haspopup="dialog"
+          >
+            <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+            Filter &amp; sort
+            {activeCount > 0 && <span className="min-w-[20px] h-5 px-1 rounded-full bg-action text-white text-xs leading-5 text-center">{activeCount}</span>}
+          </button>
+          <div className="flex gap-2 overflow-x-auto scrollbar-none snap-x" role="group" aria-label="Quick category filter">
+            {categories.map((c) => {
+              const on = filters.categories.includes(c);
+              return (
+                <button
+                  key={c}
+                  aria-pressed={on}
+                  onClick={() => update({ categories: on ? filters.categories.filter((x) => x !== c) : [...filters.categories, c] })}
+                  className={`chip snap-start ${on ? 'chip-active' : ''}`}
+                >
+                  {formatCategory(c)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="container-page pt-5 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10">
+        {/* Desktop sidebar */}
+        <aside aria-label="Filters" className="hidden lg:block">
+          <div className="sticky top-[96px] max-h-[calc(100vh-112px)] overflow-y-auto pr-1">
+            <div className="flex items-center justify-between h-9">
+              <h2 className="font-display font-semibold text-lg">Filters</h2>
+              {activeCount > 0 && <button onClick={clearAll} className="text-sm font-semibold text-action hover:underline underline-offset-4">Clear all</button>}
+            </div>
+            <FilterPanel {...panelProps} />
+          </div>
+        </aside>
+
+        <div className="min-w-0">
+          <form onSubmit={(e) => e.preventDefault()} role="search" className="relative mb-3">
             <label htmlFor="product-search" className="sr-only">Search products</label>
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-ink-mute pointer-events-none" aria-hidden="true" />
             <input
@@ -155,100 +210,66 @@ const Products = () => {
               className="input-field pl-11"
             />
           </form>
-          <div className="flex gap-2 overflow-x-auto snap-x scroll-pl-4 scrollbar-none -mx-4 px-4 md:mx-0 md:px-0 md:order-1" role="group" aria-label="Filter by category">
-            <button
-              onClick={() => handleCategoryChange('all')}
-              aria-pressed={selectedCategory === 'all'}
-              className={`chip snap-start ${selectedCategory === 'all' ? 'chip-active' : ''}`}
-            >
-              All
-            </button>
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleCategoryChange(category)}
-                aria-pressed={selectedCategory === category}
-                className={`chip snap-start ${selectedCategory === category ? 'chip-active' : ''}`}
-              >
-                {formatCategory(category)}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      <div className="container-page pt-5">
-        {selectedCategory === 'masala' && (
-          <div className="mb-6 rounded-lg border border-line bg-cream p-5">
-            <span className="badge bg-brand">Coming soon</span>
-            <h2 className="mt-3 text-xl font-display font-semibold text-ink">Masala section is on the way</h2>
-            <p className="mt-1 text-sm text-ink-soft">
-              We are preparing the masala range now. You can browse the section, but these items cannot be ordered yet.
-            </p>
-          </div>
-        )}
+          {active.length > 0 && (
+            <ul className="flex flex-wrap gap-2 mb-4" aria-label="Active filters">
+              {active.map((a) => (
+                <li key={a.key}>
+                  <button onClick={a.remove} className="inline-flex items-center gap-1.5 h-9 pl-3 pr-2 rounded-full bg-action-tint text-action-dark text-sm font-medium" aria-label={`Remove filter ${a.label}`}>
+                    {a.label} <X className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+              <li><button onClick={clearAll} className="h-9 px-2 text-sm font-semibold text-action hover:underline underline-offset-4">Clear all</button></li>
+            </ul>
+          )}
 
-        {loading ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4" aria-busy="true" aria-label="Loading products">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-white rounded-lg border border-line overflow-hidden">
-                <div className="aspect-square skeleton rounded-none"></div>
-                <div className="p-3 space-y-2">
-                  <div className="h-3 skeleton w-1/3"></div>
-                  <div className="h-4 skeleton"></div>
-                  <div className="h-4 skeleton w-2/3"></div>
-                  <div className="h-11 skeleton mt-3"></div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : sortedProducts.length > 0 ? (
-          <>
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <p className="text-sm text-ink-soft" aria-live="polite">
-                {sortedProducts.length} product{sortedProducts.length !== 1 ? 's' : ''}
-              </p>
-              <div className="flex items-center gap-2">
-                <label htmlFor="sort" className="text-sm text-ink-soft">Sort</label>
-                <select
-                  id="sort"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="input-field h-11 w-auto py-0 text-sm"
-                >
-                  <option value="featured">Featured</option>
-                  <option value="price-asc">Price: low to high</option>
-                  <option value="price-desc">Price: high to low</option>
-                </select>
-              </div>
+          {filters.categories.includes('masala') && (
+            <div className="mb-5 rounded-lg border border-line bg-cream p-4">
+              <span className="badge bg-brand">Coming soon</span>
+              <p className="mt-2 text-sm text-ink-soft">Masala items cannot be ordered yet.</p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {sortedProducts.map((product) => (
+          )}
+
+          {loading ? (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4" aria-busy="true" aria-label="Loading products">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg border border-line overflow-hidden">
+                  <div className="aspect-square skeleton rounded-none"></div>
+                  <div className="p-3 space-y-2">
+                    <div className="h-4 skeleton"></div>
+                    <div className="h-4 skeleton w-2/3"></div>
+                    <div className="h-11 skeleton mt-3"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : visible.length > 0 ? (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+              {visible.map((product) => (
                 <ProductCard key={product._id} product={product} />
               ))}
             </div>
-          </>
-        ) : (
-          <div className="text-center py-16">
-            <Search className="w-10 h-10 mx-auto text-ink-mute mb-3" strokeWidth={1.5} aria-hidden="true" />
-            <h2 className="font-display text-xl font-semibold text-ink mb-1">
-              {searchTerm ? `No products match "${searchTerm}"` : 'No products found'}
-            </h2>
-            <p className="text-ink-soft mb-6">Try a different search or category.</p>
-            <button
-              onClick={() => {
-                setSelectedCategory('all');
-                setSearchInput('');
-                setSearchTerm('');
-                setSearchParams({});
-              }}
-              className="btn-primary"
-            >
-              {searchTerm ? 'Clear search' : 'View all products'}
-            </button>
-          </div>
-        )}
+          ) : (
+            <div className="text-center py-16">
+              <Search className="w-10 h-10 mx-auto text-ink-mute mb-3" strokeWidth={1.5} aria-hidden="true" />
+              <h2 className="font-display text-xl font-semibold text-ink mb-4">
+                {searchTerm ? `No products match "${searchTerm}"` : 'No products found'}
+              </h2>
+              <button onClick={clearAll} className="btn-primary">Clear filters</button>
+            </div>
+          )}
+        </div>
       </div>
+
+      <FilterSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        onClear={clearAll}
+        resultCount={visible.length}
+        activeCount={activeCount}
+        {...panelProps}
+      />
     </div>
   );
 };
