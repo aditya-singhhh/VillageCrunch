@@ -1,19 +1,23 @@
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Star, Heart } from 'lucide-react';
+import { ShoppingCart, Star, Heart, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createReview, toggleWishlist, getWishlist } from '../utils/api';
+import { formatINR, formatCategory, discountPercent, unitPrice, averageRating } from '../utils/format';
 import toast from 'react-hot-toast';
 
-const ProductCard = ({ product, showQuickRating = false, userCanRate = false, onRatingSubmit }) => {
+const ProductCard = ({ product, showQuickRating = false, userCanRate = false, onRatingSubmit, compact = false }) => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const [hoveredRating, setHoveredRating] = useState(0);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(true); // Changed to true for immediate display
+  const [added, setAdded] = useState(false);
+  const addedTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(addedTimer.current), []);
 
   // Check if product is in wishlist on component mount
   useEffect(() => {
@@ -34,12 +38,15 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
   const handleAddToCart = (e) => {
     e.preventDefault();
     addToCart(product);
+    setAdded(true);
+    clearTimeout(addedTimer.current);
+    addedTimer.current = setTimeout(() => setAdded(false), 1500);
   };
 
   const handleToggleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!user) {
       toast.error('Please login to add to wishlist');
       return;
@@ -66,7 +73,7 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
   const handleQuickRating = async (e, rating) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!user) {
       toast.error('Please login to rate products');
       return;
@@ -93,169 +100,128 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
     }
   };
 
-  // Calculate average rating from actual reviews
-  const calculateAverageRating = (reviews) => {
-    if (!reviews || reviews.length === 0) return 0;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return (sum / reviews.length).toFixed(1);
-  };
-
-  const averageRating = calculateAverageRating(product.reviews);
+  const avg = averageRating(product.reviews);
   const reviewCount = product.reviews?.length || 0;
   const isMasalaProduct = product.category === 'masala';
+  const outOfStock = product.stock === 0;
+  const discount = discountPercent(product.price, product.originalPrice);
+  const perUnit = unitPrice(product.price, product.weight);
 
   // Generate a fallback ID if _id is missing (for products from JSON file)
   const productId = product._id || product.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
   return (
-    <Link to={`/product/${productId}`} className="card group block">
-      <div className="relative overflow-hidden h-64 bg-gray-100">
+    <article className="relative flex flex-col h-full bg-white rounded-lg border border-line shadow-card overflow-hidden zoom-on-hover hover:border-sand transition-colors">
+      <div className="relative aspect-square bg-cream overflow-hidden">
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
-          style={{ transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)' }}
+          width="400"
+          height="400"
+          loading="lazy"
+          decoding="async"
+          className={`zoom-img w-full h-full object-cover ${outOfStock ? 'opacity-50' : ''}`}
         />
-        {product.originalPrice && (
-          <div className="absolute top-4 left-4 bg-desi-terracotta text-white px-3 py-1 rounded-full text-sm font-semibold shadow-lg animate-scale-in">
-            {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-          </div>
+        {discount > 0 && !outOfStock && !isMasalaProduct && (
+          <span className="badge bg-leaf absolute top-2 left-2">Save {discount}%</span>
         )}
         {isMasalaProduct && (
-          <div className="absolute bottom-4 left-4 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-[0.2em] shadow-lg">
-            Coming Soon
-          </div>
+          <span className="badge bg-brand absolute top-2 left-2">Coming soon</span>
         )}
-        
-        {/* Wishlist button */}
-        {user && product._id && (
-          <button
-            onClick={handleToggleWishlist}
-            disabled={isTogglingWishlist}
-            className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-md disabled:opacity-50"
-            title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            {isTogglingWishlist ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
-            ) : (
-              <Heart 
-                className={`w-5 h-5 transition-colors ${
-                  isInWishlist 
-                    ? 'text-red-500 fill-current' 
-                    : 'text-gray-400 hover:text-red-500'
-                }`} 
-              />
-            )}
-          </button>
-        )}
-        {product.stock === 0 && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <span className="text-white font-bold text-xl">Out of Stock</span>
-          </div>
+        {outOfStock && (
+          <span className="badge bg-ink absolute top-2 left-2">Out of stock</span>
         )}
       </div>
 
-      <div className="p-5">
-        {isMasalaProduct && (
-          <div className="mb-3 inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-amber-800">
-            Masala Launch Soon
-          </div>
-        )}
-        {/* Rating display - interactive if user can rate, otherwise just display */}
-        {(reviewCount > 0 || (showQuickRating && userCanRate)) && (
-          <div className="flex items-center mb-2">
-            {showQuickRating && userCanRate ? (
-              // Interactive rating for users who can rate
-              <div className="flex items-center space-x-1">
-                <div 
-                  className="flex"
-                  onMouseLeave={() => setHoveredRating(0)}
-                >
-                  {[1, 2, 3, 4, 5].map((starNum) => (
-                    <button
-                      key={starNum}
-                      onClick={(e) => handleQuickRating(e, starNum)}
-                      onMouseEnter={() => setHoveredRating(starNum)}
-                      disabled={isSubmittingRating}
-                      className="focus:outline-none hover:scale-110 transition-transform disabled:opacity-50"
-                      title={`Rate ${starNum} star${starNum !== 1 ? 's' : ''}`}
-                    >
-                      <Star
-                        className={`w-5 h-5 transition-colors ${
-                          starNum <= (hoveredRating || averageRating)
-                            ? 'text-desi-gold fill-current' 
-                            : 'text-gray-300'
-                        } ${hoveredRating > 0 ? 'hover:text-desi-gold' : ''}`}
-                      />
-                    </button>
-                  ))}
-                </div>
-                <span className="ml-2 text-sm text-gray-600">
-                  {hoveredRating > 0 ? `Rate ${hoveredRating} star${hoveredRating !== 1 ? 's' : ''}` : 
-                   reviewCount > 0 ? `(${averageRating}) • ${reviewCount} review${reviewCount !== 1 ? 's' : ''}` : 
-                   'Click to rate'}
-                </span>
-              </div>
-            ) : (
-              // Display-only rating
-              <div className="flex items-center">
-                <div className="flex text-desi-gold">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-4 h-4 ${
-                        i < Math.floor(averageRating) ? 'fill-current' : ''
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="ml-2 text-sm text-gray-600">
-                  ({averageRating}) • {reviewCount} review{reviewCount !== 1 ? 's' : ''}
-                </span>
-              </div>
-            )}
-          </div>
-        )}
+      {/* Wishlist button (above the stretched link) */}
+      {user && product._id && (
+        <button
+          onClick={handleToggleWishlist}
+          disabled={isTogglingWishlist}
+          className="absolute top-0 right-0 z-10 w-11 h-11 inline-flex items-center justify-center disabled:opacity-50"
+          aria-label={isInWishlist ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
+          aria-pressed={isInWishlist}
+        >
+          <span className="w-8 h-8 rounded-full bg-white/90 shadow-card inline-flex items-center justify-center">
+            <Heart className={`w-[18px] h-[18px] ${isInWishlist ? 'text-berry fill-current' : 'text-ink-soft'}`} />
+          </span>
+        </button>
+      )}
 
-        <h3 className="text-lg font-semibold text-gray-800 mb-2 line-clamp-2">
-          {product.name}
+      <div className={`flex flex-col flex-1 ${compact ? 'p-2.5' : 'p-3 sm:p-4'}`}>
+        <p className="text-xs uppercase tracking-wide text-ink-mute mb-1">{formatCategory(product.category)}</p>
+
+        <h3 className="font-sans text-base font-semibold leading-snug text-ink line-clamp-2 min-h-[2.75rem]">
+          <Link
+            to={`/product/${productId}`}
+            className="after:absolute after:inset-0 after:content-[''] focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-focus"
+          >
+            {product.name}
+          </Link>
         </h3>
 
-        <p className="text-sm text-gray-600 mb-3">{product.weight}</p>
-
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <span className="text-2xl font-bold text-desi-brown">
-              ₹{product.price}
+        <div className="mt-1 flex items-center flex-wrap gap-x-2 gap-y-1 text-sm text-ink-soft">
+          {product.weight && <span className="inline-block px-2 py-0.5 bg-cream rounded-sm text-xs font-medium">{product.weight}</span>}
+          {showQuickRating && userCanRate ? (
+            <span className="relative z-10 inline-flex items-center" onMouseLeave={() => setHoveredRating(0)}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  onClick={(e) => handleQuickRating(e, n)}
+                  onMouseEnter={() => setHoveredRating(n)}
+                  disabled={isSubmittingRating}
+                  className="w-6 h-8 inline-flex items-center justify-center disabled:opacity-50"
+                  aria-label={`Rate ${n} star${n !== 1 ? 's' : ''}`}
+                >
+                  <Star className={`w-4 h-4 ${n <= (hoveredRating || Math.round(avg || 0)) ? 'text-gold fill-current' : 'text-sand'}`} />
+                </button>
+              ))}
             </span>
-            {product.originalPrice && (
-              <span className="ml-2 text-sm text-gray-500 line-through">
-                ₹{product.originalPrice}
+          ) : (
+            reviewCount > 0 && (
+              <span className="inline-flex items-center gap-1" aria-label={`Rated ${avg.toFixed(1)} out of 5 from ${reviewCount} review${reviewCount !== 1 ? 's' : ''}`}>
+                <Star className="w-3.5 h-3.5 text-gold fill-current" aria-hidden="true" />
+                <span className="font-medium text-ink">{avg.toFixed(1)}</span>
+                <span className="text-ink-mute">({reviewCount})</span>
               </span>
-            )}
-          </div>
+            )
+          )}
         </div>
 
-        {isMasalaProduct ? (
-          <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm font-semibold text-amber-800">
-            Not available for purchase yet
+        <div className="mt-2">
+          <div className="flex items-baseline flex-wrap gap-x-2">
+            <span className="text-lg font-semibold text-ink tabular-nums">{formatINR(product.price)}</span>
+            {product.originalPrice > product.price && (
+              <span className="text-sm text-ink-mute line-through tabular-nums">{formatINR(product.originalPrice)}</span>
+            )}
           </div>
-        ) : (
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className={`w-full py-2 px-4 rounded-lg font-semibold flex items-center justify-center space-x-2 transition-all duration-300 transform hover:scale-[1.02] active:scale-95 ${
-              product.stock === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-desi-gold text-white hover:bg-yellow-600 hover:shadow-lg'
-            }`}
-          >
-            <ShoppingCart className="w-5 h-5" />
-            <span>{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
-          </button>
-        )}
+          {perUnit && <p className="text-xs text-ink-mute mt-0.5">{perUnit}</p>}
+        </div>
+
+        <div className="mt-auto pt-3">
+          {isMasalaProduct ? (
+            <div className="w-full h-11 inline-flex items-center justify-center rounded-md bg-cream text-sm font-medium text-ink-soft">
+              Not available yet
+            </div>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              disabled={outOfStock}
+              aria-label={outOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
+              className={`relative z-10 w-full h-11 rounded-md text-sm font-semibold inline-flex items-center justify-center gap-2 transition-colors disabled:cursor-not-allowed ${
+                outOfStock
+                  ? 'bg-cream text-ink-mute'
+                  : added
+                    ? 'bg-leaf text-white'
+                    : 'bg-action text-white hover:bg-action-dark active:scale-[.98]'
+              }`}
+            >
+              {outOfStock ? 'Out of stock' : added ? (<><Check className="w-4 h-4" /> Added</>) : (<><ShoppingCart className="w-4 h-4" /> Add to cart</>)}
+            </button>
+          )}
+        </div>
       </div>
-    </Link>
+    </article>
   );
 };
 
