@@ -147,7 +147,7 @@ const Home = () => {
               <div className="p-5 md:p-10">
                 <p className="text-xs font-semibold tracking-[0.14em] uppercase text-brand">New packaging</p>
                 <h2 id="pack-title" className="font-display font-semibold text-2xl md:text-4xl text-ink mt-2">Gaon ka swad, shehar ke liye</h2>
-                <p className="text-ink/75 mt-3 max-w-md">Three thekuas in 400 g pouches, with Bihar's Mithila art on every pack. Pick your favourite.</p>
+                <p className="text-ink/75 mt-3 max-w-md">Three thekuas in 400 g pouches, with a Chhath Puja sunrise design. Pick your favourite.</p>
                 <ul className="mt-5 grid grid-cols-3 gap-3 max-w-md">
                   {[['Jaggery', 'jaggery', '#C2680C'], ['Premium', 'premium', '#6B3A1E'], ['Classic', 'classic', '#2F6B2F']].map(([n, k, c]) => (
                     <li key={k}>

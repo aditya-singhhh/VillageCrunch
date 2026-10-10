@@ -1,6 +1,6 @@
 # Thekua packaging: print artwork
 
-Source: `scripts`-free HTML/SVG layouts (Mithila-inspired, original artwork) rendered to **vector PDFs** (live text, vector borders). (300 dpi PNGs available on request.)
+Source: `scripts`-free HTML/SVG layouts (Chhath Puja themed, original artwork) rendered to **vector PDFs** (live text, vector borders). (300 dpi PNGs available on request.)
 Per variant (Premium, Jaggery, Classic): `front` and `back`, 136 x 191 mm page = **130 x 185 mm trim + 3 mm bleed**. Trim line is 3 mm inside the page edge; no crop marks (add them in your printer's template).
 
 Before sending to a printer:
