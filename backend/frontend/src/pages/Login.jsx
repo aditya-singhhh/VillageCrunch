@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
+import { AuthShell, PasswordInput } from '../components/AuthShell';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -47,89 +48,55 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-desi-cream via-white to-amber-50 py-12 px-4">
-      <div className="max-w-md mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-desi-brown mb-2">Welcome Back!</h1>
-          <p className="text-gray-600">Login to continue shopping</p>
+    <AuthShell title="Welcome back" subtitle="Log in to continue shopping">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="login-id" className="field-label">Email or phone number</label>
+          <input
+            id="login-id"
+            type="text"
+            name="emailOrPhone"
+            value={formData.emailOrPhone}
+            onChange={handleChange}
+            required
+            className="input-field"
+            placeholder="Email or phone number"
+            autoComplete="username"
+            autoCapitalize="none"
+            aria-describedby="login-id-help"
+          />
+          <p id="login-id-help" className="field-help">You can use either your email address or phone number.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email or Phone Number
-              </label>
-              <input
-                type="text"
-                name="emailOrPhone"
-                value={formData.emailOrPhone}
-                onChange={handleChange}
-                required
-                className="input-field"
-                placeholder="Enter your email or phone number"
-                autoComplete="email"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                You can login with either your email address or phone number
-              </p>
-            </div>
+        <PasswordInput
+          id="login-password"
+          label="Password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          autoComplete="current-password"
+        />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="input-field"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-desi-gold border-gray-300 rounded focus:ring-desi-gold"
-                />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
-              </label>
-              <Link to="/forgot-password" className="text-sm text-desi-gold hover:text-yellow-600">
-                Forgot password?
-              </Link>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary"
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-gray-600">
-              Don't have an account?{' '}
-              <Link
-                to={`/register${redirect !== '/' ? `?redirect=${redirect}` : ''}`}
-                className="text-desi-gold font-semibold hover:text-yellow-600"
-              >
-                Sign up
-              </Link>
-            </p>
-          </div>
+        <div className="flex items-center justify-between gap-3">
+          <label className="flex items-center gap-3 min-h-[44px] cursor-pointer">
+            <input type="checkbox" className="w-6 h-6 rounded border-[#CDBBA4]" />
+            <span className="text-ink whitespace-nowrap">Remember me</span>
+          </label>
+          <Link to="/forgot-password" className="btn-ghost h-11 whitespace-nowrap px-0">Forgot password?</Link>
         </div>
 
-        <div className="mt-8 text-center text-sm text-gray-600">
-          <p>🔒 Your information is secure with us</p>
-        </div>
+        <button type="submit" disabled={loading} aria-busy={loading} className="btn-primary w-full">
+          {loading ? 'Logging in...' : 'Log in'}
+        </button>
+      </form>
+
+      <div className="my-6 flex items-center gap-3 text-sm text-ink-mute" aria-hidden="true">
+        <span className="flex-1 border-t border-line" /> New to VillageCrunch? <span className="flex-1 border-t border-line" />
       </div>
-    </div>
+      <Link to={`/register${redirect !== '/' ? `?redirect=${redirect}` : ''}`} className="btn-secondary w-full">
+        Create an account
+      </Link>
+    </AuthShell>
   );
 };
 

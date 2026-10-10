@@ -89,7 +89,7 @@ const ReviewForm = ({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
+    <div className="bg-white border border-line rounded-lg p-6 space-y-6">
       <div className="flex items-center space-x-4">
         <img
           src={product.image}
@@ -97,15 +97,15 @@ const ReviewForm = ({
           className="w-16 h-16 object-cover rounded-lg"
         />
         <div>
-          <h3 className="font-semibold text-lg text-gray-900">{product.name}</h3>
-          <p className="text-sm text-gray-600">{product.weight}</p>
+          <h3 className="font-semibold text-lg text-ink">{product.name}</h3>
+          <p className="text-sm text-ink-soft">{product.weight}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Rating Section */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <label className="block text-sm font-semibold text-ink-soft mb-3">
             Rate this product *
           </label>
           <div 
@@ -118,7 +118,7 @@ const ReviewForm = ({
                 type="button"
                 onClick={() => setRating(starNum)}
                 onMouseEnter={() => setHoveredRating(starNum)}
-                className="focus:outline-none hover:scale-110 transition-transform"
+                className="focus:outline-none  transition-transform"
               >
                 <Star
                   className={`w-8 h-8 transition-colors ${
@@ -130,10 +130,10 @@ const ReviewForm = ({
               </button>
             ))}
             <div className="ml-3 flex flex-col">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-ink-soft">
                 {hoveredRating || rating} star{(hoveredRating || rating) !== 1 ? 's' : ''}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-ink-mute">
                 {rating === 5 ? 'Excellent' : 
                  rating === 4 ? 'Very Good' :
                  rating === 3 ? 'Good' :
@@ -145,23 +145,23 @@ const ReviewForm = ({
 
         {/* Comment Section */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <label className="block text-sm font-semibold text-ink-soft mb-3">
             Write your review *
           </label>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={6}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent resize-none"
+            className="w-full px-4 py-3 border border-[#CDBBA4] rounded-lg focus:ring-2 focus:ring-desi-gold focus:border-transparent resize-none"
             placeholder="Share your experience with this product. How was the quality, taste, packaging, etc.? Your honest review helps other customers make informed decisions."
             required
             maxLength={1000}
           />
           <div className="flex justify-between items-center mt-2">
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-ink-mute">
               Minimum 10 characters required
             </span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-ink-mute">
               {comment.length}/1000 characters
             </span>
           </div>
@@ -169,10 +169,10 @@ const ReviewForm = ({
 
         {/* Image Upload Section */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
+          <label className="block text-sm font-semibold text-ink-soft mb-3">
             Add photos (optional)
           </label>
-          <p className="text-xs text-gray-600 mb-3">
+          <p className="text-xs text-ink-soft mb-3">
             Upload up to 5 photos to show how the product looks. Maximum 5MB per image.
           </p>
           
@@ -184,7 +184,7 @@ const ReviewForm = ({
                   <img
                     src={imageUrl}
                     alt={`Review image ${index + 1}`}
-                    className="w-full h-20 object-cover rounded-lg border border-gray-200"
+                    className="w-full h-20 object-cover rounded-lg border border-line"
                   />
                   <button
                     type="button"
@@ -200,7 +200,7 @@ const ReviewForm = ({
 
           {/* Upload Button */}
           {images.length < 5 && (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-desi-gold transition-colors">
+            <div className="border-2 border-dashed border-[#CDBBA4] rounded-lg p-6 text-center hover:border-desi-gold transition-colors">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -213,7 +213,7 @@ const ReviewForm = ({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingImages}
-                className="flex flex-col items-center space-y-2 text-gray-600 hover:text-desi-gold transition-colors disabled:opacity-50"
+                className="flex flex-col items-center space-y-2 text-ink-soft hover:text-desi-gold transition-colors disabled:opacity-50"
               >
                 {uploadingImages ? (
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-desi-gold"></div>
@@ -223,7 +223,7 @@ const ReviewForm = ({
                 <span className="text-sm font-medium">
                   {uploadingImages ? 'Uploading...' : 'Add Photos'}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-ink-mute">
                   Click to browse or drag and drop
                 </span>
               </button>
@@ -232,9 +232,9 @@ const ReviewForm = ({
         </div>
 
         {/* Review Guidelines */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="text-sm font-semibold text-blue-800 mb-2">Review Guidelines:</h4>
-          <ul className="text-xs text-blue-700 space-y-1">
+        <div className="bg-cream border border-sand rounded-lg p-4">
+          <h4 className="text-sm font-semibold text-brand mb-2">Review Guidelines:</h4>
+          <ul className="text-xs text-brand space-y-1">
             <li>• Share your honest experience with the product quality and taste</li>
             <li>• Include details about packaging, freshness, and delivery</li>
             <li>• Upload clear photos showing the actual product you received</li>
@@ -248,7 +248,7 @@ const ReviewForm = ({
           <button
             type="submit"
             disabled={isSubmitting || !comment.trim() || comment.length < 10}
-            className="flex-1 bg-desi-gold text-desi-brown py-3 px-6 rounded-lg hover:bg-yellow-500 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center space-x-2"
+            className="flex-1 bg-action text-white py-3 px-6 rounded-lg hover:bg-action-dark transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center space-x-2"
           >
             {isSubmitting ? (
               <>
@@ -266,7 +266,7 @@ const ReviewForm = ({
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold"
+            className="px-6 py-3 border-2 border-[#CDBBA4] text-ink-soft rounded-lg hover:bg-cream transition font-semibold"
           >
             Cancel
           </button>

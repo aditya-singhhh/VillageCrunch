@@ -98,7 +98,7 @@ const RateProducts = () => {
             onClick={() => onRate(productId, starNum)}
             onMouseEnter={() => setHoveredRating(starNum)}
             disabled={isSubmitting}
-            className="focus:outline-none hover:scale-125 transition-all disabled:opacity-50"
+            className="focus:outline-none  transition-all disabled:opacity-50"
             title={`Rate ${starNum} star${starNum !== 1 ? 's' : ''}`}
           >
             <Star
@@ -110,7 +110,7 @@ const RateProducts = () => {
             />
           </button>
         ))}
-        <span className="ml-2 text-sm text-gray-600">
+        <span className="ml-2 text-sm text-ink-soft">
           {hoveredRating > 0 ? `${hoveredRating} star${hoveredRating !== 1 ? 's' : ''}` : 'Click to rate'}
         </span>
       </div>
@@ -119,38 +119,38 @@ const RateProducts = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-paper flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-desi-gold"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="bg-paper py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4 flex items-center">
+          <h1 className="text-3xl font-display font-bold text-ink mb-4 flex items-center">
             <Star className="w-8 h-8 text-desi-gold mr-3" />
             Rate Your Products
           </h1>
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-3 flex items-center">
+          <div className="bg-cream border border-sand rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-ink mb-3 flex items-center">
               🍯 Share Your Experience After Enjoying Our Products
             </h2>
-            <p className="text-gray-700 mb-2">
+            <p className="text-ink-soft mb-2">
               <strong>Perfect time to review:</strong> After you've consumed and enjoyed our dry fruits, makhana, or thekua!
             </p>
-            <p className="text-gray-600 text-sm">
+            <p className="text-ink-soft text-sm">
               ✨ Your honest feedback helps other customers make informed choices and helps us maintain our quality standards.
             </p>
           </div>
         </div>
 
         {deliveredProducts.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl shadow-md">
-            <Package className="w-24 h-24 mx-auto text-gray-400 mb-6" />
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">All caught up!</h2>
-            <p className="text-gray-600 mb-8">
+          <div className="text-center py-20 bg-white rounded-lg shadow-card">
+            <Package className="w-24 h-24 mx-auto text-ink-mute mb-6" />
+            <h2 className="text-2xl font-display font-bold text-ink mb-4">All caught up!</h2>
+            <p className="text-ink-soft mb-8">
               You've either rated all your delivered products or haven't made any purchases yet.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
@@ -166,34 +166,34 @@ const RateProducts = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {deliveredProducts.map((product) => (
-              <div key={product._id} className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div key={product._id} className="bg-white rounded-lg shadow-card overflow-hidden">
                 <Link to={`/product/${product._id}`} className="block">
                   <div className="relative overflow-hidden h-48">
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      className="w-full h-full object-cover  transition-transform duration-300"
                     />
                   </div>
                 </Link>
 
                 <div className="p-5">
                   <Link to={`/product/${product._id}`}>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2 hover:text-desi-brown transition-colors">
+                    <h3 className="text-lg font-semibold text-ink mb-2 hover:text-desi-brown transition-colors">
                       {product.name}
                     </h3>
                   </Link>
 
-                  <p className="text-sm text-gray-600 mb-2">{product.weight}</p>
-                  <p className="text-xs text-gray-500 mb-2">
+                  <p className="text-sm text-ink-soft mb-2">{product.weight}</p>
+                  <p className="text-xs text-ink-mute mb-2">
                     Delivered: {new Date(product.orderDate).toLocaleDateString()}
                   </p>
                   
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                    <p className="text-xs text-green-700 font-medium mb-1">
+                  <div className="bg-leaf-tint border border-leaf/30 rounded-lg p-3 mb-4">
+                    <p className="text-xs text-leaf font-medium mb-1">
                       🍽️ Have you enjoyed this product?
                     </p>
-                    <p className="text-xs text-green-600">
+                    <p className="text-xs text-leaf">
                       Rate it after consumption to help others!
                     </p>
                   </div>
@@ -208,7 +208,7 @@ const RateProducts = () => {
                     
                     <Link
                       to={`/product/${product._id}#reviews`}
-                      className="block text-center text-sm text-desi-gold hover:text-yellow-600 transition-colors"
+                      className="block text-center text-sm text-desi-gold hover:text-action-dark transition-colors"
                     >
                       Or write a detailed review →
                     </Link>
@@ -221,7 +221,7 @@ const RateProducts = () => {
                       </span>
                       <Link
                         to={`/product/${product._id}`}
-                        className="text-sm text-desi-gold hover:text-yellow-600 transition-colors"
+                        className="text-sm text-desi-gold hover:text-action-dark transition-colors"
                       >
                         View Product →
                       </Link>
