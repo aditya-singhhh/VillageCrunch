@@ -94,8 +94,8 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
   };
 
   // Reserve the final height before data arrives: no layout shift
-  const frame = 'h-[300px] sm:h-[340px] md:h-[400px] lg:h-[440px]';
-  if (!ready || !count) return <div className={`${frame} bg-cream`} aria-hidden="true" />;
+  const frame = 'h-[190px] sm:h-[240px] md:h-[300px] lg:h-[340px]';
+  if (!ready || !count) return <div className="container-page pt-3 md:pt-5"><div className={`${frame} rounded-xl bg-cream`} aria-hidden="true" /></div>;
 
   const arrow = 'hidden md:inline-flex absolute top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center rounded-full bg-white/90 text-ink shadow-raised hover:bg-white';
 
@@ -103,13 +103,14 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
     <section
       aria-roledescription="carousel"
       aria-label="Offers"
-      className="relative group"
+      className="container-page pt-3 md:pt-5"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onFocus={() => setFocusIn(true)}
       onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setFocusIn(false); }}
       onKeyDown={onKeyDown}
     >
+     <div className="relative group rounded-xl overflow-hidden">
       <div
         ref={trackRef}
         onScroll={onScroll}
@@ -140,16 +141,16 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
               className="absolute right-0 top-0 h-full w-[52%] md:w-[48%] object-cover"
               style={{ WebkitMaskImage: 'linear-gradient(to right, transparent 0%, #000 45%)', maskImage: 'linear-gradient(to right, transparent 0%, #000 45%)' }}
             />
-            <div className="relative z-10 h-full max-w-6xl mx-auto px-5 sm:px-8 flex flex-col justify-center">
+            <div className="relative z-10 h-full px-5 sm:px-8 md:pl-20 md:pr-12 flex flex-col justify-center">
               <div className="max-w-[62%] sm:max-w-[52%] md:max-w-[46%]">
-                <h2 className="font-display font-bold text-[28px] leading-[32px] sm:text-4xl sm:leading-[42px] lg:text-[52px] lg:leading-[58px]">
+                <h2 className="font-display font-bold text-[22px] leading-[26px] sm:text-3xl sm:leading-9 lg:text-[40px] lg:leading-[46px]">
                   {s.headline}
                 </h2>
-                <p className={`mt-2 md:mt-3 text-sm md:text-lg ${s.dark ? 'text-white/90' : 'text-ink-soft'}`}>{s.sub}</p>
+                <p className={`mt-1 md:mt-2 text-xs sm:text-sm md:text-base ${s.dark ? 'text-white/90' : 'text-ink-soft'}`}>{s.sub}</p>
                 <Link
                   to={s.href}
                   tabIndex={i === index ? 0 : -1}
-                  className={`mt-4 md:mt-6 inline-flex items-center justify-center h-11 md:h-12 px-6 rounded-md font-semibold text-base transition-colors ${
+                  className={`mt-3 md:mt-5 inline-flex items-center justify-center h-10 md:h-11 px-5 rounded-md font-semibold text-base transition-colors ${
                     s.dark ? 'bg-white text-brand hover:bg-cream' : 'bg-action text-white hover:bg-action-dark'
                   }`}
                 >
@@ -170,7 +171,7 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
             <ChevronRight className="w-6 h-6" />
           </button>
 
-          <div className="absolute bottom-3 left-0 right-0 z-20 flex items-center justify-center gap-1">
+          <div className="absolute bottom-2 left-0 right-0 z-20 flex items-center justify-center gap-1">
             {slides.map((s, i) => (
               <button
                 key={s.id}
@@ -194,6 +195,7 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
           </div>
         </>
       )}
+     </div>
     </section>
   );
 };
