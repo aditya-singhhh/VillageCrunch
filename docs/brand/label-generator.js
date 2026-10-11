@@ -3,13 +3,13 @@ const { chromium } = require('/opt/npm-tools/node_modules/playwright');
 const fs=require('fs'),path=require('path');
 const FR=n=>`file://${__dirname}/node_modules/@fontsource/fraunces/files/${n}`;
 const V={
- premium:{sky:['#FBF0DC','#F9DDB3','#F3B97A','#EBA25A'],name:'Premium',mrp:399,c1:'#6E1822',c2:'#9A2430',acc:'#E9C87A',badge:['100%','Shudh Desi','Ghee'],
+ premium:{sky:['#F3D79C','#EAC27A','#DFA94F','#D39A3E'],name:'Premium',mrp:399,c1:'#6E1822',c2:'#9A2430',acc:'#E9C87A',badge:['100%','Shudh Desi','Ghee'],
   ing:['Maida','Wheat Flour','100% Shudh Desi Ghee','Jaggery','Cardamom'],
   nut:[['Energy','530 kcal'],['Protein','5 g'],['Added Sugar','63 g'],['Fat','25 g'],['Saturated Fat','14 g'],['Trans Fat','0 g'],['Sodium','230 mg']]},
- jaggery:{sky:['#FBF0DC','#F9DDB3','#F3B97A','#EBA25A'],name:'Jaggery',mrp:349,c1:'#8A4310',c2:'#C0701F',acc:'#F0CF86',badge:['Made with','Jaggery','No Refined Sugar'],
+ jaggery:{sky:['#F3D79C','#EAC27A','#DFA94F','#D39A3E'],name:'Jaggery',mrp:349,c1:'#8A4310',c2:'#C0701F',acc:'#F0CF86',badge:['Made with','Jaggery','No Refined Sugar'],
   ing:['Maida','Wheat Flour','Ghee','Sunflower Oil','Jaggery'],
   nut:[['Energy','480 kcal'],['Protein','5 g'],['Added Sugar','63 g'],['Fat','23 g'],['Saturated Fat','11 g'],['Trans Fat','0 g'],['Sodium','225 mg']]},
- classic:{sky:['#FBF0DC','#F9DDB3','#F3B97A','#EBA25A'],name:'Classic',mrp:349,c1:'#2C5A36',c2:'#4A7F55',acc:'#E6CB84',badge:['Traditional','Bihari','Recipe'],
+ classic:{sky:['#F3D79C','#EAC27A','#DFA94F','#D39A3E'],name:'Classic',mrp:349,c1:'#2C5A36',c2:'#4A7F55',acc:'#E6CB84',badge:['Traditional','Bihari','Recipe'],
   ing:['Maida','Wheat','Ghee','Sunflower Oil','Cardamom','Sugar'],
   nut:[['Energy','506 kcal'],['Protein','5 g'],['Carbohydrate','58 g'],['Added Sugar','25 g'],['Fat','29 g'],['Saturated Fat','12 g'],['Trans Fat','0 g'],['Sodium','290 mg']]},
 };
@@ -47,46 +47,58 @@ const rayC=(cx,cy,r,n,l1,l2,w)=>Array.from({length:n},(_,i)=>{const t=Math.PI*(1
 const stamp=(id,c1=M_)=>`<circle cx="100" cy="100" r="96" fill="none" stroke="${c1}" stroke-width="5"/><circle cx="100" cy="100" r="86" fill="none" stroke="${G_}" stroke-width="1.6"/><clipPath id="${id}"><circle cx="100" cy="100" r="84"/></clipPath><g clip-path="url(#${id})"><circle cx="100" cy="112" r="38" fill="${G_}"/>${rayC(100,112,38,15,8,20,3.2)}<path d="M0 138 L60 138 L60 128 L78 110 L96 128 L96 138 L104 138 L104 124 L124 104 L144 124 L144 138 L200 138 V200 H0Z" fill="${c1}"/><path d="M150 138 V112 M150 112 q-16 -4 -20 -22 q12 -6 20 4 q8 -10 20 -4 q-4 18 -20 22" fill="${c1}" stroke="${c1}" stroke-width="4"/><path d="M0 156 q10 -4 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="${G_}" stroke-width="2.4"/></g>`;
 const lockup=(v,mm,top)=>`<div class="abs lk" style="left:0;right:0;top:${top}mm;display:flex;justify-content:center"><svg viewBox="0 0 560 200" style="height:${mm}mm;width:${mm*2.8}mm" xmlns="http://www.w3.org/2000/svg">${stamp('k'+top)}<text x="222" y="94" font-family="Fr" font-weight="700" font-size="58" letter-spacing="7" fill="${M_}">VILLAGE</text><text x="222" y="152" font-family="Fr" font-weight="700" font-size="58" letter-spacing="7" fill="${A_}">CRUNCH</text></svg></div>`;
 const women=()=>{const s=.58,ty=148-112*s;return `<g transform="translate(-6 ${ty}) scale(${s})">${CL.woman('#D63A22','#A82614')}</g><g transform="translate(84 ${ty}) scale(${s})">${CL.woman('#E8932A','#B8651B',true)}</g>`};
+const BR='#4A2511',TERRA='#B4562A',KR='#E4B45E';
+const madhubaniBand=(x,y,w,h,c=TERRA)=>{let d='';const n=Math.round(w/h*1.0);const step=w/n;for(let i=0;i<n;i++){const cx=x+step*(i+.5),cy=y+h/2,r=h*.42;d+=`<path d="M${cx} ${cy-r} L${cx+r} ${cy} L${cx} ${cy+r} L${cx-r} ${cy}Z" fill="none" stroke="${c}" stroke-width=".35"/><path d="M${cx} ${cy-r*.5} L${cx+r*.5} ${cy} L${cx} ${cy+r*.5} L${cx-r*.5} ${cy}Z" fill="${c}"/><circle cx="${cx+step/2}" cy="${cy}" r=".5" fill="${c}"/>`}
+ return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}" opacity=".12"/><line x1="${x}" y1="${y}" x2="${x+w}" y2="${y}" stroke="${c}" stroke-width=".35"/><line x1="${x}" y1="${y+h}" x2="${x+w}" y2="${y+h}" stroke="${c}" stroke-width=".35"/>${d}`};
+const scene=(x,y,w,h,v)=>{const cx=x+w/2,hz=y+h*.58;return `<clipPath id="sc"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3"/></clipPath><linearGradient id="ssky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7DDA6"/><stop offset=".6" stop-color="#F6C873"/><stop offset="1" stop-color="#F1B15A"/></linearGradient><linearGradient id="srv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E9C98A"/><stop offset="1" stop-color="#B98A4A"/></linearGradient>
+<g clip-path="url(#sc)"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#ssky)"/>
+<circle cx="${cx}" cy="${hz}" r="${h*.32}" fill="#FFF1C4" opacity=".55"/><circle cx="${cx}" cy="${hz}" r="${h*.21}" fill="#F4A340"/><circle cx="${cx}" cy="${hz}" r="${h*.21}" fill="none" stroke="#FFD27A" stroke-width=".6"/>
+${Array.from({length:17},(_,i)=>{const t=Math.PI*(1+(i+.5)/17),a=h*.25,b=h*.25+(i%2?4:8);return `<line x1="${cx+a*Math.cos(t)}" y1="${hz+a*Math.sin(t)}" x2="${cx+b*Math.cos(t)}" y2="${hz+b*Math.sin(t)}" stroke="#E08A2C" stroke-width=".6" stroke-linecap="round"/>`}).join('')}
+<path d="M${x} ${hz} L${x} ${hz-5} Q${x+14} ${hz-11} ${x+26} ${hz-5} Q${x+40} ${hz-12} ${x+52} ${hz-4} L${x+60} ${hz}Z" fill="#B87A3E" opacity=".55"/><path d="M${x+w} ${hz} L${x+w} ${hz-6} Q${x+w-14} ${hz-12} ${x+w-28} ${hz-5} Q${x+w-40} ${hz-10} ${x+w-52} ${hz-3} L${x+w-60} ${hz}Z" fill="#B87A3E" opacity=".55"/>
+<rect x="${x}" y="${hz}" width="${w}" height="${y+h-hz}" fill="url(#srv)"/>
+<ellipse cx="${cx}" cy="${hz+7}" rx="${h*.17}" ry="3.2" fill="#F4A340" opacity=".5"/>
+${[0,1,2,3,4].map(i=>`<path d="M${x+6+i*3} ${hz+4+i*4.2} q4 -1.6 8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0" fill="none" stroke="#FFF1C4" stroke-width=".4" opacity="${.8-i*.12}"/>`).join('')}
+${diya(cx-4,hz+11,1)}${diya(cx+7,hz+14,.85)}
+<g transform="translate(${x+.5} ${y+h-57}) scale(.5)">${CL.woman3('#C8402A','#8E2214','#2E1A14')}</g>
+<g transform="translate(${x+w-55.5} ${y+h-57}) scale(.5)">${CL.woman3('#E0782A','#A84A14','#4A1E14',true)}</g></g>
+<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="none" stroke="${BR}" stroke-width=".7"/><rect x="${x+1.3}" y="${y+1.3}" width="${w-2.6}" height="${h-2.6}" rx="2.2" fill="none" stroke="${KR}" stroke-width=".35"/>`};
 const front=(k)=>{const v=V[k];
  return `<!doctype html><meta charset=utf-8><style>${css(v)}
-body{background:${v.sky[0]}}
+body{background:#DFA94F}
 svg.art{position:absolute;left:0;top:0;width:136mm;height:191mm}
-.ribbon{left:50%;transform:translateX(-50%);top:15.5mm;width:62mm;height:10.5mm;background:linear-gradient(180deg,#B9302A,#98211C);clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%);display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 .5mm .6mm #5E140955)}
-.ribbon span{font:700 14.5pt Fr;color:#FFF3DC}
-.title{left:0;right:0;top:27mm;text-align:center;font:700 62pt/1 Fr;letter-spacing:-.01em;color:#5A1A0C;text-shadow:0 .5mm 0 #FFF3D8}
-.sub{left:17mm;right:17mm;top:51.5mm;display:flex;align-items:center;justify-content:center;gap:2.4mm;font:600 6.6pt Inter;letter-spacing:.26em;color:#6E2A12}
-.sub b{display:block;flex:1;height:.25mm;background:#B8893Caa}
-.sub em{font:700 10pt Dv;letter-spacing:0;color:#8A2A14}
-.tag{left:0;right:0;top:58mm;text-align:center;font:italic 400 11pt Fr;color:#5A2A14}
-.tagh{left:0;right:0;top:63.8mm;text-align:center;font:600 8pt Dv;color:#7A4A2A}
-.badge{left:94mm;top:124mm;width:25mm;height:25mm;border-radius:50%;padding:.7mm;box-shadow:0 .8mm 2mm #0007;background:linear-gradient(135deg,#B8893C,#F7E7B2,#B8893C)}
-.badge>div{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 30%,${v.c2},${v.c1});display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2mm;gap:.4mm}
-.badge small{font:600 4.9pt Inter;letter-spacing:.12em;text-transform:uppercase;color:#F7DF9C}
-.badge strong{font:700 10.5pt/1.02 Fr;color:#FFF3DC}
-.plaque{left:50%;transform:translateX(-50%);top:156mm;width:78mm;height:12mm;padding:.45mm;border-radius:1.4mm;background:linear-gradient(135deg,#B8893C,#F7E7B2,#B8893C);box-shadow:0 .7mm 1.6mm #0007}
-.plaque>div{height:100%;border-radius:1mm;background:linear-gradient(180deg,#FFF9E8,#F5E6C2);display:flex;align-items:center;justify-content:center;font:700 14pt Fr;color:${v.c1};letter-spacing:.08em;text-transform:uppercase}
-.foot{left:27mm;right:27mm;top:171.5mm;display:flex;align-items:center;justify-content:space-between;font:600 6.6pt Inter;letter-spacing:.2em;color:#FFF3DC}
-.veg{width:5mm;height:5mm}
+.brand{left:0;right:0;top:19mm;text-align:center;font:700 31pt/1 Fr;letter-spacing:-.015em;color:${BR}}
+.brand i{font-style:normal;color:#86350F}
+.tg{left:0;right:0;top:35mm;text-align:center;font:600 6.4pt Inter;letter-spacing:.3em;color:${BR}}
+.title{left:0;right:0;top:106mm;text-align:center;font:700 54pt/1 Fr;letter-spacing:.02em;color:${BR}}
+.tl{left:0;right:0;top:127mm;text-align:center;font:italic 600 10.5pt Fr;color:#6B3A18}
+.ph{left:19mm;width:98mm;top:133mm;height:29mm;border-radius:3mm;overflow:hidden;box-shadow:0 .8mm 2mm #4A251166;border:.5mm solid ${BR}}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:50% 52%}
+.badge{left:93mm;top:143.5mm;width:24mm;height:24mm;border-radius:50%;padding:.7mm;background:linear-gradient(135deg,#8A5A22,#F7E7B2,#8A5A22);box-shadow:0 .8mm 2mm #0006}
+.badge>div{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 30%,${v.c2},${v.c1});display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.6mm;gap:.3mm}
+.badge small{font:600 4.6pt Inter;letter-spacing:.12em;text-transform:uppercase;color:#F7DF9C}
+.badge strong{font:700 9.6pt/1.02 Fr;color:#FFF3DC}
+.plaque{left:50%;transform:translateX(-50%);top:164.6mm;width:62mm;height:7.6mm;padding:.4mm;border-radius:1.2mm;background:linear-gradient(135deg,#8A5A22,#F7E7B2,#8A5A22)}
+.plaque>div{height:100%;border-radius:.9mm;background:${v.c1};display:flex;align-items:center;justify-content:center;font:700 11pt Fr;color:#FFF3DC;letter-spacing:.12em;text-transform:uppercase}
+.foot{left:19mm;right:19mm;top:173.8mm;display:flex;align-items:center;justify-content:space-between;font:700 6.4pt Inter;letter-spacing:.14em;color:${BR}}
+.veg{width:4.6mm;height:4.6mm}
 </style>
-<svg class="art" viewBox="0 0 136 191" xmlns="http://www.w3.org/2000/svg"><defs>${GOLD}${sky(v,'sky')}<radialGradient id="glow"><stop offset="0" stop-color="#FFF6D0" stop-opacity=".95"/><stop offset=".55" stop-color="#FFD25E" stop-opacity=".45"/><stop offset="1" stop-color="#FFD25E" stop-opacity="0"/></radialGradient><clipPath id="pc"><circle cx="68" cy="110" r="29.5"/></clipPath><linearGradient id="river" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${v.c1}" stop-opacity="0"/><stop offset=".45" stop-color="${v.c1}" stop-opacity=".78"/><stop offset="1" stop-color="${v.c1}" stop-opacity=".96"/></linearGradient></defs>
- <rect width="136" height="191" fill="url(#sky)"/><rect y="146" width="136" height="45" fill="url(#river)"/>
- <circle cx="68" cy="110" r="50" fill="url(#glow)"/>${rays(68,110,34,41,32)}
-
- <circle cx="68" cy="110" r="32.8" fill="url(#gold)"/><circle cx="68" cy="110" r="31" fill="#7A4A22"/>
- <image href="file://${__dirname}/photo-${k}.jpg" x="36" y="78" width="64" height="64" preserveAspectRatio="xMidYMid slice" clip-path="url(#pc)"/>
- <circle cx="68" cy="110" r="29.5" fill="none" stroke="#0004" stroke-width=".6"/>${women()}<rect y="146" width="136" height="45" fill="url(#river)"/>
- ${waves(30,106,145.2,3)}${[34,45,56,80,91,102].map((x,i)=>diya(x,150+(i%2?.6:0),.95)).join('')}
- <rect x="7" y="7" width="122" height="177" rx="3.4" fill="none" stroke="url(#gold)" stroke-width=".75"/><rect x="9.3" y="9.3" width="117.4" height="172.4" rx="2.4" fill="none" stroke="url(#gold)" stroke-width=".3" opacity=".8"/>
- ${[[7,7],[129,7],[7,184],[129,184]].map(([x,y])=>`<path transform="translate(${x} ${y})" d="M0,-2.4 L2.4,0 L0,2.4 L-2.4,0Z" fill="url(#gold)"/>`).join('')}
+<svg class="art" viewBox="0 0 136 191" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="kr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${v.sky[0]}"/><stop offset=".5" stop-color="${v.sky[1]}"/><stop offset="1" stop-color="${v.sky[3]}"/></linearGradient><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .3  0 0 0 0 .17  0 0 0 0 .07  0 0 0 .22 0"/></filter></defs>
+ <rect width="136" height="191" fill="url(#kr)"/><rect width="136" height="191" filter="url(#grain)" opacity=".55"/>
+ ${madhubaniBand(9,9,118,5.2)}
+ <path d="M30 41 H106" stroke="${BR}" stroke-width=".3"/><circle cx="68" cy="41" r="1" fill="${TERRA}"/>
+ ${scene(12,45,112,56,v)}
+ <rect x="7" y="7" width="122" height="177" rx="3.4" fill="none" stroke="${BR}" stroke-width=".5"/>
+ ${madhubaniBand(9,178.8,118,4.2)}
 </svg>
-${lockup(v,17,12.5)}
-<div class="abs title">Thekua</div>
-<div class="abs sub"><b></b><em>ठेकुआ</em>· A BIHARI CUISINE<b></b></div>
-<div class="abs tag">Gaon ka swad, shehar ke liye</div>
-<div class="abs tagh">गाँव का स्वाद, शहर के लिए</div>
-<div class="abs badge"><div>${k!=='jaggery'?`<strong style="font-size:${k==='premium'?'10.5pt':'9pt'}">${v.badge[0]}</strong><strong style="font-size:8pt">${v.badge[1]}</strong><strong style="font-size:8pt">${v.badge[2]}</strong>`:`<small>${v.badge[0]}</small><strong>${v.badge[1]}</strong><small>${v.badge[2]}</small>`}</div></div>
+<div class="abs brand">Village<i>Crunch</i></div>
+<div class="abs tg">AUTHENTIC BIHARI DELIGHTS</div>
+<div class="abs title">THEKUA</div>
+<div class="abs tl">Gaon ka swad, shehar ke liye</div>
+<div class="abs ph"><img src="file://${__dirname}/photo-${k}.jpg"></div>
+<div class="abs badge"><div>${k!=='jaggery'?`<strong style="font-size:${k==='premium'?'9.6pt':'8.2pt'}">${v.badge[0]}</strong><strong style="font-size:7.4pt">${v.badge[1]}</strong><strong style="font-size:7.4pt">${v.badge[2]}</strong>`:`<small>${v.badge[0]}</small><strong>${v.badge[1]}</strong><small>${v.badge[2]}</small>`}</div></div>
 <div class="abs plaque"><div>${v.name} Thekua</div></div>
-<div class="abs foot"><span>NET WT. 400 g</span><span class="veg">${veg}</span><span>KHAGARIA · BIHAR</span></div>`};
+<div class="abs foot"><span>NET WT. 400 g</span><span class="veg">${veg}</span><span>KHAGARIA · BIHAR</span></div>
+</body>`};
 const back=(k)=>{const v=V[k];return `<!doctype html><meta charset=utf-8><style>${css(v)}
 body{background:#F7EEDC}
 .tex{inset:0;opacity:.35;background-image:url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .38  0 0 0 0 .2  0 0 0 .22 0'/></filter><rect width='200' height='200' filter='url(#n)'/></svg>`)}")}
@@ -129,7 +141,7 @@ td+td{font-weight:700}
 .folk{left:19mm;right:19mm;top:173.2mm;height:3mm;opacity:.55}
 </style>
 <div class="abs tex"></div><svg class="abs art" viewBox="0 0 136 191" xmlns="http://www.w3.org/2000/svg"><defs>${GOLD}${sky(v,'sky')}<clipPath id="hd"><path d="M7,52 L7,10.4 Q7,7 10.4,7 L125.6,7 Q129,7 129,10.4 L129,52Z"/></clipPath></defs><g clip-path="url(#hd)"><rect x="7" y="7" width="122" height="46" fill="url(#sky)"/><circle cx="68" cy="53" r="30" fill="#FFE27A" opacity=".16"/>${rays(68,53,10.5,15.5,24)}<circle cx="68" cy="53" r="9" fill="url(#gold)"/>${cane(14,12,52)}${cane(121,12,52)}</g><rect x="7" y="7" width="122" height="177" rx="3.4" fill="none" stroke="url(#gold)" stroke-width=".75"/><rect x="9.3" y="9.3" width="117.4" height="172.4" rx="2.4" fill="none" stroke="url(#gold)" stroke-width=".3"/><rect x="7" y="177.4" width="122" height="6.6" fill="url(#sky)" opacity=".0"/></svg>
-${lockup(v,10,13)}
+<div class="abs" style="left:0;right:0;top:12.5mm;text-align:center;font:700 17pt/1 Fr;color:#4A2511">Village<span style="color:#86350F">Crunch</span></div>
 <div class="abs h1">${v.name} Thekua</div>
 <div class="abs tg">A Bihari Cuisine · Gaon ka swad, shehar ke liye</div>
 <div class="abs col l"><h3>Ingredients</h3><ul>${v.ing.map(i=>`<li>${i}</li>`).join('')}</ul></div>

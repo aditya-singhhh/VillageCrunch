@@ -31,3 +31,12 @@ This is not legal advice. Ask your FSSAI advisor.
 - https://www.shopify.com (food packaging design)
 - https://yourstory.com (Shuddh Swad)
 - https://anantamias.com (Madhubani art)
+
+## Round 3: learning from your reference mock-ups
+What the references did well, and what we kept:
+- One warm golden-kraft base colour. We now use it on all three pouches (60%), dark brown type (30%), and a small per-flavour colour seal and plate (10%).
+- Brown type on gold is 7.0:1 contrast; "Crunch" is a darker terracotta because the lighter one only reached 2.6:1.
+- Hierarchy: brand, then a Chhath river scene, then THEKUA, then a real photo, then flavour, then weight.
+- Madhubani-style diamond borders top and bottom as the folk cue.
+- Real thekua photo instead of the AI-generated leaf biscuit; the references show a leaf shape that real thekua does not have.
+- Veg symbol and net weight stay in the bottom third, as label rules expect.

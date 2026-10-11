@@ -35,3 +35,36 @@ if(require.main===module){
  require('fs').writeFileSync('clip.html',html);
  const {chromium}=require('/opt/npm-tools/node_modules/playwright');
  (async()=>{const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'});const p=await b.newPage({viewport:{width:1500,height:630}});await p.goto('file://'+process.cwd()+'/clip.html');await p.screenshot({path:'clip.png'});await b.close()})()}
+
+// Devotee holding a fruit basket, 3/4 profile facing right, cropped at the waist. viewBox 0 0 110 120
+module.exports.woman3=(sari='#C8402A',sariD='#8E2214',blouse='#2E1A14',flip=false)=>`<g ${flip?'transform="translate(110 0) scale(-1 1)"':''}>
+ <!-- body: saree -->
+ <path d="M16 52 Q26 44 44 46 Q58 50 60 64 L64 120 L4 120 Q6 84 16 52Z" fill="${sari}"/>
+ <path d="M30 48 Q50 56 58 74 L60 120 L50 120 Q50 84 30 48Z" fill="${sariD}" opacity=".55"/>
+ <path d="M4 104 L64 100 L64 108 L4 112Z" fill="#E9B44C"/><path d="M4 112 L64 108 L64 111 L4 115Z" fill="${sariD}"/>
+ <!-- blouse sleeve -->
+ <path d="M32 50 Q46 47 56 54 L54 70 Q44 68 36 62Z" fill="${blouse}"/>
+ <path d="M54 54 L56 54 L54 70 L51 69Z" fill="#E9B44C"/>
+ <!-- upper arm & forearm -->
+ <path d="M42 66 Q52 70 54 88 L46 90 Q44 76 38 68Z" fill="${SK}"/>
+ <path d="M48 84 L76 80 L77 88 L52 95Z" fill="${SK}"/>
+ <rect x="60" y="80" width="2.6" height="9" fill="#E9B44C" transform="rotate(-8 61 84)"/><rect x="65" y="79" width="2.6" height="9" fill="#E9B44C" transform="rotate(-8 66 83)"/><rect x="70" y="79" width="2.6" height="8" fill="#C4161C" transform="rotate(-8 71 83)"/>
+ <!-- neck & head -->
+ <rect x="32" y="36" width="9" height="14" fill="${SK}"/>
+ <ellipse cx="38" cy="26" rx="11" ry="13.5" fill="${SK}"/>
+ <path d="M48 28 Q53 31 49 33 Q50 36 47 37Z" fill="${SK}"/>
+ <path d="M44 33 q3 2 6 0" stroke="#8E2214" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+ <path d="M42 22 q3 -2 6 0" stroke="${HAIR}" stroke-width="1.3" fill="none"/><circle cx="45" cy="25" r="1.15" fill="${HAIR}"/>
+ <circle cx="36" cy="32" r="1.9" fill="#E9B44C"/><circle cx="51" cy="30.5" r="1" fill="#E9B44C"/>
+ <!-- veil -->
+ <path d="M50 17 Q47 6 35 7 Q22 9 24 29 Q22 44 15 56 Q28 62 42 52 Q33 44 36 32 Q36 22 50 17Z" fill="${sari}"/>
+ <path d="M50 17 Q47 6 35 7 Q27 8 25 17 Q36 9 50 17Z" fill="#E9B44C"/>
+ <path d="M15 56 Q28 62 42 52" stroke="#E9B44C" stroke-width="2" fill="none"/>
+ <path d="M46 15.5 q-3 -2 -7 -2" stroke="#C4161C" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+ <!-- basket -->
+ <path d="M60 86 Q80 98 104 86 Q102 100 82 102 Q64 102 60 86Z" fill="#B9803F" stroke="#7A4A1E" stroke-width="1.2"/>
+ <path d="M64 92 Q82 100 100 91 M66 97 Q82 103 98 96" stroke="#7A4A1E" stroke-width=".8" fill="none" opacity=".7"/>
+ <ellipse cx="82" cy="86" rx="23" ry="5" fill="#C8924B" stroke="#7A4A1E" stroke-width="1"/>
+ <circle cx="70" cy="78" r="7" fill="#F08A24"/><circle cx="83" cy="75" r="7.4" fill="#C8302A"/><circle cx="96" cy="79" r="6.4" fill="#6FA35A"/><circle cx="77" cy="68" r="6" fill="#8A5A2E"/><path d="M84 66 q10 -8 20 2 q-8 8 -20 -2Z" fill="#F2C94C"/><path d="M70 71 q-6 -10 2 -14 q4 8 -2 14Z" fill="#4F8A3E"/>
+ <ellipse cx="68" cy="75" rx="2" ry="1.2" fill="#fff" opacity=".35"/><ellipse cx="81" cy="72" rx="2" ry="1.2" fill="#fff" opacity=".35"/>
+</g>`;
