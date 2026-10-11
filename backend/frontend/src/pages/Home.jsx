@@ -10,8 +10,8 @@ import { formatINR, discountPercent } from '../utils/format';
 
 const CATEGORIES = [
   { to: '/products?category=dry-fruits', label: 'Dry fruits', img: '/Product_Images/MixDry.jpg' },
-  { to: '/products?category=makhana', label: 'Makhana', img: '/Product_Images/Makhana.jpg' },
-  { to: '/products?category=thekua', label: 'Thekua', img: '/packaging/thekua-premium-card.jpg' },
+  { to: '/products?category=makhana', label: 'Makhana', img: '/packaging/makhana-card.jpg' },
+  { to: '/products?category=thekua', label: 'Thekua', img: '/packaging/thekua-card.jpg' },
   { to: '/products?sort=discount', label: 'Offers', icon: BadgePercent },
   { to: '/products', label: 'Shop all', icon: LayoutGrid },
 ];
@@ -139,21 +139,22 @@ const Home = () => {
           <section aria-labelledby="pack-title" className="container-page py-6 md:py-10">
             <div className="rounded-xl bg-paper border border-sand/60 overflow-hidden md:grid md:grid-cols-[1.1fr_1fr] md:items-center">
               <img
-                src="/packaging/thekua-range.jpg"
-                alt="VillageCrunch Thekua in three kraft pouches: Jaggery, Premium and Classic"
-                width="2400" height="1100" loading="lazy" decoding="async"
+                src="/packaging/thekua-sizes.jpg"
+                alt="VillageCrunch Thekua pouches in 200 g, 400 g and 800 g"
+                width="2000" height="1500" loading="lazy" decoding="async"
                 className="w-full h-auto"
               />
               <div className="p-5 md:p-10">
-                <p className="text-xs font-semibold tracking-[0.14em] uppercase text-brand">New packaging</p>
+                <p className="text-xs font-semibold tracking-[0.14em] uppercase text-brand">Jaggery &amp; desi ghee · no maida</p>
                 <h2 id="pack-title" className="font-display font-semibold text-2xl md:text-4xl text-ink mt-2">Gaon ka swad, shehar ke liye</h2>
-                <p className="text-ink/75 mt-3 max-w-md">Three thekuas in 400 g pouches, with a Chhath Puja sunrise design. Pick your favourite.</p>
+                <p className="text-ink/75 mt-3 max-w-md">Bihar&apos;s Chhath prasad, made with whole wheat atta, jaggery and desi ghee. Pick a size, or a bundle to share.</p>
                 <ul className="mt-5 grid grid-cols-3 gap-3 max-w-md">
-                  {[['Jaggery', 'jaggery', '#C2680C'], ['Premium', 'premium', '#6B3A1E'], ['Classic', 'classic', '#2F6B2F']].map(([n, k, c]) => (
+                  {[['200 g', 'thekua-200', '697a51ed6d805b30e09a52e1', '₹219'], ['400 g', 'thekua-400', '697a51ed6d805b30e09a52dc', '₹399'], ['800 g', 'thekua-800', '697a51ed6d805b30e09a52e2', '₹749']].map(([n, k, id, pr]) => (
                     <li key={k}>
-                      <Link to="/products?category=thekua" className="block text-center group">
+                      <Link to={`/product/${id}`} className="block text-center group">
                         <img src={`/packaging/${k}-front.webp`} alt="" width="300" height="400" loading="lazy" decoding="async" className="w-full h-auto drop-shadow-md group-hover:-translate-y-1 transition-transform" />
-                        <span className="mt-2 inline-block text-sm font-semibold" style={{ color: c }}>{n}</span>
+                        <span className="mt-2 block text-sm font-semibold text-ink">{n}</span>
+                        <span className="block text-sm text-ink-soft">{pr}</span>
                       </Link>
                     </li>
                   ))}

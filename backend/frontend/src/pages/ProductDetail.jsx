@@ -373,8 +373,15 @@ const ProductDetail = () => {
     images.push('/placeholder-product.jpg');
   }
 
+  // Sizes and bundles of the same product (products sharing a packGroup)
+  const packOptions = product.packGroup
+    ? allProducts.filter(p => p.packGroup === product.packGroup).sort((a, b) => (a.packOrder || 0) - (b.packOrder || 0))
+    : [];
+  const sizeOptions = packOptions.filter(p => !p.isBundle);
+  const bundleOptions = packOptions.filter(p => p.isBundle);
+
   const relatedProducts = allProducts
-    .filter(p => p.category === product.category && (p._id || p.name) !== (product._id || product.name))
+    .filter(p => p.category === product.category && (p._id || p.name) !== (product._id || product.name) && (!product.packGroup || p.packGroup !== product.packGroup))
     .slice(0, 4);
   const isMasalaProduct = product.category === 'masala';
 
@@ -568,9 +575,37 @@ const ProductDetail = () => {
               </p>
             </div>
 
+            {/* Pack sizes and bundles */}
+            {packOptions.length > 1 && (
+              <div className="mt-4 space-y-3">
+                {[['Choose a pack size', sizeOptions], ['Bundles & gift packs', bundleOptions]].map(([title, opts]) => opts.length > 0 && (
+                  <div key={title}>
+                    <p className="text-sm font-semibold text-ink mb-2">{title}</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {opts.map((o) => {
+                        const active = o._id === product._id;
+                        return (
+                          <Link
+                            key={o._id}
+                            to={`/product/${o._id}`}
+                            aria-current={active ? 'true' : undefined}
+                            className={`block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : 'border-line bg-white hover:border-brand/60'}`}
+                          >
+                            <span className="block text-sm font-semibold text-ink">{o.packLabel || o.weight}</span>
+                            <span className="block text-sm text-ink-soft">{formatINR(o.price)}</span>
+                            {o.packNote && <span className="block text-xs font-semibold text-leaf">{o.packNote}</span>}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Weight + stock */}
             <div className="mt-4 flex flex-wrap items-center gap-3">
-              {product.weight && (
+              {product.weight && packOptions.length <= 1 && (
                 <span className="inline-flex items-center h-10 px-4 rounded-md border-2 border-brand bg-action-tint text-brand text-sm font-semibold">{product.weight}</span>
               )}
               <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${outOfStock ? 'text-berry' : 'text-leaf'}`}>

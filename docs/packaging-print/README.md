@@ -1,16 +1,16 @@
-# Thekua packaging: print artwork
+# Print files
 
-Source: `scripts`-free HTML/SVG layouts (Chhath Puja themed, original artwork) rendered to **vector PDFs** (live text, vector borders). (300 dpi PNGs available on request.)
-Per variant (Premium, Jaggery, Classic): `front` and `back`, 136 x 191 mm page = **130 x 185 mm trim + 3 mm bleed**. Trim line is 3 mm inside the page edge; no crop marks (add them in your printer's template).
+Front and back artwork for the VillageCrunch pouches, 136 x 191 mm (130 x 185 mm face + 3 mm bleed).
 
-Before sending to a printer:
-- **Pouch size/die-line:** 130 x 185 mm is a placeholder. Re-flow to your pouch maker's template.
-- **Food photo:** the thekua photo comes from your Drive image (about 1450 px wide). That is fine on screen but soft at print size. Replace it with a real product photo shoot.
-- **Label facts to confirm with your FSSAI advisor** (copied from your Drive labels, not verified):
-  - Ingredients differ between variants and from an earlier back label (Chini / Cardamom only).
-  - Premium and Jaggery nutrition tables have no Carbohydrate / Total Sugars rows (Classic has Carbohydrate). FSSAI expects energy, protein, carbohydrate, total sugars, added sugars, total fat, saturated fat, trans fat and sodium.
-  - "Added Sugar 63 g" on the Jaggery label looks inconsistent with a jaggery-sweetened product.
-  - Claims on the front: "100% Shudh Desi Ghee" (Premium), "Made with Jaggery, No Refined Sugar" (Jaggery), "Traditional Bihari Recipe" (Classic).
-  - FSSAI logo (the official mark) is not drawn; add it per FSSAI guidelines next to the licence number.
-- Keep the MFD box blank for the batch date; add batch / lot as your printer or law requires.
-- Prices: MRP shown is Premium Rs 399, Jaggery Rs 349, Classic Rs 349 (inclusive of all taxes), as on your Drive labels.
+| File | Product |
+|---|---|
+| `villagecrunch-thekua-{200g,400g,800g}-front-...pdf` | Thekua, Jaggery & Desi Ghee (one recipe, three pack sizes) |
+| `villagecrunch-thekua-back-...pdf` | Thekua back panel (change NET WT. and MRP per size) |
+| `villagecrunch-makhana-{raw,classic,periperi,masala}-250g-{front,back}-...pdf` | Makhana range |
+
+## Before printing
+- Replace the product photos with sharp, high-resolution shots of your own product.
+- Fill the nutrition tables from a lab test (they are shown as "—").
+- Add a real EAN-13 barcode, MFD and batch.
+- Ask the printer for their exact pouch size and die-line, convert to CMYK, and approve a physical proof.
+- Confirm claims ("No maida", "Desi ghee", "Jaggery", "Hand-picked") with your FSSAI advisor; use them only if 100% true.

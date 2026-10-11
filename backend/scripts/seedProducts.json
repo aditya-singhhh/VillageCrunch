@@ -1,7 +1,7 @@
 [
   {
     "_id": "69e3585393621137e26e18cd",
-    "name": "Roasted Makana - Classic Masala",
+    "name": "Roasted Makhana · Desi Masala (250 g)",
     "category": "makhana",
     "price": 269,
     "originalPrice": 349,
@@ -9,9 +9,11 @@
     "stock": 140,
     "featured": true,
     "rating": 4.7,
-    "image": "/Product_Images/Makhana.jpg",
+    "image": "/packaging/makhana-masala.jpg",
     "images": [
-      "/Product_Images/Makhana.jpg"
+      "/packaging/makhana-masala.jpg",
+      "/packaging/makhana-front-back.jpg",
+      "/packaging/makhana-range.jpg"
     ],
     "benefits": [
       "Lightly roasted and crunchy",
@@ -21,17 +23,16 @@
       "Made from quality lotus seeds"
     ],
     "ingredients": [
-      "Fox Nuts (Makhana)",
-      "Edible Oil",
-      "Rock Salt",
-      "Indian Masala Blend"
+      "Makhana (fox nut)",
+      "Edible vegetable oil",
+      "Masala seasoning (salt, chilli, turmeric, spices)"
     ],
-    "description": "Light and crispy roasted makana with a balanced Indian masala blend. A tasty daily snack that combines flavor with nutrition.",
+    "description": "Phool makhana from Bihar, slow-roasted and tossed in a desi masala blend. Made for chai-time snacking. Packed in a facility that also handles wheat, milk and nuts.",
     "isActive": true
   },
   {
     "_id": "69e3585293621137e26e18ca",
-    "name": "Pure Natural Makhana (Lotus Seeds)",
+    "name": "Phool Makhana · Natural (250 g)",
     "category": "makhana",
     "price": 199,
     "originalPrice": 299,
@@ -39,9 +40,11 @@
     "stock": 200,
     "featured": true,
     "rating": 4.9,
-    "image": "/Product_Images/Makhana.jpg",
+    "image": "/packaging/makhana-raw.jpg",
     "images": [
-      "/Product_Images/Makhana.jpg"
+      "/packaging/makhana-raw.jpg",
+      "/packaging/makhana-front-back.jpg",
+      "/packaging/makhana-range.jpg"
     ],
     "benefits": [
       "100% Natural and unprocessed",
@@ -51,9 +54,9 @@
       "Versatile - can be roasted or cooked"
     ],
     "ingredients": [
-      "100% Pure Lotus Seeds (Phool Makhana)"
+      "Makhana (fox nut / lotus seeds)"
     ],
-    "description": "Premium quality, handpicked lotus seeds (fox nuts) in their pure, unroasted form. Perfect for home roasting or cooking.",
+    "description": "Hand-gathered phool makhana from the ponds of Bihar, sun-dried and popped. Plain and unflavoured: roast at home or add to kheer. Packed in a facility that also handles wheat, milk and nuts.",
     "isActive": true
   },
   {
@@ -85,7 +88,7 @@
   },
   {
     "_id": "697a51ed6d805b30e09a52d8",
-    "name": "Roasted Makhana",
+    "name": "Roasted Makhana · Classic Salted (250 g)",
     "category": "makhana",
     "price": 249,
     "originalPrice": 349,
@@ -93,9 +96,11 @@
     "stock": 150,
     "featured": true,
     "rating": 4.6,
-    "image": "/Product_Images/Roasted_makhana.jpg",
+    "image": "/packaging/makhana-classic.jpg",
     "images": [
-      "/Product_Images/Roasted_makhana.jpg"
+      "/packaging/makhana-classic.jpg",
+      "/packaging/makhana-front-back.jpg",
+      "/packaging/makhana-range.jpg"
     ],
     "benefits": [
       "Low in calories",
@@ -105,16 +110,16 @@
       "Good for weight management"
     ],
     "ingredients": [
-      "Fox Nuts (Makhana)",
-      "Edible Oil",
-      "Rock Salt"
+      "Makhana (fox nut)",
+      "Edible vegetable oil",
+      "Rock salt"
     ],
-    "description": "Crunchy roasted fox nuts with light salt. Perfect guilt-free snack, low in calories and high in nutrition.",
+    "description": "Phool makhana from Bihar, slow-roasted till light and crunchy and finished with a pinch of salt. Packed in a facility that also handles wheat, milk and nuts.",
     "isActive": true
   },
   {
     "_id": "697a51ed6d805b30e09a52d9",
-    "name": "Roasted Makhana - Peri Peri",
+    "name": "Roasted Makhana · Peri Peri (250 g)",
     "category": "makhana",
     "price": 299,
     "originalPrice": 399,
@@ -122,9 +127,11 @@
     "stock": 120,
     "featured": true,
     "rating": 4.7,
-    "image": "/Product_Images/Peri_Peri_Makhana.jpg",
+    "image": "/packaging/makhana-periperi.jpg",
     "images": [
-      "/Product_Images/Peri_Peri_Makhana.jpg"
+      "/packaging/makhana-periperi.jpg",
+      "/packaging/makhana-front-back.jpg",
+      "/packaging/makhana-range.jpg"
     ],
     "benefits": [
       "Low calorie spicy snack",
@@ -134,13 +141,11 @@
       "Gluten-free"
     ],
     "ingredients": [
-      "Fox Nuts (Makhana)",
-      "Peri Peri Seasoning",
-      "Edible Oil",
-      "Salt",
-      "Spices"
+      "Makhana (fox nut)",
+      "Edible vegetable oil",
+      "Peri peri seasoning (chilli, salt, garlic, spices)"
     ],
-    "description": "Spicy peri peri flavored roasted fox nuts. Crunchy, tasty, and healthy snacking option.",
+    "description": "Phool makhana from Bihar, slow-roasted and tossed in a spicy, tangy peri peri seasoning. Packed in a facility that also handles wheat, milk and nuts.",
     "isActive": true
   },
   {
@@ -208,44 +213,50 @@
       "Sugar"
     ],
     "description": "Our everyday Bihari thekua, fried crisp and fragrant with cardamom. Packed in a 400 g pouch. Contains wheat.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52dc",
-    "name": "Jaggery Thekua",
+    "name": "Thekua · Jaggery & Desi Ghee (400 g)",
     "category": "thekua",
-    "price": 349,
-    "originalPrice": 349,
+    "price": 399,
+    "originalPrice": 399,
     "weight": "400g",
     "stock": 95,
-    "featured": false,
-    "rating": 4.7,
-    "image": "/packaging/thekua-jaggery.jpg",
+    "featured": true,
+    "rating": 4.8,
+    "image": "/packaging/pack-400.jpg",
     "images": [
-      "/packaging/thekua-jaggery.jpg",
-      "/packaging/listing/jaggery-benefits.jpg",
-      "/packaging/listing/jaggery-inside.jpg",
-      "/packaging/listing/jaggery-label.jpg",
-      "/packaging/listing/jaggery-gift.jpg",
-      "/packaging/listing/range.jpg"
+      "/packaging/pack-400.jpg",
+      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/thekua-front-back.jpg",
+      "/packaging/thekua-sizes.jpg",
+      "/packaging/thekua-showcase.jpg"
     ],
     "benefits": [
-      "Made with pure jaggery",
-      "No refined sugar",
-      "Rich in iron and minerals",
-      "Traditional authentic taste",
-      "Natural sweetness",
-      "Healthy alternative to sweets"
+      "No maida – made with whole wheat atta",
+      "Sweetened only with jaggery, no refined sugar",
+      "Desi ghee in every batch",
+      "Pressed in a wooden sancha, the Bihari way",
+      "Chhath Puja's traditional prasad"
     ],
     "ingredients": [
-      "Maida",
-      "Wheat Flour",
-      "Ghee",
-      "Sunflower Oil",
-      "Jaggery"
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)"
     ],
-    "description": "Bihari thekua sweetened with jaggery instead of refined sugar. Packed in a 400 g pouch. Contains wheat.",
-    "isActive": true
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "isActive": true,
+    "packGroup": "thekua",
+    "packLabel": "400 g",
+    "packNote": "Most popular",
+    "packOrder": 2,
+    "isBundle": false
   },
   {
     "_id": "697a51ed6d805b30e09a52d3",
@@ -361,7 +372,7 @@
       "Fennel Seeds"
     ],
     "description": "Premium Bihari thekua enriched with mixed dry fruits including almonds, cashews, and raisins. Traditional recipe with a nutritious twist. Perfect for special occasions and gifting.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52d2",
@@ -423,6 +434,221 @@
       "Cardamom"
     ],
     "description": "Our richest thekua, made with sudh desi ghee and packed in a 400 g pouch. Contains wheat.",
-    "isActive": true
+    "isActive": false
+  },
+  {
+    "category": "thekua",
+    "packGroup": "thekua",
+    "ingredients": [
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)"
+    ],
+    "benefits": [
+      "No maida – made with whole wheat atta",
+      "Sweetened only with jaggery, no refined sugar",
+      "Desi ghee in every batch",
+      "Pressed in a wooden sancha, the Bihari way",
+      "Chhath Puja's traditional prasad"
+    ],
+    "rating": 4.8,
+    "featured": true,
+    "isActive": true,
+    "_id": "697a51ed6d805b30e09a52e1",
+    "name": "Thekua · Jaggery & Desi Ghee (200 g)",
+    "price": 219,
+    "originalPrice": 219,
+    "weight": "200g",
+    "packLabel": "200 g",
+    "packNote": "Trial pack",
+    "packOrder": 1,
+    "isBundle": false,
+    "image": "/packaging/pack-200.jpg",
+    "images": [
+      "/packaging/pack-200.jpg",
+      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/thekua-front-back.jpg",
+      "/packaging/thekua-sizes.jpg",
+      "/packaging/thekua-showcase.jpg"
+    ],
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "stock": 100
+  },
+  {
+    "category": "thekua",
+    "packGroup": "thekua",
+    "ingredients": [
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)"
+    ],
+    "benefits": [
+      "No maida – made with whole wheat atta",
+      "Sweetened only with jaggery, no refined sugar",
+      "Desi ghee in every batch",
+      "Pressed in a wooden sancha, the Bihari way",
+      "Chhath Puja's traditional prasad"
+    ],
+    "rating": 4.8,
+    "featured": true,
+    "isActive": true,
+    "_id": "697a51ed6d805b30e09a52e2",
+    "name": "Thekua · Jaggery & Desi Ghee (800 g Family Pack)",
+    "price": 749,
+    "originalPrice": 798,
+    "weight": "800g",
+    "packLabel": "800 g",
+    "packNote": "Save ₹49",
+    "packOrder": 3,
+    "isBundle": false,
+    "image": "/packaging/pack-800.jpg",
+    "images": [
+      "/packaging/pack-800.jpg",
+      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/thekua-front-back.jpg",
+      "/packaging/thekua-sizes.jpg",
+      "/packaging/thekua-showcase.jpg"
+    ],
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "stock": 60
+  },
+  {
+    "category": "thekua",
+    "packGroup": "thekua",
+    "ingredients": [
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)"
+    ],
+    "benefits": [
+      "No maida – made with whole wheat atta",
+      "Sweetened only with jaggery, no refined sugar",
+      "Desi ghee in every batch",
+      "Pressed in a wooden sancha, the Bihari way",
+      "Chhath Puja's traditional prasad"
+    ],
+    "rating": 4.8,
+    "featured": true,
+    "isActive": true,
+    "_id": "697a51ed6d805b30e09a52e3",
+    "name": "Thekua · Pack of 3 × 400 g",
+    "price": 1099,
+    "originalPrice": 1197,
+    "weight": "1.2kg",
+    "packLabel": "Pack of 3 × 400 g",
+    "packNote": "Save ₹98",
+    "packOrder": 4,
+    "isBundle": true,
+    "image": "/packaging/pack-3x400.jpg",
+    "images": [
+      "/packaging/pack-3x400.jpg",
+      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/thekua-front-back.jpg",
+      "/packaging/thekua-sizes.jpg",
+      "/packaging/thekua-showcase.jpg"
+    ],
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "stock": 40
+  },
+  {
+    "category": "thekua",
+    "packGroup": "thekua",
+    "ingredients": [
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)"
+    ],
+    "benefits": [
+      "No maida – made with whole wheat atta",
+      "Sweetened only with jaggery, no refined sugar",
+      "Desi ghee in every batch",
+      "Pressed in a wooden sancha, the Bihari way",
+      "Chhath Puja's traditional prasad"
+    ],
+    "rating": 4.8,
+    "featured": true,
+    "isActive": true,
+    "_id": "697a51ed6d805b30e09a52e4",
+    "name": "Thekua Festive Gift Box (2 × 400 g)",
+    "price": 899,
+    "originalPrice": 899,
+    "weight": "800g",
+    "packLabel": "Gift Box · 2 × 400 g",
+    "packNote": "For Chhath & Diwali",
+    "packOrder": 5,
+    "isBundle": true,
+    "image": "/packaging/gift-box.jpg",
+    "images": [
+      "/packaging/gift-box.jpg",
+      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/thekua-front-back.jpg",
+      "/packaging/thekua-sizes.jpg",
+      "/packaging/thekua-showcase.jpg"
+    ],
+    "description": "Two 400 g pouches of VillageCrunch Thekua (jaggery & desi ghee, no maida) packed as a festive gift for Chhath and Diwali. Contains wheat and milk.",
+    "stock": 40
+  },
+  {
+    "category": "thekua",
+    "packGroup": "thekua",
+    "ingredients": [
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)"
+    ],
+    "benefits": [
+      "No maida – made with whole wheat atta",
+      "Sweetened only with jaggery, no refined sugar",
+      "Desi ghee in every batch",
+      "Pressed in a wooden sancha, the Bihari way",
+      "Chhath Puja's traditional prasad"
+    ],
+    "rating": 4.8,
+    "featured": true,
+    "isActive": true,
+    "_id": "697a51ed6d805b30e09a52e5",
+    "name": "Thekua + Roasted Makhana Combo",
+    "price": 599,
+    "originalPrice": 648,
+    "weight": "650g",
+    "packLabel": "Thekua 400 g + Makhana 250 g",
+    "packNote": "Save ₹49",
+    "packOrder": 6,
+    "isBundle": true,
+    "image": "/packaging/combo-makhana.jpg",
+    "images": [
+      "/packaging/combo-makhana.jpg",
+      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/thekua-front-back.jpg",
+      "/packaging/thekua-sizes.jpg",
+      "/packaging/thekua-showcase.jpg"
+    ],
+    "description": "One 400 g pouch of VillageCrunch Thekua (jaggery & desi ghee, no maida) with a 250 g pack of our Roasted Makhana. Contains wheat and milk.",
+    "stock": 40
   }
 ]

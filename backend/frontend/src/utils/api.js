@@ -207,6 +207,7 @@ export const updateContactStatus = async (contactId, status) => {
 export const getAllProducts = async () => {
   const token = localStorage.getItem('token');
   const { data } = await axios.get(`${API_URL}/products`, {
+    params: { all: true },
     headers: { Authorization: `Bearer ${token}` },
   });
   return data;
