@@ -12,6 +12,7 @@ const CATEGORIES = [
   { to: '/products?category=dry-fruits', label: 'Dry fruits', img: '/Product_Images/MixDry.jpg' },
   { to: '/products?category=makhana', label: 'Makhana', img: '/packaging/makhana-card.jpg' },
   { to: '/products?category=thekua', label: 'Thekua', img: '/packaging/thekua-card.jpg' },
+  { to: '/products?category=sattu', label: 'Sattu', img: '/packaging/sattu-card.jpg' },
   { to: '/products?sort=discount', label: 'Offers', icon: BadgePercent },
   { to: '/products', label: 'Shop all', icon: LayoutGrid },
 ];
@@ -67,6 +68,7 @@ const Home = () => {
   const byCat = (c) => products.filter((p) => p.category === c);
   const dryFruits = useMemo(() => byCat('dry-fruits'), [products]);
   const makhana = useMemo(() => byCat('makhana'), [products]);
+  const sattu = useMemo(() => byCat('sattu'), [products]);
   const thekua = useMemo(() => byCat('thekua'), [products]);
 
   const trust = [
@@ -134,6 +136,7 @@ const Home = () => {
 
           <Row title="Makhana" to="/products?category=makhana" products={makhana} />
           <Row title="Thekua" to="/products?category=thekua" products={thekua} />
+          <Row title="Sattu" to="/products?category=sattu" products={sattu} />
 
           {/* Packaging showcase */}
           <section aria-labelledby="pack-title" className="container-page py-6 md:py-10">

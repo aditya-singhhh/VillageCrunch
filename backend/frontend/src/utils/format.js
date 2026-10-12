@@ -19,6 +19,7 @@ const CATEGORY_LABELS = {
   'dry-fruits': 'Dry fruits',
   dryfruits: 'Dry fruits',
   makhana: 'Makhana',
+  sattu: 'Sattu',
   thekua: 'Thekua',
   masala: 'Masala & spices',
   gifts: 'Gift boxes',

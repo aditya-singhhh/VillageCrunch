@@ -650,5 +650,33 @@
     ],
     "description": "One 400 g pouch of VillageCrunch Thekua (jaggery & desi ghee, no maida) with a 250 g pack of our Roasted Makhana. Contains wheat and milk.",
     "stock": 40
+  },
+  {
+    "_id": "697a51ed6d805b30e09a52f1",
+    "name": "Sattu · Roasted Chana Powder (500 g)",
+    "category": "sattu",
+    "price": 149,
+    "originalPrice": 149,
+    "weight": "500g",
+    "stock": 100,
+    "featured": true,
+    "rating": 4.8,
+    "image": "/packaging/sattu-500.jpg",
+    "images": [
+      "/packaging/sattu-500.jpg",
+      "/packaging/sattu-front-back.jpg",
+      "/packaging/villagecrunch-range.jpg"
+    ],
+    "benefits": [
+      "100% roasted chana, nothing added",
+      "Naturally high in plant protein and fibre",
+      "Cooling summer sharbat in 1 minute",
+      "For litti, paratha and laddoo"
+    ],
+    "ingredients": [
+      "Roasted Bengal gram (chana) – 100%"
+    ],
+    "description": "Bihar's original superfood: whole chana slow-roasted and stone-ground into fine sattu. Mix 2–3 spoons with water, lemon and salt for sattu sharbat, or use for litti and paratha. Contains chickpea.",
+    "isActive": true
   }
 ]
