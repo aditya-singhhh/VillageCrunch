@@ -1,12 +1,20 @@
-# Thekua packaging: flat print files (proof grade)
+# Print files
 
-Built from the label images in the owner's Google Drive. Per variant (Premium, Jaggery, Classic):
-front and back PNG, 130 x 185 mm trim, 3 mm bleed, plus `thekua-print-proof.pdf` (front/back with crop marks).
+Front and back artwork for the VillageCrunch pouches, 136 x 191 mm (130 x 185 mm face + 3 mm bleed).
 
-**These are proofs, not press-ready files.**
-- Source art is ~1000 px wide (AI-generated JPEGs), so real print resolution is about 120 dpi at this size. A printer will want vector text and 300 dpi photos.
-- The 130 x 185 mm panel size is a placeholder. Use your pouch maker's die-line.
-- Bleed is extended by edge replication, not real artwork.
-- Garbled text in the source art (Jaggery badge "Mad on Jaggery", tiny text above "100% Sudh Desi Ghee") must be redrawn.
-- The two labels disagree on ingredients/nutrition. Confirm the label facts (and the "natural" claims) with your FSSAI advisor before printing.
-- Keep the MFD box blank for the batch date.
+| File | Product |
+|---|---|
+| `villagecrunch-thekua-{200g,400g,800g}-front-...pdf` | Thekua, Jaggery & Desi Ghee (one recipe, three pack sizes) |
+| `villagecrunch-thekua-back-...pdf` | Thekua back panel (change NET WT. and MRP per size) |
+| `villagecrunch-makhana-{raw,classic,periperi,masala}-250g-{front,back}-...pdf` | Makhana range |
+
+## Before printing
+- Replace the product photos with sharp, high-resolution shots of your own product.
+- Fill the nutrition tables from a lab test (they are shown as "—").
+- Add a real EAN-13 barcode, MFD and batch.
+- Ask the printer for their exact pouch size and die-line, convert to CMYK, and approve a physical proof.
+- Confirm claims ("No maida", "Desi ghee", "Jaggery", "Hand-picked") with your FSSAI advisor; use them only if 100% true.
+
+## Claims used
+- "Natural ingredients · No preservatives · Direct to your home" (thekua) and "100% Natural / Natural · No preservatives · Farm to home" (makhana, sattu).
+- "Organic" is NOT used: in India it needs NPOP or PGS-India certification and the Jaivik Bharat logo. Add it only after certification.

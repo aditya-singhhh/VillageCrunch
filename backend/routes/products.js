@@ -79,8 +79,17 @@ router.post('/upload-images', protect, admin, upload.array('images', 10), (req, 
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { category, featured, search } = req.query;
+    const { category, featured, search, group, all } = req.query;
     let query = {};
+
+    // Hidden products (isActive: false) stay out of the shop; the admin list asks for all=true.
+    if (all !== 'true') {
+      query.isActive = { $ne: false };
+    }
+
+    if (group) {
+      query.packGroup = String(group);
+    }
 
     if (category) {
       query.category = category;

@@ -31,6 +31,12 @@ const productSchema = new mongoose.Schema({
   weight: {
     type: String,
   },
+  // Pack options: products sharing a packGroup are shown as size/bundle choices on the product page.
+  packGroup: { type: String },
+  packLabel: { type: String },   // e.g. "400 g" or "Pack of 3"
+  packNote: { type: String },    // e.g. "Save ₹49"
+  packOrder: { type: Number, default: 0 },
+  isBundle: { type: Boolean, default: false },
   stock: {
     type: Number,
     required: true,

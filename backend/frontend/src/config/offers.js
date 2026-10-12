@@ -17,7 +17,7 @@
  *   bg        background CSS gradient (any valid CSS background value)
  *   dark      true  = light text on a dark background, false = dark text on a light background
  *   badge     OPTIONAL: small label above the headline, e.g. 'Coming soon'
- *   art       OPTIONAL: 'chhath' = built-in Chhath illustration; 'packs' = our pouches (set packs: ['jaggery','premium','classic']);
+ *   art       OPTIONAL: 'chhath' = built-in Chhath illustration; 'packs' = our pouches (set packs: ['thekua-200','thekua-400','thekua-800']);
  *             'arch' = the photo in an arched frame
  *   from      OPTIONAL: first day this slide shows, as 'YYYY-MM-DD'
  *   until     OPTIONAL: last day this slide shows (it disappears by itself afterwards)
@@ -50,7 +50,7 @@ export const OFFER_SLIDES = [
     cta: 'Shop thekua',
     to: '/products?category=thekua',
     art: 'packs',
-    packs: ['jaggery'],
+    packs: ['thekua-400'],
     bg: 'radial-gradient(circle at 78% 50%,#8A4A25 0%,#4A2410 55%,#2E1508 100%)',
     dark: true,
     from: '2026-10-10',
@@ -64,7 +64,7 @@ export const OFFER_SLIDES = [
     cta: 'Shop thekua',
     to: '/products?category=thekua',
     art: 'packs',
-    packs: ['jaggery', 'premium', 'classic'],
+    packs: ['thekua-200', 'thekua-400', 'thekua-800'],
     bg: 'linear-gradient(110deg,#7A2E00 0%,#C2410C 60%,#E8761F 100%)',
     dark: true,
     from: '2026-10-10',

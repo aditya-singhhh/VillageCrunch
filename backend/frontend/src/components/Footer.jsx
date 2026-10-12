@@ -8,6 +8,7 @@ const SHOP = [
   { to: '/products?category=dry-fruits', label: 'Dry fruits' },
   { to: '/products?category=makhana', label: 'Makhana' },
   { to: '/products?category=thekua', label: 'Thekua' },
+  { to: '/products?category=sattu', label: 'Sattu' },
 ];
 const HELP = [
   { to: '/shipping-policy', label: 'Shipping policy' },

@@ -164,3 +164,22 @@ test('addresses: first is default, add, update, set default, delete', async () =
   assert.equal((await app.api('DELETE', `/api/addresses/${first._id}`, undefined, token)).status, 400);
   assert.equal((await app.api('DELETE', '/api/addresses/ffffffffffffffffffffffff', undefined, token)).status, 400);
 });
+
+test('products: hidden products stay out of the shop list; pack groups list sizes and bundles', async () => {
+  const admin = await h.makeAdmin();
+  const mk = (over) => app.api('POST', '/api/products', productBody(over), admin.token);
+  await mk({ name: 'Thekua 200 g', category: 'thekua', packGroup: 'thekua', packLabel: '200 g', packOrder: 1 });
+  await mk({ name: 'Thekua 400 g', category: 'thekua', packGroup: 'thekua', packLabel: '400 g', packOrder: 2 });
+  await mk({ name: 'Thekua gift box', category: 'thekua', packGroup: 'thekua', isBundle: true, packOrder: 3 });
+  await mk({ name: 'Old Thekua', category: 'thekua', isActive: false });
+
+  const shop = await app.api('GET', '/api/products?category=thekua');
+  assert.ok(!shop.body.some((p) => p.name === 'Old Thekua'));
+  const adminList = await app.api('GET', '/api/products?category=thekua&all=true', undefined, admin.token);
+  assert.ok(adminList.body.some((p) => p.name === 'Old Thekua'));
+
+  const group = await app.api('GET', '/api/products?group=thekua');
+  assert.equal(group.body.length, 3);
+  const bundle = group.body.find((p) => p.name === 'Thekua gift box');
+  assert.equal(bundle.isBundle, true);
+});
