@@ -175,17 +175,19 @@
   },
   {
     "_id": "697a51ed6d805b30e09a52da",
-    "name": "Traditional Bihari Thekua",
+    "name": "Classic Thekua",
     "category": "thekua",
-    "price": 199,
-    "originalPrice": 249,
-    "weight": "500g",
+    "price": 349,
+    "originalPrice": 349,
+    "weight": "400g",
     "stock": 120,
     "featured": true,
     "rating": 4.9,
-    "image": "/thekua.jpg",
+    "image": "/packaging/thekua-classic.jpg",
     "images": [
-      "/thekua.jpg"
+      "/packaging/thekua-classic.jpg",
+      "/packaging/thekua-classic-card.jpg",
+      "/packaging/classic-back.webp"
     ],
     "benefits": [
       "Made with natural jaggery",
@@ -195,28 +197,31 @@
       "Long shelf life"
     ],
     "ingredients": [
-      "Wheat Flour",
-      "Jaggery",
-      "Pure Ghee",
+      "Maida",
+      "Wheat",
+      "Ghee",
+      "Sunflower Oil",
       "Cardamom",
-      "Fennel Seeds"
+      "Sugar"
     ],
-    "description": "Authentic Bihari thekua made with jaggery and wheat flour. Traditional recipe passed down through generations. Perfect for festivals and daily consumption.",
+    "description": "Our everyday Bihari thekua, fried crisp and fragrant with cardamom. Packed in a 400 g kraft pouch. Contains wheat.",
     "isActive": true
   },
   {
     "_id": "697a51ed6d805b30e09a52dc",
     "name": "Jaggery Thekua",
     "category": "thekua",
-    "price": 229,
-    "originalPrice": 279,
-    "weight": "500g",
+    "price": 349,
+    "originalPrice": 349,
+    "weight": "400g",
     "stock": 95,
     "featured": false,
     "rating": 4.7,
-    "image": "/thekua.jpg",
+    "image": "/packaging/thekua-jaggery.jpg",
     "images": [
-      "/thekua.jpg"
+      "/packaging/thekua-jaggery.jpg",
+      "/packaging/thekua-jaggery-card.jpg",
+      "/packaging/jaggery-back.webp"
     ],
     "benefits": [
       "Made with pure jaggery",
@@ -227,14 +232,13 @@
       "Healthy alternative to sweets"
     ],
     "ingredients": [
+      "Maida",
       "Wheat Flour",
-      "Pure Jaggery",
-      "Pure Ghee",
-      "Cardamom",
-      "Fennel Seeds",
-      "Coconut"
+      "Ghee",
+      "Sunflower Oil",
+      "Jaggery"
     ],
-    "description": "Pure jaggery-sweetened Bihari thekua made with the finest quality gur. Rich, deep flavor with traditional taste. Completely natural with no added sugar or artificial sweeteners.",
+    "description": "Bihari thekua sweetened with jaggery instead of refined sugar. Packed in a 400 g kraft pouch. Contains wheat.",
     "isActive": true
   },
   {
@@ -378,6 +382,38 @@
       "100% Natural California Almonds"
     ],
     "description": "Rich, crunchy California almonds packed with nutrition. Perfect for daily snacking, cooking, and gifting. Grade A quality handpicked almonds.",
+    "isActive": true
+  },
+  {
+    "_id": "697a51ed6d805b30e09a52e0",
+    "name": "Premium Thekua",
+    "category": "thekua",
+    "price": 399,
+    "originalPrice": 399,
+    "weight": "400g",
+    "stock": 80,
+    "featured": true,
+    "rating": 4.9,
+    "image": "/packaging/thekua-premium.jpg",
+    "images": [
+      "/packaging/thekua-premium.jpg",
+      "/packaging/thekua-premium-card.jpg",
+      "/packaging/premium-back.webp"
+    ],
+    "benefits": [
+      "Made with 100% sudh desi ghee",
+      "Traditional Bihari recipe",
+      "Kraft pouch, 400 g",
+      "Perfect for gifting"
+    ],
+    "ingredients": [
+      "Maida",
+      "Wheat Flour",
+      "100% Shudh Desi Ghee",
+      "Jaggery",
+      "Cardamom"
+    ],
+    "description": "Our richest thekua, made with sudh desi ghee and packed in a premium 400 g kraft pouch. Contains wheat.",
     "isActive": true
   }
 ]

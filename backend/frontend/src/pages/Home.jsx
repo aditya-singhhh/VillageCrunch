@@ -11,7 +11,7 @@ import { formatINR, discountPercent } from '../utils/format';
 const CATEGORIES = [
   { to: '/products?category=dry-fruits', label: 'Dry fruits', img: '/Product_Images/MixDry.jpg' },
   { to: '/products?category=makhana', label: 'Makhana', img: '/Product_Images/Makhana.jpg' },
-  { to: '/products?category=thekua', label: 'Thekua', img: '/thekua.jpg' },
+  { to: '/products?category=thekua', label: 'Thekua', img: '/packaging/thekua-premium-card.jpg' },
   { to: '/products?sort=discount', label: 'Offers', icon: BadgePercent },
   { to: '/products', label: 'Shop all', icon: LayoutGrid },
 ];
@@ -134,6 +134,33 @@ const Home = () => {
 
           <Row title="Makhana" to="/products?category=makhana" products={makhana} />
           <Row title="Thekua" to="/products?category=thekua" products={thekua} />
+
+          {/* Packaging showcase */}
+          <section aria-labelledby="pack-title" className="container-page py-6 md:py-10">
+            <div className="rounded-xl bg-paper border border-sand/60 overflow-hidden md:grid md:grid-cols-[1.1fr_1fr] md:items-center">
+              <img
+                src="/packaging/thekua-range.jpg"
+                alt="VillageCrunch Thekua in three kraft pouches: Jaggery, Premium and Classic"
+                width="2400" height="1100" loading="lazy" decoding="async"
+                className="w-full h-auto"
+              />
+              <div className="p-5 md:p-10">
+                <p className="text-xs font-semibold tracking-[0.14em] uppercase text-brand">New packaging</p>
+                <h2 id="pack-title" className="font-display font-semibold text-2xl md:text-4xl text-ink mt-2">Gaon ka swad, shehar ke liye</h2>
+                <p className="text-ink/75 mt-3 max-w-md">Three thekuas in kraft pouches, 400 g each. Pick your favourite.</p>
+                <ul className="mt-5 grid grid-cols-3 gap-3 max-w-md">
+                  {[['Jaggery', 'jaggery', '#C2680C'], ['Premium', 'premium', '#6B3A1E'], ['Classic', 'classic', '#2F6B2F']].map(([n, k, c]) => (
+                    <li key={k}>
+                      <Link to="/products?category=thekua" className="block text-center group">
+                        <img src={`/packaging/${k}-front.webp`} alt="" width="300" height="400" loading="lazy" decoding="async" className="w-full h-auto drop-shadow-md group-hover:-translate-y-1 transition-transform" />
+                        <span className="mt-2 inline-block text-sm font-semibold" style={{ color: c }}>{n}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
         </>
       )}
 
