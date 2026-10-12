@@ -11,7 +11,7 @@ const products = require('./seedProducts.json');
 const REFRESH = new Set([
   '697a51ed6d805b30e09a52da', '697a51ed6d805b30e09a52db', '697a51ed6d805b30e09a52dc', '697a51ed6d805b30e09a52e0',
   '697a51ed6d805b30e09a52e1', '697a51ed6d805b30e09a52e2', '697a51ed6d805b30e09a52e3', '697a51ed6d805b30e09a52e4', '697a51ed6d805b30e09a52e5',
-  '69e3585293621137e26e18ca', '697a51ed6d805b30e09a52d8', '697a51ed6d805b30e09a52d9', '69e3585393621137e26e18cd', '697a51ed6d805b30e09a52f1',
+  '69e3585293621137e26e18ca', '697a51ed6d805b30e09a52d8', '697a51ed6d805b30e09a52d9', '69e3585393621137e26e18cd', '697a51ed6d805b30e09a52f1', '697a51ed6d805b30e09a52f2',
 ]);
 const REFRESH_FIELDS = ['name', 'price', 'originalPrice', 'weight', 'image', 'images', 'ingredients', 'benefits', 'description',
   'isActive', 'packGroup', 'packLabel', 'packNote', 'packOrder', 'isBundle'];

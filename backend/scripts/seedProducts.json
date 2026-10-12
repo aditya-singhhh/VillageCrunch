@@ -9,10 +9,8 @@
     "stock": 140,
     "featured": true,
     "rating": 4.7,
-    "image": "/packaging/makhana-masala.jpg",
+    "image": "/packaging/makhana-range.jpg",
     "images": [
-      "/packaging/makhana-masala.jpg",
-      "/packaging/makhana-front-back.jpg",
       "/packaging/makhana-range.jpg"
     ],
     "benefits": [
@@ -28,14 +26,14 @@
       "Masala seasoning (salt, chilli, turmeric, spices)"
     ],
     "description": "Phool makhana from Bihar, slow-roasted and tossed in a desi masala blend. Made for chai-time snacking. Packed in a facility that also handles wheat, milk and nuts.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "69e3585293621137e26e18ca",
     "name": "Phool Makhana · Natural (250 g)",
     "category": "makhana",
     "price": 199,
-    "originalPrice": 299,
+    "originalPrice": 199,
     "weight": "250g",
     "stock": 200,
     "featured": true,
@@ -43,20 +41,19 @@
     "image": "/packaging/makhana-raw.jpg",
     "images": [
       "/packaging/makhana-raw.jpg",
-      "/packaging/makhana-front-back.jpg",
+      "/packaging/makhana-raw-front-back.jpg",
       "/packaging/makhana-range.jpg"
     ],
     "benefits": [
-      "100% Natural and unprocessed",
-      "High in protein and minerals",
-      "Low in calories",
-      "Perfect for diabetics",
-      "Versatile - can be roasted or cooked"
+      "100% natural, single ingredient",
+      "No preservatives",
+      "Sourced from Bihar",
+      "Light, crunchy snack base"
     ],
     "ingredients": [
       "Makhana (fox nut / lotus seeds)"
     ],
-    "description": "Hand-gathered phool makhana from the ponds of Bihar, sun-dried and popped. Plain and unflavoured: roast at home or add to kheer. Packed in a facility that also handles wheat, milk and nuts.",
+    "description": "Hand-gathered phool makhana from the ponds of Bihar, sun-dried and popped. 100% natural, nothing added: roast at home with ghee or add to kheer. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "isActive": true
   },
   {
@@ -96,10 +93,8 @@
     "stock": 150,
     "featured": true,
     "rating": 4.6,
-    "image": "/packaging/makhana-classic.jpg",
+    "image": "/packaging/makhana-range.jpg",
     "images": [
-      "/packaging/makhana-classic.jpg",
-      "/packaging/makhana-front-back.jpg",
       "/packaging/makhana-range.jpg"
     ],
     "benefits": [
@@ -115,7 +110,7 @@
       "Rock salt"
     ],
     "description": "Phool makhana from Bihar, slow-roasted till light and crunchy and finished with a pinch of salt. Packed in a facility that also handles wheat, milk and nuts.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52d9",
@@ -127,10 +122,8 @@
     "stock": 120,
     "featured": true,
     "rating": 4.7,
-    "image": "/packaging/makhana-periperi.jpg",
+    "image": "/packaging/makhana-range.jpg",
     "images": [
-      "/packaging/makhana-periperi.jpg",
-      "/packaging/makhana-front-back.jpg",
       "/packaging/makhana-range.jpg"
     ],
     "benefits": [
@@ -146,7 +139,7 @@
       "Peri peri seasoning (chilli, salt, garlic, spices)"
     ],
     "description": "Phool makhana from Bihar, slow-roasted and tossed in a spicy, tangy peri peri seasoning. Packed in a facility that also handles wheat, milk and nuts.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52d7",
@@ -234,11 +227,11 @@
       "/packaging/thekua-showcase.jpg"
     ],
     "benefits": [
-      "No maida – made with whole wheat atta",
-      "Sweetened only with jaggery, no refined sugar",
-      "Desi ghee in every batch",
-      "Pressed in a wooden sancha, the Bihari way",
-      "Chhath Puja's traditional prasad"
+      "No maida – whole wheat atta",
+      "Jaggery, no refined sugar",
+      "Desi ghee",
+      "No preservatives",
+      "Pressed in a wooden sancha, the Bihari way"
     ],
     "ingredients": [
       "Whole wheat flour (atta)",
@@ -250,7 +243,7 @@
       "Cardamom (elaichi)",
       "Rice bran oil (for frying)"
     ],
-    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "isActive": true,
     "packGroup": "thekua",
     "packLabel": "400 g",
@@ -450,11 +443,11 @@
       "Rice bran oil (for frying)"
     ],
     "benefits": [
-      "No maida – made with whole wheat atta",
-      "Sweetened only with jaggery, no refined sugar",
-      "Desi ghee in every batch",
-      "Pressed in a wooden sancha, the Bihari way",
-      "Chhath Puja's traditional prasad"
+      "No maida – whole wheat atta",
+      "Jaggery, no refined sugar",
+      "Desi ghee",
+      "No preservatives",
+      "Pressed in a wooden sancha, the Bihari way"
     ],
     "rating": 4.8,
     "featured": true,
@@ -476,7 +469,7 @@
       "/packaging/thekua-sizes.jpg",
       "/packaging/thekua-showcase.jpg"
     ],
-    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 100
   },
   {
@@ -493,11 +486,11 @@
       "Rice bran oil (for frying)"
     ],
     "benefits": [
-      "No maida – made with whole wheat atta",
-      "Sweetened only with jaggery, no refined sugar",
-      "Desi ghee in every batch",
-      "Pressed in a wooden sancha, the Bihari way",
-      "Chhath Puja's traditional prasad"
+      "No maida – whole wheat atta",
+      "Jaggery, no refined sugar",
+      "Desi ghee",
+      "No preservatives",
+      "Pressed in a wooden sancha, the Bihari way"
     ],
     "rating": 4.8,
     "featured": true,
@@ -519,7 +512,7 @@
       "/packaging/thekua-sizes.jpg",
       "/packaging/thekua-showcase.jpg"
     ],
-    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 60
   },
   {
@@ -536,11 +529,11 @@
       "Rice bran oil (for frying)"
     ],
     "benefits": [
-      "No maida – made with whole wheat atta",
-      "Sweetened only with jaggery, no refined sugar",
-      "Desi ghee in every batch",
-      "Pressed in a wooden sancha, the Bihari way",
-      "Chhath Puja's traditional prasad"
+      "No maida – whole wheat atta",
+      "Jaggery, no refined sugar",
+      "Desi ghee",
+      "No preservatives",
+      "Pressed in a wooden sancha, the Bihari way"
     ],
     "rating": 4.8,
     "featured": true,
@@ -562,7 +555,7 @@
       "/packaging/thekua-sizes.jpg",
       "/packaging/thekua-showcase.jpg"
     ],
-    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk.",
+    "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 40
   },
   {
@@ -579,11 +572,11 @@
       "Rice bran oil (for frying)"
     ],
     "benefits": [
-      "No maida – made with whole wheat atta",
-      "Sweetened only with jaggery, no refined sugar",
-      "Desi ghee in every batch",
-      "Pressed in a wooden sancha, the Bihari way",
-      "Chhath Puja's traditional prasad"
+      "No maida – whole wheat atta",
+      "Jaggery, no refined sugar",
+      "Desi ghee",
+      "No preservatives",
+      "Pressed in a wooden sancha, the Bihari way"
     ],
     "rating": 4.8,
     "featured": true,
@@ -605,7 +598,7 @@
       "/packaging/thekua-sizes.jpg",
       "/packaging/thekua-showcase.jpg"
     ],
-    "description": "Two 400 g pouches of VillageCrunch Thekua (jaggery & desi ghee, no maida) packed as a festive gift for Chhath and Diwali. Contains wheat and milk.",
+    "description": "Two 400 g pouches of VillageCrunch Thekua (jaggery & desi ghee, no maida) packed as a festive gift for Chhath and Diwali. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 40
   },
   {
@@ -622,21 +615,21 @@
       "Rice bran oil (for frying)"
     ],
     "benefits": [
-      "No maida – made with whole wheat atta",
-      "Sweetened only with jaggery, no refined sugar",
-      "Desi ghee in every batch",
-      "Pressed in a wooden sancha, the Bihari way",
-      "Chhath Puja's traditional prasad"
+      "No maida – whole wheat atta",
+      "Jaggery, no refined sugar",
+      "Desi ghee",
+      "No preservatives",
+      "Pressed in a wooden sancha, the Bihari way"
     ],
     "rating": 4.8,
     "featured": true,
     "isActive": true,
     "_id": "697a51ed6d805b30e09a52e5",
     "name": "Thekua + Roasted Makhana Combo",
-    "price": 599,
-    "originalPrice": 648,
-    "weight": "650g",
-    "packLabel": "Thekua 400 g + Makhana 250 g",
+    "price": 499,
+    "originalPrice": 548,
+    "weight": "475g",
+    "packLabel": "Thekua 400 g + Makhana 75 g",
     "packNote": "Save ₹49",
     "packOrder": 6,
     "isBundle": true,
@@ -648,7 +641,7 @@
       "/packaging/thekua-sizes.jpg",
       "/packaging/thekua-showcase.jpg"
     ],
-    "description": "One 400 g pouch of VillageCrunch Thekua (jaggery & desi ghee, no maida) with a 250 g pack of our Roasted Makhana. Contains wheat and milk.",
+    "description": "One 400 g pouch of VillageCrunch Thekua (jaggery & desi ghee, no maida) with a 75 g pack of Roasted Makhana, Himalayan Salt & Pepper. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 40
   },
   {
@@ -669,14 +662,45 @@
     ],
     "benefits": [
       "100% roasted chana, nothing added",
+      "No preservatives",
       "Naturally high in plant protein and fibre",
-      "Cooling summer sharbat in 1 minute",
-      "For litti, paratha and laddoo"
+      "Cooling summer sharbat in 1 minute"
     ],
     "ingredients": [
       "Roasted Bengal gram (chana) – 100%"
     ],
-    "description": "Bihar's original superfood: whole chana slow-roasted and stone-ground into fine sattu. Mix 2–3 spoons with water, lemon and salt for sattu sharbat, or use for litti and paratha. Contains chickpea.",
+    "description": "Bihar's original superfood: whole chana slow-roasted and stone-ground into fine sattu. Mix 2–3 spoons with water, lemon and salt for sattu sharbat, or use for litti and paratha. Contains chickpea. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "isActive": true
+  },
+  {
+    "_id": "697a51ed6d805b30e09a52f2",
+    "name": "Roasted Makhana · Himalayan Salt & Pepper (75 g)",
+    "category": "makhana",
+    "price": 149,
+    "originalPrice": 149,
+    "weight": "75g",
+    "stock": 120,
+    "featured": true,
+    "rating": 4.8,
+    "isActive": true,
+    "image": "/packaging/makhana-saltpepper.jpg",
+    "images": [
+      "/packaging/makhana-saltpepper.jpg",
+      "/packaging/makhana-front-back.jpg",
+      "/packaging/makhana-range.jpg"
+    ],
+    "ingredients": [
+      "Makhana (fox nut)",
+      "Edible vegetable oil",
+      "Himalayan pink salt",
+      "Black pepper"
+    ],
+    "benefits": [
+      "Natural ingredients",
+      "No preservatives",
+      "Light and crunchy",
+      "Sourced from Bihar"
+    ],
+    "description": "Phool makhana from Bihar, slow-roasted till light and crunchy and seasoned with Himalayan pink salt and cracked black pepper. No preservatives. Packed fresh and sent from Bihar direct to your home."
   }
 ]

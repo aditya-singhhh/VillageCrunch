@@ -14,3 +14,7 @@ Front and back artwork for the VillageCrunch pouches, 136 x 191 mm (130 x 185 mm
 - Add a real EAN-13 barcode, MFD and batch.
 - Ask the printer for their exact pouch size and die-line, convert to CMYK, and approve a physical proof.
 - Confirm claims ("No maida", "Desi ghee", "Jaggery", "Hand-picked") with your FSSAI advisor; use them only if 100% true.
+
+## Claims used
+- "Natural ingredients · No preservatives · Direct to your home" (thekua) and "100% Natural / Natural · No preservatives · Farm to home" (makhana, sattu).
+- "Organic" is NOT used: in India it needs NPOP or PGS-India certification and the Jaivik Bharat logo. Add it only after certification.
