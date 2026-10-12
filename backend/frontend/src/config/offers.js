@@ -17,7 +17,8 @@
  *   bg        background CSS gradient (any valid CSS background value)
  *   dark      true  = light text on a dark background, false = dark text on a light background
  *   badge     OPTIONAL: small label above the headline, e.g. 'Coming soon'
- *   art       OPTIONAL: 'chhath' draws the built-in Chhath illustration instead of a photo
+ *   art       OPTIONAL: 'chhath' = built-in Chhath illustration; 'packs' = our pouches (set packs: ['jaggery','premium','classic']);
+ *             'arch' = the photo in an arched frame
  *   from      OPTIONAL: first day this slide shows, as 'YYYY-MM-DD'
  *   until     OPTIONAL: last day this slide shows (it disappears by itself afterwards)
  *   needs     OPTIONAL: slide is hidden unless these are available.
@@ -48,8 +49,9 @@ export const OFFER_SLIDES = [
     sub: 'Ghar ka swaad, ghar se door bhi',
     cta: 'Shop thekua',
     to: '/products?category=thekua',
-    art: 'chhath',
-    bg: 'linear-gradient(110deg,#4A1208 0%,#7C1D12 55%,#A8330F 100%)',
+    art: 'packs',
+    packs: ['jaggery'],
+    bg: 'radial-gradient(circle at 78% 50%,#8A4A25 0%,#4A2410 55%,#2E1508 100%)',
     dark: true,
     from: '2026-10-10',
     until: '2026-11-17',
@@ -61,8 +63,9 @@ export const OFFER_SLIDES = [
     sub: 'With your order. Delivery & packing extra.',
     cta: 'Shop thekua',
     to: '/products?category=thekua',
-    art: 'chhath',
-    bg: 'linear-gradient(110deg,#5A2E00 0%,#9A4A08 55%,#C2680C 100%)',
+    art: 'packs',
+    packs: ['jaggery', 'premium', 'classic'],
+    bg: 'linear-gradient(110deg,#7A2E00 0%,#C2410C 60%,#E8761F 100%)',
     dark: true,
     from: '2026-10-10',
     until: '2026-11-12',
@@ -73,9 +76,10 @@ export const OFFER_SLIDES = [
     sub: 'Thekua and dry fruits for family',
     cta: 'Shop thekua',
     to: '/products?category=thekua',
-    art: 'chhath',
-    bg: 'linear-gradient(110deg,#7C1D12 0%,#B4380F 60%,#D9561A 100%)',
-    dark: true,
+    art: 'arch',
+    image: '/Product_Images/Festival_thekua.jpg',
+    bg: 'linear-gradient(110deg,#FFF3E0 0%,#FBDDB0 65%,#F4C47E 100%)',
+    dark: false,
     from: '2026-10-10',
     until: '2026-11-12',
   },
