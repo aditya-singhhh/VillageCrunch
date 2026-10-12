@@ -420,7 +420,7 @@ const ProductDetail = () => {
       <SEOHead 
         title={`${product.name} - Buy Online at VillageCrunch`}
         description={`${product.description || `Buy premium ${product.name} online at VillageCrunch`}. Fresh, natural, and authentic quality. Price: ₹${product.price}. Fast delivery across India.`}
-        keywords={`${product.name}, buy ${product.name} online, ${product.category}, premium dry fruits, natural ${product.category}`}
+        keywords={`${product.name}, buy ${product.name} online, ${product.category}, natural ${product.category}, no preservatives, Bihar`}
         url={`/product/${product._id}`}
         image={product.image}
         type="product"

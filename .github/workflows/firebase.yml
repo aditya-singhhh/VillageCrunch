@@ -3,6 +3,8 @@ name: Firebase
 #   bootstrap  = one-time cloud setup (database, bucket, secrets...)   -> run this FIRST
 #   deploy     = build + publish the site (also runs automatically on push to main)
 #   create-admin = make/promote an admin user (needs ADMIN_EMAIL, ADMIN_PASSWORD secrets)
+#   connect-domain = add CUSTOM_DOMAIN (repo variable, default villagecrunch.in) + www to Firebase Hosting
+#                    and print the DNS records to add at your domain registrar
 # Setup: docs/FIREBASE_AUTOMATED_SETUP.md
 on:
   push:
@@ -12,7 +14,7 @@ on:
       action:
         description: What to run
         type: choice
-        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate, seed-products]
+        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate, seed-products, connect-domain]
         default: bootstrap-and-deploy
 
 concurrency:
@@ -91,6 +93,12 @@ jobs:
           }
           tail -n 25 /tmp/migrate.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > /tmp/tail.txt
           echo "::warning title=Migration summary::$(cat /tmp/tail.txt)"
+
+      - name: Connect custom domain
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'connect-domain'
+        env:
+          DOMAIN: ${{ vars.CUSTOM_DOMAIN || 'villagecrunch.in' }}
+        run: ./scripts/connect-domain.sh
 
       - name: Load starter products
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'seed-products'

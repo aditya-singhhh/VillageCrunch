@@ -9,7 +9,6 @@ import MobileMenu from './MobileMenu';
 
 const SHOP_LINKS = [
   { to: '/products', label: 'Shop all' },
-  { to: '/products?category=dry-fruits', label: 'Dry fruits' },
   { to: '/products?category=makhana', label: 'Makhana' },
   { to: '/products?category=thekua', label: 'Thekua' },
   { to: '/products?category=sattu', label: 'Sattu' },

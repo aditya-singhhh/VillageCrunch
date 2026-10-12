@@ -15,10 +15,10 @@ const SEOHead = ({
 }) => {
   const baseUrl = 'https://villagecrunch.me';
   const siteName = 'VillageCrunch';
-  const defaultTitle = 'Premium Dry Fruits & Makhana - VillageCrunch | Authentic Indian Delights';
-  const defaultDescription = 'Buy premium quality dry fruits, makhana, and traditional Bihari thekua online. 100% natural and authentic Indian products with fast delivery across India.';
+  const defaultTitle = 'VillageCrunch | Thekua, Makhana & Sattu from Bihar';
+  const defaultDescription = 'Authentic Bihari thekua, phool makhana and sattu. Natural ingredients, no preservatives, direct to your home from Bihar.';
   const defaultImage = `${baseUrl}/images/villagecrunch-logo.png`;
-  const defaultKeywords = 'dry fruits, makhana, thekua, Bihar snacks, premium dry fruits, almonds, cashews, dates, pistachios, walnuts, fox nuts, traditional sweets, online shopping, Indian snacks, natural products';
+  const defaultKeywords = 'thekua, makhana, phool makhana, sattu, Bihar snacks, Chhath prasad, no preservatives, natural snacks, VillageCrunch';
 
   const pageTitle = title ? `${title} - ${siteName}` : defaultTitle;
   const pageDescription = description || defaultDescription;
@@ -38,7 +38,7 @@ const SEOHead = ({
       "alternateName": "Village Crunch",
       "url": baseUrl,
       "logo": `${baseUrl}/images/villagecrunch-logo.png`,
-      "description": "Premium Indian dry fruits, makhana, and traditional snacks online store",
+      "description": "Authentic Bihari thekua, makhana and sattu, natural and preservative-free",
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "India",
@@ -173,7 +173,7 @@ const SEOHead = ({
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={pageDescription} />
       <meta property="og:image" content={pageImage} />
-      <meta property="og:image:alt" content={`${siteName} - ${title || 'Premium Dry Fruits'}`} />
+      <meta property="og:image:alt" content={`${siteName} - ${title || 'Thekua, Makhana & Sattu'}`} />
       <meta property="og:url" content={pageUrl} />
       <meta property="og:site_name" content={siteName} />
       <meta property="og:locale" content="en_IN" />

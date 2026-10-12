@@ -9,7 +9,6 @@ import { getProducts } from '../utils/api.js';
 import { formatINR, discountPercent } from '../utils/format';
 
 const CATEGORIES = [
-  { to: '/products?category=dry-fruits', label: 'Dry fruits', img: '/Product_Images/MixDry.jpg' },
   { to: '/products?category=makhana', label: 'Makhana', img: '/packaging/makhana-card.jpg' },
   { to: '/products?category=thekua', label: 'Thekua', img: '/packaging/thekua-card.jpg' },
   { to: '/products?category=sattu', label: 'Sattu', img: '/packaging/sattu-card.jpg' },

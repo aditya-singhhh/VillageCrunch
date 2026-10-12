@@ -42,7 +42,7 @@ const AIChatbot = () => {
     // Set initial quick actions
     setQuickActions([
       { label: '🌰 Makhana', value: 'show me makhana' },
-      { label: '🥜 Dry Fruits', value: 'show dry fruits' },
+      { label: '🌾 Sattu', value: 'sattu' },
       { label: '🍪 Thekua', value: 'show thekua' },
       { label: '💰 Best Deals', value: 'best offers' }
     ]);
@@ -181,7 +181,7 @@ const AIChatbot = () => {
       const userName = user?.name ? ` ${user.name}` : '';
       setQuickActions([
         { label: '🌰 Makhana', value: 'show makhana' },
-        { label: '🥜 Dry Fruits', value: 'dry fruits' },
+        { label: '🌾 Sattu', value: 'sattu' },
         { label: '🍪 Thekua', value: 'thekua' },
         { label: '🎁 Gift Ideas', value: 'gifting' }
       ]);
@@ -433,7 +433,7 @@ const AIChatbot = () => {
     // Default - Smart suggestions
     setQuickActions([
       { label: '🌰 Makhana', value: 'makhana' },
-      { label: '🥜 Dry Fruits', value: 'dry fruits' },
+      { label: '🌾 Sattu', value: 'sattu' },
       { label: '🍪 Thekua', value: 'thekua' },
       { label: '💰 Offers', value: 'offers' },
       { label: '👤 Talk to Agent', value: 'agent' }

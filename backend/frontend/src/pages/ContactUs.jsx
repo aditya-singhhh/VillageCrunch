@@ -67,7 +67,7 @@ const ContactUs = () => {
   return (
     <div className="bg-paper py-12">
       <SEOHead 
-        title="Contact VillageCrunch - Get in Touch for Premium Dry Fruits & Support"
+        title="Contact VillageCrunch - Get in Touch for Orders & Support"
         description="Contact VillageCrunch for any queries about our premium dry fruits, makhana, and traditional snacks. Get support, ask questions, or share feedback. We're here to help!"
         keywords="contact VillageCrunch, customer support, dry fruits help, makhana queries, product questions, customer service"
         url="/contact"

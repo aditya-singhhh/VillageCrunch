@@ -730,7 +730,7 @@ const Profile = () => {
                 <User className="w-6 h-6 text-ink-soft" />
                 <h3 className="text-lg font-display font-bold text-ink">Account Summary</h3>
               </div>
-              <p className="text-ink-soft mb-4">Thank you for being a valued customer! Enjoy our premium quality dry fruits.</p>
+              <p className="text-ink-soft mb-4">Thank you for being a valued customer! Enjoy our authentic Bihari snacks.</p>
               <div className="bg-white/80 rounded-lg p-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-ink-soft">Member Since</span>
