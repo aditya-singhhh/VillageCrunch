@@ -5,7 +5,6 @@ import Logo from './Logo';
 
 const SHOP = [
   { to: '/products', label: 'All products' },
-  { to: '/products?category=dry-fruits', label: 'Dry fruits' },
   { to: '/products?category=makhana', label: 'Makhana' },
   { to: '/products?category=thekua', label: 'Thekua' },
   { to: '/products?category=sattu', label: 'Sattu' },

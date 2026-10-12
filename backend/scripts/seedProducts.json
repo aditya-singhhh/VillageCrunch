@@ -81,7 +81,7 @@
       "100% Natural Afghan Raisins"
     ],
     "description": "Sweet and juicy Afghan raisins. Natural source of energy, perfect for all ages.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52d8",
@@ -169,7 +169,7 @@
       "Pistachios"
     ],
     "description": "Perfect blend of almonds, cashews, raisins, and pistachios. Ideal for gifting and daily consumption.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52da",
@@ -276,7 +276,7 @@
       "100% Natural Cashew Nuts"
     ],
     "description": "Whole cashews from Kerala, creamy and delicious. Grade A quality, perfect for snacking, cooking, and making sweets.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52d4",
@@ -303,7 +303,7 @@
       "100% Natural Kashmir Walnuts"
     ],
     "description": "Fresh Kashmir walnuts, rich in omega-3 fatty acids. Perfect for brain health and overall wellness.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52d5",
@@ -330,7 +330,7 @@
       "100% Natural Iranian Pistachios"
     ],
     "description": "Iranian pistachios with natural flavor. Rich in antioxidants and perfect for healthy snacking.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52db",
@@ -392,7 +392,7 @@
       "100% Natural California Almonds"
     ],
     "description": "Rich, crunchy California almonds packed with nutrition. Perfect for daily snacking, cooking, and gifting. Grade A quality handpicked almonds.",
-    "isActive": true
+    "isActive": false
   },
   {
     "_id": "697a51ed6d805b30e09a52e0",

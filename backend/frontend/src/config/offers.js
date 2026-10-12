@@ -13,7 +13,7 @@
  *   to        where the button goes (e.g. '/products?category=thekua')
  *   product   OPTIONAL: part of a product name. If a product with that text in its name exists,
  *             the button opens that product page instead of `to`
- *   image     a photo from /public (for example '/Product_Images/MixDry.jpg')
+ *   image     a photo from /public (for example '/packaging/villagecrunch-range.jpg')
  *   bg        background CSS gradient (any valid CSS background value)
  *   dark      true  = light text on a dark background, false = dark text on a light background
  *   badge     OPTIONAL: small label above the headline, e.g. 'Coming soon'
@@ -73,7 +73,7 @@ export const OFFER_SLIDES = [
   {
     id: 'chhath-gift',
     headline: 'Send love home this Chhath',
-    sub: 'Thekua and dry fruits for family',
+    sub: 'Thekua, makhana and sattu for family',
     cta: 'Shop thekua',
     to: '/products?category=thekua',
     art: 'arch',
@@ -89,7 +89,7 @@ export const OFFER_SLIDES = [
     sub: 'Straight to your door',
     cta: 'Shop now',
     to: '/products',
-    image: '/Product_Images/MixDry.jpg',
+    image: '/packaging/villagecrunch-range.jpg',
     bg: 'linear-gradient(110deg,#3A1E0F 0%,#6B3A1E 60%,#8A4A25 100%)',
     dark: true,
     needs: ['threshold'],
@@ -97,10 +97,10 @@ export const OFFER_SLIDES = [
   {
     id: 'up-to-off',
     headline: 'Up to {maxOff}% off',
-    sub: 'On dry fruits, makhana and thekua',
+    sub: 'On thekua family packs and bundles',
     cta: 'Shop the sale',
     to: '/products?sort=discount',
-    image: '/Product_Images/cashew.jpg',
+    image: '/packaging/pack-3x400.jpg',
     bg: 'linear-gradient(110deg,#9A3412 0%,#C2410C 65%,#D9561A 100%)',
     dark: true,
     needs: ['discount'],
@@ -111,18 +111,17 @@ export const OFFER_SLIDES = [
     sub: 'Traditional Bihari sweet, fresh-made',
     cta: 'Shop thekua',
     to: '/products?category=thekua',
-    image: '/Product_Images/Festival_thekua.jpg',
+    image: '/packaging/gift-box.jpg',
     bg: 'linear-gradient(110deg,#FDEBDD 0%,#F6D3AE 70%,#EFC08A 100%)',
     dark: false,
   },
   {
-    id: 'gift-packs',
-    headline: 'Gift-ready dry fruits',
-    sub: 'Premium packs for every occasion',
-    cta: 'Shop gifts',
-    product: 'Mixed Dry Fruits',
-    to: '/products?category=dry-fruits',
-    image: '/Product_Images/almond.jpg',
+    id: 'sattu',
+    headline: "Sattu, Bihar's superfood",
+    sub: 'Roasted chana, nothing added',
+    cta: 'Shop sattu',
+    to: '/products?category=sattu',
+    image: '/packaging/sattu-500.jpg',
     bg: 'linear-gradient(110deg,#2F5D3A 0%,#3F7A4D 70%,#4C8C5A 100%)',
     dark: true,
   },
@@ -132,7 +131,7 @@ export const OFFER_SLIDES = [
     sub: 'Pay when it reaches your door',
     cta: 'Shop makhana',
     to: '/products?category=makhana',
-    image: '/Product_Images/Roasted_makhana.jpg',
+    image: '/packaging/makhana-range.jpg',
     bg: 'linear-gradient(110deg,#F3E9D8 0%,#E6D6BD 70%,#DCC6A3 100%)',
     dark: false,
   },
