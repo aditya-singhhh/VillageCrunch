@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatINR } from '../utils/format';
 import useOverlay from '../hooks/useOverlay';
+import { imgSrc, imgProps } from '../utils/img';
 
 /** Desktop mini-cart. Reads from CartContext only; no API changes. */
 const CartDrawer = ({ open, onClose }) => {
@@ -44,7 +45,7 @@ const CartDrawer = ({ open, onClose }) => {
               {cartItems.map((item) => (
                 <li key={item.cartItemId || item._id} className="flex gap-3 py-4">
                   <img
-                    src={item.image || item.images?.[0]}
+                    src={imgSrc(item.image || item.images?.[0], 400)}
                     alt={item.name}
                     width="72" height="72" loading="lazy" decoding="async"
                     className="w-[72px] h-[72px] rounded-md object-cover bg-cream flex-shrink-0"

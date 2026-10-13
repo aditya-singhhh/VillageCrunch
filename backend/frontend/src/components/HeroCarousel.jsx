@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
 import { OFFER_SLIDES } from '../config/offers';
 import { ChhathScene, FolkBorder } from './ChhathArt';
 import { formatINR, discountPercent } from '../utils/format';
+import { imgSrc, imgProps } from '../utils/img';
 
 const AUTOPLAY_MS = 5000;
 
@@ -160,12 +161,12 @@ const HeroCarousel = ({ products = [], freeShippingThreshold = 0, ready = true }
               <>
                 <FolkBorder className="absolute top-0 left-0 opacity-40 rotate-180" />
                 <div className="absolute right-2 sm:right-4 md:right-14 bottom-0 h-[74%] sm:h-[86%] aspect-[4/5] rounded-t-[999px] overflow-hidden border-[3px] border-white/80 shadow-xl" aria-hidden="true">
-                  <img src={s.image} alt="" width="480" height="600" loading="lazy" decoding="async" draggable="false" className="w-full h-full object-cover" />
+                  <img src={imgSrc(s.image, 800)} alt="" width="480" height="600" loading="lazy" decoding="async" draggable="false" className="w-full h-full object-cover" />
                 </div>
               </>
             ) : (
             <img
-              src={s.image}
+              src={imgSrc(s.image, 800)}
               alt=""
               width="640"
               height="640"
