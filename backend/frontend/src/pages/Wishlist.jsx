@@ -6,6 +6,7 @@ import { getWishlist, removeFromWishlist } from '../utils/api';
 import { formatINR } from '../utils/format';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { imgSrc, imgProps } from '../utils/img';
 
 const Wishlist = () => {
   const { user } = useAuth();
@@ -137,7 +138,7 @@ const Wishlist = () => {
               <article key={product._id} className="relative flex flex-col bg-white rounded-lg border border-line shadow-card overflow-hidden">
                 <div className="relative aspect-square bg-cream">
                   <img
-                    src={product.image || product.images?.[0]}
+                    src={imgSrc(product.image || product.images?.[0], 400)}
                     alt={product.name}
                     width="400" height="400" loading="lazy" decoding="async"
                     className="w-full h-full object-cover"

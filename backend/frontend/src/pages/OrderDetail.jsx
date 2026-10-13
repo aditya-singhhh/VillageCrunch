@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { formatINR } from "../utils/format";
 import { getOrder } from "../utils/api"; // your api.js file
 import { Loader2, ArrowLeft, Check, XCircle } from "lucide-react";
+import { imgSrc, imgProps } from '../utils/img';
 
 const OrdersDetail = () => {
   const { id } = useParams();
@@ -107,7 +108,7 @@ const OrdersDetail = () => {
                 return (
                   <li key={idx} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
                     {item.image && (
-                      <img src={item.image} alt="" width="64" height="64" loading="lazy" decoding="async"
+                      <img src={imgSrc(item.image, 400)} alt="" width="64" height="64" loading="lazy" decoding="async"
                         className="w-16 h-16 rounded-md object-cover bg-cream flex-shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">

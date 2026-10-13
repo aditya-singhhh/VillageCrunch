@@ -12,6 +12,7 @@ import SEOHead from '../components/SEOHead';
 import ProductCard from '../components/ProductCard';
 import useStoreSettings from '../hooks/useStoreSettings';
 import { formatINR, formatCategory, discountPercent, unitPrice, averageRating } from '../utils/format';
+import { imgSrc, imgProps } from '../utils/img';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -473,7 +474,7 @@ const ProductDetail = () => {
             >
               <div className="aspect-square bg-cream rounded-lg overflow-hidden">
                 <img
-                  src={images[selectedImage]}
+                  {...imgProps(images[selectedImage], '(min-width: 1024px) 50vw, 100vw')}
                   alt={product.name}
                   width="800"
                   height="800"
@@ -533,7 +534,7 @@ const ProductDetail = () => {
                     }`}
                   >
                     <img
-                      src={img}
+                      src={imgSrc(img, 400)}
                       alt=""
                       width="72" height="72" loading="lazy" decoding="async"
                       className="w-full h-full object-cover"

@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createReview, toggleWishlist, getWishlist } from '../utils/api';
 import { formatINR, discountPercent, averageRating } from '../utils/format';
 import toast from 'react-hot-toast';
+import { imgSrc, imgProps } from '../utils/img';
 
 const ProductCard = ({ product, showQuickRating = false, userCanRate = false, onRatingSubmit, compact = false }) => {
   const { addToCart } = useCart();
@@ -113,7 +114,7 @@ const ProductCard = ({ product, showQuickRating = false, userCanRate = false, on
     <article className="relative flex flex-col h-full bg-white rounded-lg border border-line shadow-card overflow-hidden zoom-on-hover hover:border-sand transition-colors">
       <div className="relative aspect-square bg-cream overflow-hidden">
         <img
-          src={product.image}
+          {...imgProps(product.image)}
           alt={product.name}
           width="400"
           height="400"

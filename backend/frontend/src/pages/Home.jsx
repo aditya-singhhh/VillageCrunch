@@ -7,6 +7,7 @@ import HeroCarousel from '../components/HeroCarousel';
 import useStoreSettings from '../hooks/useStoreSettings';
 import { getProducts } from '../utils/api.js';
 import { formatINR, discountPercent } from '../utils/format';
+import { imgSrc, imgProps } from '../utils/img';
 
 const CATEGORIES = [
   { to: '/products?category=makhana', label: 'Makhana', img: '/packaging/makhana-card.jpg' },
@@ -107,7 +108,7 @@ const Home = () => {
               <Link to={to} className="group flex flex-col items-center gap-2 w-[72px] md:w-[104px]">
                 <span className="w-[68px] h-[68px] md:w-24 md:h-24 rounded-full overflow-hidden bg-cream border-2 border-line group-hover:border-action transition-colors inline-flex items-center justify-center">
                   {img ? (
-                    <img src={img} alt="" width="96" height="96" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                    <img src={imgSrc(img, 400)} alt="" width="96" height="96" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   ) : (
                     <Icon className="w-7 h-7 md:w-9 md:h-9 text-action" strokeWidth={1.5} aria-hidden="true" />
                   )}
@@ -150,7 +151,7 @@ const Home = () => {
           <section aria-labelledby="pack-title" className="container-page py-6 md:py-10">
             <div className="rounded-xl bg-paper border border-sand/60 overflow-hidden md:grid md:grid-cols-[1.1fr_1fr] md:items-center">
               <img
-                src="/packaging/thekua-sizes.jpg"
+                {...imgProps('/packaging/thekua-sizes.jpg', '(min-width: 768px) 55vw, 100vw')}
                 alt="VillageCrunch Thekua pouches in 200 g, 400 g and 800 g"
                 width="2000" height="1500" loading="lazy" decoding="async"
                 className="w-full h-auto"

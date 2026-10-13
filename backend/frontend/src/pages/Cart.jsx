@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
 import { validatePromocode, calculateOrderTotal, getSettings } from '../utils/api';
 import toast from 'react-hot-toast';
+import { imgSrc, imgProps } from '../utils/img';
 
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
@@ -284,7 +285,7 @@ const Cart = () => {
                 <li key={idOf(item)} className="p-3 sm:p-5 flex gap-3 sm:gap-4">
                   <Link to={`/product/${item._id}`} className="flex-shrink-0" aria-label={item.name}>
                     <img
-                      src={item.image || (item.images && item.images[0]) || '/placeholder-image.jpg'}
+                      src={imgSrc(item.image || (item.images && item.images[0]), 400) || '/placeholder-image.jpg'}
                       alt=""
                       width="80" height="80" loading="lazy" decoding="async"
                       className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-md bg-cream"

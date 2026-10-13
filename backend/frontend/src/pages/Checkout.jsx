@@ -6,6 +6,7 @@ import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, ge
 import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
+import { imgSrc, imgProps } from '../utils/img';
 
 // Utility function to wait for Razorpay to load
 const waitForRazorpay = () => {
@@ -608,7 +609,7 @@ const Checkout = () => {
         {cartItems.map((item) => (
           <li key={item._id || item.cartItemId} className="flex items-center gap-3">
             <img
-              src={item.image}
+              src={imgSrc(item.image, 400)}
               alt=""
               width="56" height="56" loading="lazy" decoding="async"
               className="w-14 h-14 object-cover rounded-md bg-cream flex-shrink-0"
