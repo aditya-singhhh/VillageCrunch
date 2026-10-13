@@ -24,7 +24,7 @@ concurrency:
 env:
   PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
   REGION: ${{ vars.GCP_REGION || 'asia-south1' }}
-  SITE_URL: ${{ vars.SITE_URL }}
+  SITE_URL: ${{ vars.SITE_URL || 'https://villagecrunch.in' }}
   TRUST_PROXY: ${{ vars.TRUST_PROXY || '2' }}
 
 jobs:

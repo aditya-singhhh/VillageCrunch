@@ -7,7 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const path = require('path');
 const connectDB = require('./config/db');
-const DEFAULT_PUBLIC_SITE_URL = 'https://villagecrunch.me';
+const DEFAULT_PUBLIC_SITE_URL = 'https://villagecrunch.in';
 
 const isPrivateHost = (hostname) => {
   return hostname === 'localhost'
@@ -107,6 +107,11 @@ app.use(hpp());
 const allowedOrigins = [
   ...(process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim()),
   process.env.FRONTEND_URL,
+  // Public addresses of the live site (custom domain + Firebase defaults)
+  'https://villagecrunch.in',
+  'https://www.villagecrunch.in',
+  'https://villagecrunch.web.app',
+  'https://villagecrunch.firebaseapp.com',
   ...(isProd ? [] : ['http://localhost:5173', 'http://localhost:8080']),
 ].filter(Boolean);
 
@@ -238,7 +243,7 @@ app.get('/sitemap.xml', async (req, res) => {
     res.status(500).set('Content-Type', 'application/xml').send(`<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://villagecrunch.me</loc>
+    <loc>https://villagecrunch.in</loc>
     <lastmod>${new Date().toISOString().split('T')[0]}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>

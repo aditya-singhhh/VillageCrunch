@@ -2,7 +2,7 @@ const express = require('express');
 const Product = require('../models/Product');
 
 const router = express.Router();
-const DEFAULT_PUBLIC_SITE_URL = 'https://villagecrunch.me';
+const DEFAULT_PUBLIC_SITE_URL = 'https://villagecrunch.in';
 
 const isPrivateHost = (hostname) => {
   return hostname === 'localhost'

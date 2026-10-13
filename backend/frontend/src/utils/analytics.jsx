@@ -245,7 +245,7 @@ export const withAnalytics = (Component) => {
 //
 // 4. For Google Search Console:
 //    - Add meta tag to index.html
-//    - Submit sitemap.xml to Search Console: https://villagecrunch.me/sitemap.xml
+//    - Submit sitemap.xml to Search Console: https://villagecrunch.in/sitemap.xml
 //
 // 5. Additional SEO Tools to consider:
 //    - Microsoft Clarity for user behavior analytics
