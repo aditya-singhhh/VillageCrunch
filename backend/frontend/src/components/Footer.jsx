@@ -8,6 +8,8 @@ const SHOP = [
   { to: '/products?category=makhana', label: 'Makhana' },
   { to: '/products?category=thekua', label: 'Thekua' },
   { to: '/products?category=sattu', label: 'Sattu' },
+  { to: '/diwali', label: 'Diwali gift boxes' },
+  { to: '/ghar', label: 'Chhath: ghar se door?' },
 ];
 const HELP = [
   { to: '/shipping-policy', label: 'Shipping policy' },

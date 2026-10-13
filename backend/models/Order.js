@@ -26,6 +26,8 @@ const orderSchema = new mongoose.Schema({
       weight: String,
     },
   ],
+  // Optional message printed on the gift card in the box
+  giftMessage: { type: String, trim: true, maxlength: 300 },
   shippingAddress: {
     name: String,
     phone: String,

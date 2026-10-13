@@ -79,6 +79,10 @@ const Home = () => {
     return [...items, ...(combo ? [combo] : [])].slice(0, 4);
   }, [products, thekua]);
   const giftBox = useMemo(() => thekua.find((p) => /gift/i.test(p.name)), [thekua]);
+  const giftRow = useMemo(
+    () => [...products.filter((p) => p.category === 'gifts').sort(byOrder), ...(giftBox ? [giftBox] : [])],
+    [products, giftBox]
+  );
 
   const trust = [
     { icon: Truck, text: freeShippingThreshold ? `Free delivery ${formatINR(freeShippingThreshold)}+` : 'Delivery across India' },
@@ -128,22 +132,22 @@ const Home = () => {
         <>
           <Row title="Thekua" to="/products?category=thekua" products={thekuaRow} />
 
-          {/* Gifting strip */}
+          {/* Chhath campaign strip */}
           <section className="container-page py-3">
             <Link
-              to={giftBox ? `/product/${giftBox._id}` : '/products?category=thekua'}
-              className="flex items-center gap-3 rounded-lg bg-cream border border-sand/60 px-4 py-3 md:px-6 md:py-4 hover:bg-[#EFE2CC] transition-colors"
+              to="/ghar"
+              className="flex items-center gap-3 rounded-lg bg-[#2B1B33] text-white px-4 py-3 md:px-6 md:py-4 hover:bg-[#3A2545] transition-colors"
             >
-              <span className="w-11 h-11 rounded-full bg-white inline-flex items-center justify-center flex-shrink-0">
-                <Gift className="w-5 h-5 text-action" strokeWidth={1.75} aria-hidden="true" />
-              </span>
+              <span className="w-11 h-11 rounded-full bg-[#FFD27A] inline-flex items-center justify-center flex-shrink-0 text-xl" aria-hidden="true">🌅</span>
               <span className="flex-1">
-                <span className="block font-display font-semibold text-lg md:text-xl text-ink">Festive Gift Box</span>
-                <span className="block text-sm text-ink-soft">2 × 400 g thekua for Chhath & Diwali{giftBox ? ` · ${formatINR(giftBox.price)}` : ''}</span>
+                <span className="block font-display font-semibold text-lg md:text-xl">Is Chhath ghar nahi ja paa rahe?</span>
+                <span className="block text-sm text-white/75">Ghar se ek dabba, free — 300 dabbe, har shaam 6 baje. Aur ghar ke naam ek chitthi.</span>
               </span>
-              <span className="inline-flex items-center gap-1 text-sm font-semibold text-action">Shop gifts <ArrowRight className="w-4 h-4" aria-hidden="true" /></span>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#FFD27A]">Dekhiye <ArrowRight className="w-4 h-4" aria-hidden="true" /></span>
             </Link>
           </section>
+
+          <Row title="Diwali gift boxes" to="/diwali" products={giftRow} />
 
           <Row title="Makhana & Sattu" to="/products" products={pantryRow} />
 

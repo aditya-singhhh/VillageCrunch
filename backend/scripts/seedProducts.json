@@ -699,5 +699,93 @@
       "Sourced from Bihar"
     ],
     "description": "Phool makhana from Bihar, slow-roasted till light and crunchy and seasoned with Himalayan pink salt and cracked black pepper. No preservatives. Packed fresh and sent from Bihar direct to your home."
+  },
+  {
+    "_id": "697a51ed6d805b30e09a52f3",
+    "name": "Bihar Heritage Gift Box",
+    "category": "gifts",
+    "packGroup": "diwali",
+    "isBundle": true,
+    "packLabel": "Heritage Box",
+    "packNote": "Thekua + 2 makhana + diya",
+    "packOrder": 1,
+    "price": 999,
+    "originalPrice": 999,
+    "weight": "725g",
+    "stock": 50,
+    "featured": true,
+    "isActive": true,
+    "rating": 4.8,
+    "image": "/packaging/gift-heritage.jpg",
+    "images": [
+      "/packaging/gift-heritage.jpg",
+      "/packaging/gift-lid-heritage.jpg",
+      "/packaging/real-thekua-basket.jpg",
+      "/packaging/makhana-range.jpg"
+    ],
+    "description": "A keepsake rigid box with original Madhubani-style art from Bihar. Inside: Thekua 400 g (jaggery & desi ghee, no maida), Phool Makhana 250 g, Roasted Makhana Himalayan Salt & Pepper 75 g, a clay diya and a story card. Add your own message at checkout. Contains wheat and milk. No preservatives.",
+    "ingredients": [
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)",
+      "Phool makhana (fox nut)",
+      "Makhana, edible vegetable oil, Himalayan pink salt, black pepper"
+    ],
+    "benefits": [
+      "Original Madhubani-style art box",
+      "Thekua, makhana and a clay diya",
+      "Handmade in Bihar",
+      "No preservatives",
+      "Your message on a card"
+    ]
+  },
+  {
+    "_id": "697a51ed6d805b30e09a52f4",
+    "name": "Healthy Diwali Gift Box",
+    "category": "gifts",
+    "packGroup": "diwali",
+    "isBundle": true,
+    "packLabel": "Healthy Box",
+    "packNote": "Makhana-led + thekua + diya",
+    "packOrder": 2,
+    "price": 899,
+    "originalPrice": 899,
+    "weight": "600g",
+    "stock": 50,
+    "featured": true,
+    "isActive": true,
+    "rating": 4.8,
+    "image": "/packaging/gift-healthy.jpg",
+    "images": [
+      "/packaging/gift-healthy.jpg",
+      "/packaging/gift-lid-healthy.jpg",
+      "/packaging/makhana-range.jpg",
+      "/packaging/real-thekua-basket.jpg"
+    ],
+    "description": "A lighter Diwali gift, led by makhana. Inside: Phool Makhana 250 g, two Roasted Makhana Himalayan Salt & Pepper 75 g, Thekua 200 g (jaggery & desi ghee, no maida), a clay diya and a story card, in a rigid box with Madhubani-style art. Contains wheat and milk. No preservatives.",
+    "ingredients": [
+      "Phool makhana (fox nut)",
+      "Makhana, edible vegetable oil, Himalayan pink salt, black pepper",
+      "Whole wheat flour (atta)",
+      "Jaggery (gur)",
+      "Desi ghee",
+      "Semolina (suji)",
+      "Dry coconut",
+      "Fennel (saunf)",
+      "Cardamom (elaichi)",
+      "Rice bran oil (for frying)"
+    ],
+    "benefits": [
+      "Makhana-led, lighter gift",
+      "No refined sugar in the thekua",
+      "Original Madhubani-style art box",
+      "No preservatives",
+      "Your message on a card"
+    ]
   }
 ]

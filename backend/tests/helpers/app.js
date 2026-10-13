@@ -71,6 +71,7 @@ const models = {
   Promocode: require('../../models/Promocode'),
   Campaign: require('../../models/Campaign'),
   Settings: require('../../models/Settings'),
+  GharClaim: require('../../models/GharClaim'),
 };
 
 function buildApp() {
@@ -92,6 +93,7 @@ function buildApp() {
   mount('/api/wishlist', '../../routes/wishlist');
   mount('/api/seo', '../../routes/seo');
   mount('/api/support', '../../routes/support');
+  mount('/api/ghar', '../../routes/ghar');
   app.use((err, req, res, next) => res.status(err.status || 500).json({ message: err.message }));
   return app;
 }

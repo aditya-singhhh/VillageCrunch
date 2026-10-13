@@ -70,6 +70,8 @@ const Checkout = () => {
   const [settings, setSettings] = useState(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
 
+  const [giftMessage, setGiftMessage] = useState('');
+  const [isGift, setIsGift] = useState(false);
   const [shippingInfo, setShippingInfo] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -296,6 +298,7 @@ const Checkout = () => {
           price: item.price,
           weight: item.weight,
         })),
+        giftMessage: isGift ? giftMessage : undefined,
         shippingAddress: {
           name: shippingInfo.name,
           phone: shippingInfo.phone,
@@ -478,6 +481,7 @@ const Checkout = () => {
             
             const orderData = {
               items: validatedItems,
+              giftMessage: isGift ? giftMessage : undefined,
               shippingAddress: {
                 name: shippingInfo.name.trim(),
                 phone: shippingInfo.phone.trim(),
@@ -764,6 +768,20 @@ const Checkout = () => {
                   )}
                 </div>
               )}
+              <div className="mt-5 pt-5 border-t border-line">
+                <label className="flex items-center gap-3 text-ink font-medium">
+                  <input type="checkbox" checked={isGift} onChange={(e) => setIsGift(e.target.checked)} className="w-5 h-5" />
+                  Yeh ek tohfa hai (this is a gift)
+                </label>
+                {isGift && (
+                  <div className="mt-3">
+                    <label htmlFor="gift-msg" className="block text-sm text-ink-soft mb-1">Card pe aapka sandesh (we print it on the card in the box; no prices inside)</label>
+                    <textarea id="gift-msg" rows="3" maxLength={300} value={giftMessage} onChange={(e) => setGiftMessage(e.target.value)}
+                      className="input-field" placeholder="Shubh Deepawali! Aapke liye Bihar se kuch meetha. — Riya" />
+                    <p className="text-xs text-ink-mute mt-1">{giftMessage.length}/300 · Deliver to the person's address above.</p>
+                  </div>
+                )}
+              </div>
             </section>
 
             {/* 3. Payment */}
