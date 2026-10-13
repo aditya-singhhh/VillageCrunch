@@ -1,5 +1,5 @@
 // URL Collection Script for Google Search Console Indexing
-// Run this script in your browser console on villagecrunch.me
+// Run this script in your browser console on villagecrunch.in
 
 console.log('🔍 Collecting URLs for Google Search Console Indexing...\n');
 

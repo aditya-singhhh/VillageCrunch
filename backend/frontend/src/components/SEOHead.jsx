@@ -13,7 +13,7 @@ const SEOHead = ({
   noIndex = false,
   canonical
 }) => {
-  const baseUrl = 'https://villagecrunch.me';
+  const baseUrl = 'https://villagecrunch.in';
   const siteName = 'VillageCrunch';
   const defaultTitle = 'VillageCrunch | Thekua, Makhana & Sattu from Bihar';
   const defaultDescription = 'Authentic Bihari thekua, phool makhana and sattu. Natural ingredients, no preservatives, direct to your home from Bihar.';
