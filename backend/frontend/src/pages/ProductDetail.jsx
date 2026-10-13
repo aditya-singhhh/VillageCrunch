@@ -347,22 +347,11 @@ const ProductDetail = () => {
 
   if (!product) return null;
 
-  // Create images array with main image and additional images
+  // Gallery order comes from product.images (so a real photo can lead);
+  // the card image is added only if the list doesn't already include it.
   const images = [];
-  
-  // Always add the main image first if it exists
-  if (product.image) {
-    images.push(product.image);
-  }
-  
-  // Add all additional images (including duplicates for now)
-  if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-    product.images.forEach(img => {
-      if (img) {
-        images.push(img);
-      }
-    });
-  }
+  (Array.isArray(product.images) ? product.images : []).forEach((img) => { if (img && !images.includes(img)) images.push(img); });
+  if (product.image && !images.includes(product.image)) images.unshift(product.image);
   
   // Drop duplicate entries (main image is often repeated in `images`)
   const uniqueImages = images.filter((img, i) => images.indexOf(img) === i);
