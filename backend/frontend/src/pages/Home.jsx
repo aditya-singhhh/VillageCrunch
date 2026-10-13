@@ -16,8 +16,13 @@ const CATEGORIES = [
   { to: '/products', label: 'Shop all', icon: LayoutGrid },
 ];
 
-const Row = ({ title, to, products }) => {
+// Desktop column classes spelled out so Tailwind keeps them
+const COLS = { 3: 'md:grid-cols-3', 4: 'md:grid-cols-4' };
+
+// cols = cards per desktop line; max = how many cards to show on desktop (full lines only)
+const Row = ({ title, to, products, cols = 4, max = cols }) => {
   if (!products.length) return null;
+  const shown = products.slice(0, max);
   return (
     <section className="container-page py-5 md:py-8">
       <div className="flex items-center justify-between gap-4 mb-3 md:mb-5">
@@ -26,14 +31,14 @@ const Row = ({ title, to, products }) => {
           View all <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>
-      <div className="flex gap-3 overflow-x-auto snap-x scroll-pl-4 scrollbar-none -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:grid md:grid-cols-4 md:gap-5 md:overflow-visible">
-        {products.slice(0, 4).map((product) => (
+      <div className={`flex gap-3 overflow-x-auto snap-x scroll-pl-4 scrollbar-none -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:grid ${COLS[cols]} md:gap-5 md:overflow-visible`}>
+        {shown.map((product) => (
           <div key={product._id} className="flex-none w-[44%] sm:w-[30%] snap-start md:w-auto">
             <ProductCard product={product} />
           </div>
         ))}
         {/* Mobile-only: scroll further for the rest */}
-        {products.length > 4 && products.slice(4, 8).map((product) => (
+        {products.length > max && products.slice(max, max + 4).map((product) => (
           <div key={product._id} className="flex-none w-[44%] sm:w-[30%] snap-start md:hidden">
             <ProductCard product={product} />
           </div>
@@ -60,15 +65,17 @@ const Home = () => {
     return () => { alive = false; };
   }, []);
 
-  const bestSellers = useMemo(() => {
-    const featured = products.filter((p) => p.featured);
-    return (featured.length ? featured : products).slice(0, 8);
-  }, [products]);
-  const byCat = (c) => products.filter((p) => p.category === c);
-  const dryFruits = useMemo(() => byCat('dry-fruits'), [products]);
-  const makhana = useMemo(() => byCat('makhana'), [products]);
-  const sattu = useMemo(() => byCat('sattu'), [products]);
+  const byOrder = (a, b) => (a.packOrder || 0) - (b.packOrder || 0);
+  const byCat = (c) => products.filter((p) => p.category === c).sort(byOrder);
   const thekua = useMemo(() => byCat('thekua'), [products]);
+  const makhanaSattu = useMemo(() => [...byCat('makhana'), ...byCat('sattu')], [products]);
+  // Best sellers: one hero pack from each line (thekua 400 g, then makhana and sattu), topped up with featured items
+  const bestSellers = useMemo(() => {
+    const hero = thekua.find((p) => !p.isBundle && /400/.test(p.weight || p.name)) || thekua[0];
+    const picks = [hero, ...makhanaSattu].filter(Boolean);
+    for (const p of products) if (picks.length < 4 && p.featured && !picks.includes(p)) picks.push(p);
+    return picks.slice(0, 4);
+  }, [products, thekua, makhanaSattu]);
 
   const trust = [
     { icon: Truck, text: freeShippingThreshold ? `Free delivery ${formatINR(freeShippingThreshold)}+` : 'Delivery across India' },
@@ -80,13 +87,13 @@ const Home = () => {
   return (
     <div>
       <SEOHead
-        title="Premium Dry Fruits & Makhana Online"
-        description="Shop the finest quality dry fruits, roasted makhana, and traditional Bihari thekua at VillageCrunch. 100% natural products with fast delivery across India. Order now!"
-        keywords="buy dry fruits online, premium almonds, cashews, pistachios, walnuts, makhana online, thekua Bihar, natural dry fruits, healthy snacks"
+        title="Thekua, Makhana & Sattu from Bihar"
+        description="Traditional Bihari thekua made with jaggery and desi ghee, phool makhana and sattu. Natural, no preservatives, delivered direct to your home across India."
+        keywords="thekua online, Bihari thekua, makhana online, phool makhana, roasted makhana, sattu online, Chhath prasad, natural snacks, no preservatives"
         url="/"
         type="website"
       />
-      <h1 className="sr-only">VillageCrunch: dry fruits, makhana and thekua</h1>
+      <h1 className="sr-only">VillageCrunch: thekua, makhana and sattu</h1>
 
       <HeroCarousel products={products} freeShippingThreshold={freeShippingThreshold} ready={loaded && (!!settings || !settingsWait)} />
 
@@ -117,7 +124,6 @@ const Home = () => {
       ) : (
         <>
           <Row title="Best sellers" to="/products" products={bestSellers} />
-          <Row title="Dry fruits" to="/products?category=dry-fruits" products={dryFruits} />
 
           {/* Gifting strip */}
           <section className="container-page py-3">
@@ -133,9 +139,8 @@ const Home = () => {
             </Link>
           </section>
 
-          <Row title="Makhana" to="/products?category=makhana" products={makhana} />
-          <Row title="Thekua" to="/products?category=thekua" products={thekua} />
-          <Row title="Sattu" to="/products?category=sattu" products={sattu} />
+          <Row title="Thekua · sizes & gift packs" to="/products?category=thekua" products={thekua} cols={3} max={6} />
+          <Row title="Makhana & Sattu" to="/products" products={makhanaSattu} cols={3} max={3} />
 
           {/* Packaging showcase */}
           <section aria-labelledby="pack-title" className="container-page py-6 md:py-10">
