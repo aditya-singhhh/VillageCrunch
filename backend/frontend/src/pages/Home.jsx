@@ -11,7 +11,7 @@ import { imgSrc, imgProps } from '../utils/img';
 
 const CATEGORIES = [
   { to: '/products?category=makhana', label: 'Makhana', img: '/packaging/makhana-card.jpg' },
-  { to: '/products?category=thekua', label: 'Thekua', img: '/packaging/thekua-card.jpg' },
+  { to: '/products?category=thekua', label: 'Thekua', img: '/packaging/real-thekua-basket.jpg' },
   { to: '/products?category=sattu', label: 'Sattu', img: '/packaging/sattu-card.jpg' },
   { to: '/products?sort=discount', label: 'Offers', icon: BadgePercent },
   { to: '/products', label: 'Shop all', icon: LayoutGrid },

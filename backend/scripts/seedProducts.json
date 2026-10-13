@@ -220,11 +220,11 @@
     "rating": 4.8,
     "image": "/packaging/pack-400.jpg",
     "images": [
+      "/packaging/real-thekua-basket.jpg",
       "/packaging/pack-400.jpg",
-      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/real-thekua-mould.jpg",
       "/packaging/thekua-front-back.jpg",
-      "/packaging/thekua-sizes.jpg",
-      "/packaging/thekua-showcase.jpg"
+      "/packaging/thekua-sizes.jpg"
     ],
     "benefits": [
       "No maida – whole wheat atta",
@@ -463,11 +463,11 @@
     "isBundle": false,
     "image": "/packaging/pack-200.jpg",
     "images": [
+      "/packaging/real-thekua-basket.jpg",
       "/packaging/pack-200.jpg",
-      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/real-thekua-mould.jpg",
       "/packaging/thekua-front-back.jpg",
-      "/packaging/thekua-sizes.jpg",
-      "/packaging/thekua-showcase.jpg"
+      "/packaging/thekua-sizes.jpg"
     ],
     "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 100
@@ -506,11 +506,11 @@
     "isBundle": false,
     "image": "/packaging/pack-800.jpg",
     "images": [
+      "/packaging/real-thekua-basket.jpg",
       "/packaging/pack-800.jpg",
-      "/packaging/thekua-hero-warm.jpg",
+      "/packaging/real-thekua-mould.jpg",
       "/packaging/thekua-front-back.jpg",
-      "/packaging/thekua-sizes.jpg",
-      "/packaging/thekua-showcase.jpg"
+      "/packaging/thekua-sizes.jpg"
     ],
     "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 60
@@ -550,10 +550,9 @@
     "image": "/packaging/pack-3x400.jpg",
     "images": [
       "/packaging/pack-3x400.jpg",
-      "/packaging/thekua-hero-warm.jpg",
-      "/packaging/thekua-front-back.jpg",
-      "/packaging/thekua-sizes.jpg",
-      "/packaging/thekua-showcase.jpg"
+      "/packaging/real-thekua-basket.jpg",
+      "/packaging/real-thekua-mould.jpg",
+      "/packaging/thekua-front-back.jpg"
     ],
     "description": "VillageCrunch Thekua, the Chhath Puja prasad of Bihar: whole wheat atta, jaggery and desi ghee with coconut, saunf and elaichi, pressed in a wooden mould and fried till crisp. No maida, no refined sugar. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 40
@@ -593,10 +592,9 @@
     "image": "/packaging/gift-box.jpg",
     "images": [
       "/packaging/gift-box.jpg",
-      "/packaging/thekua-hero-warm.jpg",
-      "/packaging/thekua-front-back.jpg",
-      "/packaging/thekua-sizes.jpg",
-      "/packaging/thekua-showcase.jpg"
+      "/packaging/real-thekua-basket.jpg",
+      "/packaging/real-thekua-mould.jpg",
+      "/packaging/thekua-front-back.jpg"
     ],
     "description": "Two 400 g pouches of VillageCrunch Thekua (jaggery & desi ghee, no maida) packed as a festive gift for Chhath and Diwali. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 40
@@ -636,10 +634,9 @@
     "image": "/packaging/combo-makhana.jpg",
     "images": [
       "/packaging/combo-makhana.jpg",
-      "/packaging/thekua-hero-warm.jpg",
-      "/packaging/thekua-front-back.jpg",
-      "/packaging/thekua-sizes.jpg",
-      "/packaging/thekua-showcase.jpg"
+      "/packaging/real-thekua-basket.jpg",
+      "/packaging/real-thekua-mould.jpg",
+      "/packaging/thekua-front-back.jpg"
     ],
     "description": "One 400 g pouch of VillageCrunch Thekua (jaggery & desi ghee, no maida) with a 75 g pack of Roasted Makhana, Himalayan Salt & Pepper. Contains wheat and milk. No preservatives. Packed fresh and sent from Bihar direct to your home.",
     "stock": 40
