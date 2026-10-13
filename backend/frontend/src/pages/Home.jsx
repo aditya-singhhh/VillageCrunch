@@ -16,13 +16,11 @@ const CATEGORIES = [
   { to: '/products', label: 'Shop all', icon: LayoutGrid },
 ];
 
-// Desktop column classes spelled out so Tailwind keeps them
-const COLS = { 3: 'md:grid-cols-3', 4: 'md:grid-cols-4' };
-
-// cols = cards per desktop line; max = how many cards to show on desktop (full lines only)
-const Row = ({ title, to, products, cols = 4, max = cols }) => {
+// Every row uses the same card size (4 across on desktop). A row with fewer
+// than 4 products is centred instead of stretching or leaving a gap.
+const Row = ({ title, to, products }) => {
   if (!products.length) return null;
-  const shown = products.slice(0, max);
+  const shown = products.slice(0, 4);
   return (
     <section className="container-page py-5 md:py-8">
       <div className="flex items-center justify-between gap-4 mb-3 md:mb-5">
@@ -31,14 +29,14 @@ const Row = ({ title, to, products, cols = 4, max = cols }) => {
           View all <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>
-      <div className={`flex gap-3 overflow-x-auto snap-x scroll-pl-4 scrollbar-none -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:grid ${COLS[cols]} md:gap-5 md:overflow-visible`}>
+      <div className="flex gap-3 overflow-x-auto snap-x scroll-pl-4 scrollbar-none -mx-4 px-4 pb-2 md:mx-0 md:px-0 md:gap-5 md:overflow-visible md:justify-center">
         {shown.map((product) => (
-          <div key={product._id} className="flex-none w-[44%] sm:w-[30%] snap-start md:w-auto">
+          <div key={product._id} className="flex-none w-[44%] sm:w-[30%] snap-start md:w-[calc((100%-3.75rem)/4)]">
             <ProductCard product={product} />
           </div>
         ))}
         {/* Mobile-only: scroll further for the rest */}
-        {products.length > max && products.slice(max, max + 4).map((product) => (
+        {products.slice(4, 8).map((product) => (
           <div key={product._id} className="flex-none w-[44%] sm:w-[30%] snap-start md:hidden">
             <ProductCard product={product} />
           </div>
@@ -66,16 +64,20 @@ const Home = () => {
   }, []);
 
   const byOrder = (a, b) => (a.packOrder || 0) - (b.packOrder || 0);
-  const byCat = (c) => products.filter((p) => p.category === c).sort(byOrder);
-  const thekua = useMemo(() => byCat('thekua'), [products]);
-  const makhanaSattu = useMemo(() => [...byCat('makhana'), ...byCat('sattu')], [products]);
-  // Best sellers: one hero pack from each line (thekua 400 g, then makhana and sattu), topped up with featured items
-  const bestSellers = useMemo(() => {
-    const hero = thekua.find((p) => !p.isBundle && /400/.test(p.weight || p.name)) || thekua[0];
-    const picks = [hero, ...makhanaSattu].filter(Boolean);
-    for (const p of products) if (picks.length < 4 && p.featured && !picks.includes(p)) picks.push(p);
-    return picks.slice(0, 4);
-  }, [products, thekua, makhanaSattu]);
+  const thekua = useMemo(() => products.filter((p) => p.category === 'thekua').sort(byOrder), [products]);
+  // Row 1: the three thekua sizes + the best-value pack
+  const thekuaRow = useMemo(() => {
+    const sizes = thekua.filter((p) => !p.isBundle);
+    const packs = thekua.filter((p) => p.isBundle && !/makhana/i.test(p.name) && !/gift/i.test(p.name));
+    return [...sizes, ...packs, ...thekua.filter((p) => p.isBundle)].filter((p, i, a) => a.indexOf(p) === i).slice(0, 4);
+  }, [thekua]);
+  // Row 2: makhana and sattu, topped up with the thekua + makhana combo
+  const pantryRow = useMemo(() => {
+    const items = products.filter((p) => p.category === 'makhana' || p.category === 'sattu');
+    const combo = thekua.find((p) => p.isBundle && /makhana/i.test(p.name));
+    return [...items, ...(combo ? [combo] : [])].slice(0, 4);
+  }, [products, thekua]);
+  const giftBox = useMemo(() => thekua.find((p) => /gift/i.test(p.name)), [thekua]);
 
   const trust = [
     { icon: Truck, text: freeShippingThreshold ? `Free delivery ${formatINR(freeShippingThreshold)}+` : 'Delivery across India' },
@@ -123,24 +125,26 @@ const Home = () => {
         </div>
       ) : (
         <>
-          <Row title="Best sellers" to="/products" products={bestSellers} />
+          <Row title="Thekua" to="/products?category=thekua" products={thekuaRow} />
 
           {/* Gifting strip */}
           <section className="container-page py-3">
             <Link
-              to="/products?category=thekua"
+              to={giftBox ? `/product/${giftBox._id}` : '/products?category=thekua'}
               className="flex items-center gap-3 rounded-lg bg-cream border border-sand/60 px-4 py-3 md:px-6 md:py-4 hover:bg-[#EFE2CC] transition-colors"
             >
               <span className="w-11 h-11 rounded-full bg-white inline-flex items-center justify-center flex-shrink-0">
                 <Gift className="w-5 h-5 text-action" strokeWidth={1.75} aria-hidden="true" />
               </span>
-              <span className="font-display font-semibold text-lg md:text-xl text-ink flex-1">Gifting made easy</span>
+              <span className="flex-1">
+                <span className="block font-display font-semibold text-lg md:text-xl text-ink">Festive Gift Box</span>
+                <span className="block text-sm text-ink-soft">2 × 400 g thekua for Chhath & Diwali{giftBox ? ` · ${formatINR(giftBox.price)}` : ''}</span>
+              </span>
               <span className="inline-flex items-center gap-1 text-sm font-semibold text-action">Shop gifts <ArrowRight className="w-4 h-4" aria-hidden="true" /></span>
             </Link>
           </section>
 
-          <Row title="Thekua · sizes & gift packs" to="/products?category=thekua" products={thekua} cols={3} max={6} />
-          <Row title="Makhana & Sattu" to="/products" products={makhanaSattu} cols={3} max={3} />
+          <Row title="Makhana & Sattu" to="/products" products={pantryRow} />
 
           {/* Packaging showcase */}
           <section aria-labelledby="pack-title" className="container-page py-6 md:py-10">
