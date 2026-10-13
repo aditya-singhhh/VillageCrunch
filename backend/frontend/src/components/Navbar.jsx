@@ -113,7 +113,7 @@ const Navbar = () => {
           <Logo className="max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2 md:text-[26px]" />
 
           {/* Desktop nav */}
-          <nav aria-label="Main" className="hidden md:flex items-center gap-7 lg:gap-8">
+          <nav aria-label="Main" className="hidden md:flex items-center gap-5 lg:gap-8 whitespace-nowrap">
             {DESKTOP_LINKS.map((l) => (
               <NavLink
                 key={l.label}
