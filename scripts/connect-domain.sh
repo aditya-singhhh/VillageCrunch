@@ -35,6 +35,8 @@ for d in "${DOMAIN}" "www.${DOMAIN}"; do
       console.log(`::notice title=DNS ${t} ${h}::${v}`);
       require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, `| ${h} | ${t} | ${v} |\n`);
     }
-    console.log(`${d}: hostState=${j.hostState||"?"} ownershipState=${j.ownershipState||"?"} cert=${j.cert?.state||"?"}`);
+    const seen=[];
+    for (const s of (j.requiredDnsUpdates?.discovered||[])) for (const r of (s.records||[])) seen.push(`${r.type} ${r.rdata}`);
+    console.log(`::notice title=Status ${d}::hostState=${j.hostState||"?"} ownershipState=${j.ownershipState||"?"} cert=${j.cert?.state||"?"} | Firebase sees: ${seen.join(", ")||"nothing"}`);
   ' "/tmp/get-${d}.json" "$d"
 done
