@@ -165,6 +165,7 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
         weight: l.weight,
       })),
       shippingAddress: address,
+      giftMessage: cleanString(req.body.giftMessage, 300) || undefined,
       itemsPrice: round2(amounts.itemsPrice),
       shippingPrice: round2(amounts.shippingPrice),
       taxPrice: round2(amounts.taxPrice),

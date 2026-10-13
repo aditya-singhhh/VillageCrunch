@@ -1373,6 +1373,9 @@ const saveSettings = async (e) => {
                       <p><MapPin className="w-4 h-4 inline mr-2" />
                         {selectedOrder.shippingAddress?.street}, {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} - {selectedOrder.shippingAddress?.pincode}
                       </p>
+                      {selectedOrder.giftMessage && (
+                        <p className="mt-2 rounded bg-cream px-3 py-2"><strong>🎁 Gift card message:</strong> {selectedOrder.giftMessage}</p>
+                      )}
                     </div>
                   </div>
                 </div>

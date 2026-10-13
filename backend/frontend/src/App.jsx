@@ -31,6 +31,9 @@ import Wishlist from './pages/Wishlist';
 import CustomerSupport from './pages/CustomerSupport';
 import ProtectedRoute from './components/ProtectedRoute';
 import OrdersDetail from './pages/OrderDetail';
+import Ghar from './pages/Ghar';
+import Diwali from './pages/Diwali';
+import AdminGhar from './pages/AdminGhar';
 
 // Storefront shell; the admin console hides storefront-only chrome.
 const Shell = () => {
@@ -54,6 +57,9 @@ const Shell = () => {
                 <Route path="/support" element={<ProtectedRoute>
                   <CustomerSupport />
                 </ProtectedRoute>} />
+                <Route path="/admin/ghar" element={<ProtectedRoute adminOnly={true}><AdminGhar /></ProtectedRoute>} />
+                <Route path="/ghar" element={<Ghar />} />
+                <Route path="/diwali" element={<Diwali />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />

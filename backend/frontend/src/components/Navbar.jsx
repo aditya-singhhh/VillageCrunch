@@ -16,8 +16,10 @@ const SHOP_LINKS = [
 
 const DESKTOP_LINKS = [
   ...SHOP_LINKS,
-  { to: '/about', label: 'About' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/diwali', label: 'Diwali gifts' },
+  { to: '/ghar', label: 'Chhath 🌅' },
+  { to: '/about', label: 'About', wide: true },
+  { to: '/contact', label: 'Contact', wide: true },
 ];
 
 const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches;
@@ -126,7 +128,7 @@ const Navbar = () => {
                     : l.to === '/products'
                       ? location.pathname === '/products' && !location.search.includes('category=')
                       : location.pathname === l.to;
-                  return navLinkCls({ isActive: active }) + (active ? ' after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-action' : '');
+                  return navLinkCls({ isActive: active }) + (active ? ' after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-action' : '') + (l.wide ? ' hidden xl:inline-flex' : '');
                 }}
               >
                 {l.label}
@@ -210,7 +212,7 @@ const Navbar = () => {
         )}
       </div>
 
-      <MobileMenu open={drawerOpen} onClose={() => setDrawerOpen(false)} links={SHOP_LINKS} user={user} onLogout={handleLogout} />
+      <MobileMenu open={drawerOpen} onClose={() => setDrawerOpen(false)} links={[...SHOP_LINKS, { to: '/diwali', label: 'Diwali gift boxes' }, { to: '/ghar', label: 'Chhath: ghar se door? 🌅' }]} user={user} onLogout={handleLogout} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </header>
   );

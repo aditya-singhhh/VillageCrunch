@@ -581,5 +581,14 @@ export const toggleWishlist = async (productId) => {
   return data;
 };
 
+// Chhath "Ghar" campaign
+export const getGharStatus = async () => (await api.get('/ghar/status')).data;
+export const claimGhar = async (payload) => (await api.post('/ghar/claim', payload)).data;
+export const getMyGhar = async () => (await api.get('/ghar/mine')).data;
+export const postChitthi = async (payload) => (await api.post('/ghar/chitthi', payload)).data;
+export const getGharClaims = async (params = {}) => (await api.get('/ghar/claims', { params })).data;
+export const updateGharClaim = async (id, payload) => (await api.put(`/ghar/claims/${id}`, payload)).data;
+export const downloadGharCsv = async (type) => (await api.get('/ghar/claims.csv', { params: { type }, responseType: 'blob' })).data;
+
 // Export the axios instance as default
 export default api;

@@ -27,6 +27,7 @@ export default {
         display: ['Fraunces', 'Georgia', 'Cambria', 'serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
         hindi: ['Inter', 'system-ui', 'sans-serif'],
+        hand: ['Kalam', 'Fraunces', 'cursive'],
       },
       borderRadius: { sm: '6px', md: '10px', lg: '16px' },
       boxShadow: {
