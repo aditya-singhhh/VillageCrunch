@@ -45,8 +45,8 @@ export const OFFER_SLIDES = [
   {
     id: 'ghar',
     badge: 'Ghar se door?',
-    headline: 'Is Chhath ghar ka dabba, free',
-    sub: '300 dabbe · 19 Oct se har shaam 6 baje',
+    headline: 'Ghat door hai, suraj wahi hai',
+    sub: 'Ghar nahi ja paa rahe? Bihar se ek dabba, hamari taraf se',
     cta: 'Dekhiye',
     to: '/ghar',
     art: 'arch',

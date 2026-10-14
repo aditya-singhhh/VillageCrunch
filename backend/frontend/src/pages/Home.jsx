@@ -140,8 +140,8 @@ const Home = () => {
             >
               <span className="w-11 h-11 rounded-full bg-[#FFD27A] inline-flex items-center justify-center flex-shrink-0 text-xl" aria-hidden="true">🌅</span>
               <span className="flex-1">
-                <span className="block font-display font-semibold text-lg md:text-xl">Is Chhath ghar nahi ja paa rahe?</span>
-                <span className="block text-sm text-white/75">Ghar ka ek hissa, aapke paas — free. 300 dabbe, har shaam 6 baje.</span>
+                <span className="block font-display font-semibold text-lg md:text-xl">Ghat door hai, suraj wahi hai.</span>
+                <span className="block text-sm text-white/75">Is Chhath ghar nahi ja paa rahe? Bihar se aapke liye ek dabba — hamari taraf se.</span>
               </span>
               <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#FFD27A]">Dekhiye <ArrowRight className="w-4 h-4" aria-hidden="true" /></span>
             </Link>

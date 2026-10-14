@@ -220,6 +220,35 @@ const Memories = ({ stories }) => {
   );
 };
 
+/** Claim button that follows the reader after the opening screen, until the form is on screen. */
+const StickyClaim = ({ status, done }) => {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const hero = document.getElementById('ghar-top');
+    const form = document.getElementById('dabba');
+    if (!hero || !form || typeof IntersectionObserver === 'undefined') return undefined;
+    let heroVisible = true;
+    let formVisible = false;
+    const update = () => setShow(!heroVisible && !formVisible);
+    const io = new IntersectionObserver(([e]) => { heroVisible = e.isIntersecting; update(); }, { threshold: 0 });
+    // the form only counts as "on screen" once it reaches the middle of the screen
+    const io2 = new IntersectionObserver(([e]) => { formVisible = e.isIntersecting; update(); }, { rootMargin: '0px 0px -45% 0px' });
+    io.observe(hero);
+    io2.observe(form);
+    return () => { io.disconnect(); io2.disconnect(); };
+  }, []);
+  const closed = status?.box?.closed;
+  if (closed || done) return null;
+  return (
+    <div className={`fixed inset-x-0 z-30 flex justify-center px-4 transition-all duration-300 bottom-[calc(68px+env(safe-area-inset-bottom))] md:bottom-6 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+      <a href="#dabba" className="inline-flex items-center gap-3 rounded-full bg-[#2B1B33] text-white pl-5 pr-2 py-2 shadow-raised">
+        <span className="text-sm">{status?.box ? `${status.box.leftTotal} dabbe baaki` : 'Ghat door hai, suraj wahi'}</span>
+        <span className="rounded-full bg-action px-4 py-2 text-sm font-semibold">Apna dabba lijiye</span>
+      </a>
+    </div>
+  );
+};
+
 const Ghar = () => {
   const [status, setStatus] = useState(null);
   const [result, setResult] = useState(null);
@@ -244,24 +273,25 @@ const Ghar = () => {
   return (
     <div className="bg-[#F7EFDF]">
       <SEOHead
-        title="Ghar se door, is Chhath | Ek Suraj, Ek Arghya"
-        description="Is Chhath ghar nahi ja paa rahe? Ghar ka ek hissa, aapke paas — Bihar se ek dabba, free. 300 dabbe, har shaam 6 baje."
+        title="Ghat door hai, suraj wahi hai | Chhath 2026"
+        description="Ghat door hai, suraj wahi hai. Is Chhath ghar nahi ja paa rahe? Bihar se aapke liye ek dabba — hamari taraf se. 300 dabbe, har shaam 6 baje."
         keywords="Chhath 2026, ghar se door Chhath, Bihari away from home, thekua, Ek Suraj Ek Arghya"
         url="/ghar"
         type="website"
       />
 
       {/* 1. Dusk */}
-      <section className="relative overflow-hidden text-white min-h-[86vh] flex items-end">
+      <section id="ghar-top" className="relative overflow-hidden text-white min-h-[86vh] flex items-end">
         <Dusk className="absolute inset-0 w-full h-full hidden md:block" />
         <Dusk className="absolute inset-0 w-full h-full md:hidden" viewBox="330 0 400 420" />
         <div className="absolute inset-0 bg-gradient-to-b from-[#1E1226]/75 via-[#1E1226]/25 to-[#1E1226]/10" aria-hidden="true" />
         <div className="relative container-page pb-[38vh] md:pb-[34vh] pt-24">
           <p className="text-[12px] tracking-[0.3em] uppercase text-[#F7C98B]">Chhath · 13–16 November</p>
-          <h1 className="font-display font-semibold text-[36px] leading-[1.1] md:text-[60px] max-w-3xl mt-4">Is baar ghat pe aapki jagah khali rahegi.</h1>
-          <p className="font-hand text-[22px] md:text-[26px] text-[#FFE3A3] mt-4">Ghar ka ek hissa, aapke paas. Free.</p>
+          <h1 className="font-display font-semibold text-[38px] leading-[1.08] md:text-[64px] max-w-3xl mt-4">Ghat door hai,<br />suraj wahi hai.</h1>
+          <p className="text-[17px] md:text-[19px] text-[#FCE9C8] mt-5">Is Chhath ghar nahi ja paa rahe?</p>
+          <p className="font-hand text-[22px] md:text-[26px] text-[#FFE3A3] mt-1">Bihar se aapke liye ek dabba — hamari taraf se.</p>
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <a href="#dabba" className="btn-primary h-12 px-7 text-base">Ghar se dabba mangwaiye</a>
+            <a href="#dabba" className="btn-primary h-12 px-7 text-base">Ghar ka dabba mangwaiye</a>
             <Counter status={status} />
           </div>
         </div>
@@ -288,7 +318,7 @@ const Ghar = () => {
           <img src={imgSrc('/packaging/ghar-box.jpg', 1200)} alt="Ghar ka dabba: thekua, Maa ke liye postcard, genda ke beej aur ghat ki awaaz ka QR"
             width="1200" height="800" loading="lazy" decoding="async" className="w-full rounded-lg shadow-card" />
           <figcaption className="text-center mt-6 font-hand text-[22px] md:text-[26px] text-ink">
-            Khagaria se saanche wala thekua, Maa ke liye ek postcard, aur ghat ki awaaz.
+            Saanche wala thekua, Maa ke liye ek postcard, aur ghat ki awaaz.
           </figcaption>
         </figure>
       </section>
@@ -296,11 +326,13 @@ const Ghar = () => {
       {/* 4. Take yours */}
       <section id="dabba" className="container-page pb-24 md:pb-28 scroll-mt-20">
         <div className="max-w-xl mx-auto">
-          <h2 className="font-display font-semibold text-[30px] md:text-[38px] text-ink text-center mb-8">Apna dabba lijiye</h2>
+          <h2 className="font-display font-semibold text-[30px] md:text-[38px] text-ink text-center mb-8">Ghar se, aapke liye</h2>
           {result || already ? <Done refCode={(result || already).refCode} /> : <BoxForm status={status} onDone={setResult} />}
         </div>
         <Memories stories={stories} />
       </section>
+
+      <StickyClaim status={status} done={!!(result || already)} />
 
       {/* quiet footer: the 15 Nov ending + the ghat sound the box QR opens */}
       <section id="awaaz" className="border-t border-sand/70 py-12 scroll-mt-20">
@@ -312,7 +344,7 @@ const Ghar = () => {
           {GHAT_AUDIO ? (
             <audio controls preload="none" className="mx-auto mt-6 w-full max-w-md" src="/ghar/ghat-awaaz.mp3">Ghat ki awaaz</audio>
           ) : (
-            <p className="text-sm text-ink-mute mt-3">Ghat ki awaaz yahan 12 November se. Khagaria, Bihar se. 🙏</p>
+            <p className="text-sm text-ink-mute mt-3">Ghat ki awaaz yahan 12 November se. Bihar ke ek ghat se. 🙏</p>
           )}
         </div>
       </section>
