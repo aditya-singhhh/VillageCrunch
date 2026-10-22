@@ -608,6 +608,11 @@ const ProductDetail = () => {
                 {outOfStock ? 'Out of stock' : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
               </span>
             </div>
+            {!outOfStock && ['thekua', 'gifts'].includes(product.category) && (
+              <p className="mt-2 text-sm text-ink-soft">
+                <span className="font-medium text-ink">Made fresh after you order</span>{product.category === 'thekua' ? ' in desi ghee' : ''} · ships in 1–2 days
+              </p>
+            )}
 
             {/* Description */}
             {product.description && (

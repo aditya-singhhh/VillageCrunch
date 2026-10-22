@@ -675,6 +675,11 @@ const Checkout = () => {
       {appliedPromocode && promocodeDiscount > 0 && (
         <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount)}</p>
       )}
+      {cartItems.some((i) => ['thekua', 'gifts'].includes(i.category)) && (
+        <p className="mt-3 rounded-md bg-action-tint px-3 py-2 text-sm text-ink-soft">
+          Thekua is made fresh after you order and ships in 1–2 days.
+        </p>
+      )}
     </>
   );
 
