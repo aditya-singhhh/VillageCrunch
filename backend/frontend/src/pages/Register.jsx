@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import { AuthShell, PasswordInput } from '../components/AuthShell';
+import PhoneOtp from '../components/PhoneOtp';
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,7 @@ const Register = () => {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
+  const [useEmail, setUseEmail] = useState(false);
   
   const { register } = useAuth();
   const { syncCartOnLogin } = useCart();
@@ -67,7 +69,20 @@ const Register = () => {
   };
 
   return (
-    <AuthShell title="Create your account" subtitle="Join us for premium Indian delights">
+    <AuthShell title="Create your account" subtitle="Takes 30 seconds with your mobile number">
+      {!useEmail ? (
+        <>
+          <PhoneOtp onDone={() => navigate(redirect)} cta="Verify & continue" />
+          <p className="mt-3 text-xs text-ink-mute text-center">
+            By continuing you agree to our{' '}
+            <Link to="/terms" className="underline underline-offset-2">Terms</Link> and{' '}
+            <Link to="/privacy" className="underline underline-offset-2">Privacy Policy</Link>.
+          </p>
+          <button type="button" onClick={() => setUseEmail(true)} className="btn-ghost w-full mt-2 text-sm">
+            Sign up with email & password instead
+          </button>
+        </>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="reg-name" className="field-label">Full name</label>
@@ -107,6 +122,7 @@ const Register = () => {
           {loading ? 'Creating account...' : 'Create account'}
         </button>
       </form>
+      )}
 
       <p className="mt-6 text-center text-ink-soft">
         Already have an account?{' '}

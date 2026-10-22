@@ -76,6 +76,10 @@ jobs:
             exit 1
           }
 
+      - name: Enable phone OTP login
+        if: github.event_name == 'push' || contains(inputs.action, 'deploy')
+        run: ./scripts/enable-phone-auth.sh
+
       - name: Migrate data from MongoDB (dry run checks only, writes nothing)
         if: github.event_name == 'workflow_dispatch' && (inputs.action == 'migrate-dry-run' || inputs.action == 'migrate')
         env:

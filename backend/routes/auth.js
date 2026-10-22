@@ -61,6 +61,65 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// 🧩 PHONE OTP LOGIN / SIGNUP
+// The browser verifies the phone number with Firebase (SMS OTP) and sends us the
+// resulting Firebase ID token. We trust only the phone number Firebase put in that
+// token. Existing customers are logged in; new ones are asked for their name once.
+let verifyPhoneToken = async (idToken) => {
+  const admin = require('firebase-admin');
+  if (!admin.apps.length) {
+    admin.initializeApp(process.env.FIREBASE_PROJECT_ID ? { projectId: process.env.FIREBASE_PROJECT_ID } : undefined);
+  }
+  return admin.auth().verifyIdToken(idToken);
+};
+router.__setPhoneVerifier = (fn) => { verifyPhoneToken = fn; }; // tests only
+
+const userPayload = (user) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  phone: user.phone,
+  role: user.role,
+  token: generateToken(user._id),
+});
+
+router.post('/phone', async (req, res) => {
+  try {
+    const { idToken, name } = req.body || {};
+    if (typeof idToken !== 'string' || idToken.length < 20) {
+      return res.status(400).json({ message: 'Phone verification is required' });
+    }
+    let decoded;
+    try {
+      decoded = await verifyPhoneToken(idToken);
+    } catch (e) {
+      return res.status(401).json({ message: 'OTP verification expired. Please try again.' });
+    }
+    const ten = String(decoded.phone_number || '').replace(/\D/g, '').slice(-10);
+    if (!/^[6-9]\d{9}$/.test(ten)) {
+      return res.status(400).json({ message: 'Please use an Indian mobile number' });
+    }
+
+    let user = (await User.findOne({ phone: ten })) || (await User.findOne({ phone: `+91${ten}` }));
+    if (!user) {
+      const clean = typeof name === 'string' ? name.trim().replace(/\s+/g, ' ').slice(0, 60) : '';
+      if (clean.length < 2) return res.json({ needName: true });
+      user = await User.create({
+        name: clean,
+        email: `${ten}@phone.villagecrunch.in`, // placeholder until the customer adds an email
+        password: crypto.randomBytes(24).toString('hex'), // never used; they log in with OTP
+        phone: ten,
+        role: 'user',
+      });
+      return res.status(201).json(userPayload(user));
+    }
+    res.json(userPayload(user));
+  } catch (error) {
+    console.error('Phone login error:', error.message);
+    res.status(500).json({ message: 'Login failed' });
+  }
+});
+
 // 🧩 LOGIN (User or Admin)
 router.post('/login', async (req, res) => {
   try {

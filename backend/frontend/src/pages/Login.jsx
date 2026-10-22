@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import { AuthShell, PasswordInput } from '../components/AuthShell';
+import PhoneOtp from '../components/PhoneOtp';
 
 const Login = () => {
   const [searchParams] = useSearchParams();
@@ -14,6 +15,7 @@ const Login = () => {
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [usePassword, setUsePassword] = useState(false);
   
   const { login } = useAuth();
   const { syncCartOnLogin } = useCart();
@@ -48,7 +50,16 @@ const Login = () => {
   };
 
   return (
-    <AuthShell title="Welcome back" subtitle="Log in to continue shopping">
+    <AuthShell title="Log in or sign up" subtitle="Just your mobile number and an OTP">
+      {!usePassword ? (
+        <>
+          <PhoneOtp onDone={() => navigate(redirect)} cta="Verify & continue" />
+          <button type="button" onClick={() => setUsePassword(true)} className="btn-ghost w-full mt-3 text-sm">
+            Log in with email & password instead
+          </button>
+        </>
+      ) : (
+      <>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="login-id" className="field-label">Email or phone number</label>
@@ -85,13 +96,22 @@ const Login = () => {
           {loading ? 'Logging in...' : 'Log in'}
         </button>
       </form>
+      <button type="button" onClick={() => setUsePassword(false)} className="btn-ghost w-full mt-3 text-sm">
+        Use mobile OTP instead
+      </button>
+      </>
+      )}
 
-      <div className="my-6 flex items-center gap-3 text-sm text-ink-mute" aria-hidden="true">
-        <span className="flex-1 border-t border-line" /> New to VillageCrunch? <span className="flex-1 border-t border-line" />
-      </div>
-      <Link to={`/register${redirect !== '/' ? `?redirect=${redirect}` : ''}`} className="btn-secondary w-full">
-        Create an account
-      </Link>
+      {usePassword && (
+        <>
+          <div className="my-6 flex items-center gap-3 text-sm text-ink-mute" aria-hidden="true">
+            <span className="flex-1 border-t border-line" /> New to VillageCrunch? <span className="flex-1 border-t border-line" />
+          </div>
+          <Link to={`/register${redirect !== '/' ? `?redirect=${redirect}` : ''}`} className="btn-secondary w-full">
+            Create an account
+          </Link>
+        </>
+      )}
     </AuthShell>
   );
 };
