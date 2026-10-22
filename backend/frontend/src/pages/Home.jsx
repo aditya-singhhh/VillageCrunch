@@ -132,6 +132,37 @@ const Home = () => {
         <>
           <Row title="Thekua" to="/products?category=thekua" products={thekuaRow} />
 
+          {/* Why our thekua */}
+          <section aria-labelledby="story-title" className="container-page py-4 md:py-8">
+            <div className="rounded-xl bg-paper border border-sand/60 overflow-hidden md:grid md:grid-cols-[1.1fr_1fr] md:items-center">
+              <img
+                {...imgProps('/packaging/real-thekua-mould.jpg', '(min-width: 768px) 55vw, 100vw')}
+                alt="Thekua in a basket with the carved wooden saancha it is pressed in"
+                width="1200" height="1200" loading="lazy" decoding="async"
+                className="w-full h-64 md:h-full object-cover"
+              />
+              <div className="p-5 md:p-10">
+                <p className="text-xs font-semibold tracking-[0.14em] uppercase text-brand">Bihar ka Chhath prasad</p>
+                <h2 id="story-title" className="font-display font-semibold text-2xl md:text-4xl text-ink mt-2">Gaon ka swad, shehar ke liye</h2>
+                <ul className="mt-5 space-y-3 text-ink">
+                  {[
+                    ['Desi ghee mein tala', 'Wahi khushboo jo ghar ki rasoi mein aati thi'],
+                    ['Gud ki mithaas', 'Jaggery, no maida, no preservatives'],
+                    ['Order pe taaza', 'Aapka order aata hai, tab banta hai · 1–2 din mein dispatch'],
+                  ].map(([t, d]) => (
+                    <li key={t} className="flex gap-3">
+                      <span className="mt-2 w-2 h-2 rounded-full bg-brand flex-shrink-0" aria-hidden="true" />
+                      <span><span className="font-semibold">{t}</span><span className="block text-sm text-ink-soft">{d}</span></span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/product/697a51ed6d805b30e09a52dc" className="btn-primary mt-6 inline-flex">
+                  Thekua dekhiye <ArrowRight className="w-4 h-4 ml-1" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          </section>
+
           {/* Chhath campaign strip */}
           <section className="container-page py-3">
             <Link
@@ -151,33 +182,6 @@ const Home = () => {
 
           <Row title="Makhana & Sattu" to="/products" products={pantryRow} />
 
-          {/* Packaging showcase */}
-          <section aria-labelledby="pack-title" className="container-page py-6 md:py-10">
-            <div className="rounded-xl bg-paper border border-sand/60 overflow-hidden md:grid md:grid-cols-[1.1fr_1fr] md:items-center">
-              <img
-                {...imgProps('/packaging/thekua-sizes.jpg', '(min-width: 768px) 55vw, 100vw')}
-                alt="VillageCrunch Thekua pouches in 200 g, 400 g and 800 g"
-                width="2000" height="1500" loading="lazy" decoding="async"
-                className="w-full h-auto"
-              />
-              <div className="p-5 md:p-10">
-                <p className="text-xs font-semibold tracking-[0.14em] uppercase text-brand">Jaggery &amp; desi ghee · no maida</p>
-                <h2 id="pack-title" className="font-display font-semibold text-2xl md:text-4xl text-ink mt-2">Gaon ka swad, shehar ke liye</h2>
-                <p className="text-ink/75 mt-3 max-w-md">Bihar&apos;s Chhath prasad, made with whole wheat atta, jaggery and desi ghee. Natural ingredients, no preservatives, direct to your home.</p>
-                <ul className="mt-5 grid grid-cols-3 gap-3 max-w-md">
-                  {[['200 g', 'thekua-200', '697a51ed6d805b30e09a52e1', '₹219'], ['400 g', 'thekua-400', '697a51ed6d805b30e09a52dc', '₹399'], ['800 g', 'thekua-800', '697a51ed6d805b30e09a52e2', '₹749']].map(([n, k, id, pr]) => (
-                    <li key={k}>
-                      <Link to={`/product/${id}`} className="block text-center group">
-                        <img src={`/packaging/${k}-front.webp`} alt="" width="300" height="400" loading="lazy" decoding="async" className="w-full h-auto drop-shadow-md group-hover:-translate-y-1 transition-transform" />
-                        <span className="mt-2 block text-sm font-semibold text-ink">{n}</span>
-                        <span className="block text-sm text-ink-soft">{pr}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </section>
         </>
       )}
 
