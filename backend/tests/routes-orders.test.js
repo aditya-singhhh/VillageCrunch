@@ -12,16 +12,16 @@ const cod = (items, over = {}) => ({ items, shippingAddress: h.address, paymentI
 
 /* ---------------------------------------------------------------- pricing */
 
-test('priceCart: shipping, GST on subtotal+shipping, COD charge, promocode; client prices ignored', async () => {
+test('priceCart: shipping, GST included in prices (shown, not added), COD charge, promocode; client prices ignored', async () => {
   const p = await h.makeProduct({ price: 300 });
   const small = await priceCart({ items: [{ product: String(p._id), quantity: 1, price: 1 }] });
-  assert.deepEqual([small.subtotal, small.shipping, small.tax, small.total], [300, 50, 63, 413]);
+  assert.deepEqual([small.subtotal, small.shipping, small.tax, small.total], [300, 50, 16.67, 350]);
 
   const { user } = await h.makeUser();
   await h.models.Promocode.create({ code: `T10${h.uniq()}`, name: 'Ten', type: 'percentage', value: 10, createdBy: user._id });
   const promo = await h.models.Promocode.findOne({ type: 'percentage' });
   const big = await priceCart({ items: [{ productId: String(p._id), quantity: 2 }], paymentMethod: 'cod', promocodeCode: promo.code.toLowerCase(), userId: user._id });
-  assert.deepEqual([big.shipping, big.codCharge, big.discount, big.total], [0, 25, 60, 600 + 108 + 25 - 60]);
+  assert.deepEqual([big.shipping, big.codCharge, big.discount, big.total], [0, 25, 60, 600 + 25 - 60]);
 });
 
 test('priceCart rejects bad quantities, ids, masala, low stock, unknown promo', async () => {
@@ -51,7 +51,7 @@ test('COD order: totals are server-computed (client values ignored), stock reser
   }), buyer.token);
   assert.equal(res.status, 201, JSON.stringify(res.body));
   const o = res.body;
-  assert.equal(o.totalPrice, 300 + 50 + 63 + 25);
+  assert.equal(o.totalPrice, 300 + 50 + 25);
   assert.equal(o.shippingPrice, 50);
   assert.equal(o.promocodeDiscount, 0);
   assert.equal(o.isPaid, false);
@@ -123,7 +123,7 @@ test('promocode: applied server-side, usage recorded, per-user limit enforced', 
   const order = await app.api('POST', '/api/orders', cod(items, { promocode: code }), buyer.token);
   assert.equal(order.status, 201, JSON.stringify(order.body));
   assert.equal(order.body.promocodeDiscount, 80);
-  assert.equal(order.body.totalPrice, 800 + 0 + 144 + 25 - 80);
+  assert.equal(order.body.totalPrice, 800 + 0 + 25 - 80);
   assert.equal(order.body.promocode.code, code);
 
   const promo = await h.models.Promocode.findOne({ code });
@@ -162,12 +162,12 @@ test('online flow: server-priced Razorpay order -> signature verified -> exactly
   h.razorpayCalls.length = 0;
   const pay = await app.api('POST', '/api/payment/create-order', { amount: 1, cartItems: items }, buyer.token);
   assert.equal(pay.status, 200, JSON.stringify(pay.body));
-  assert.equal(h.razorpayCalls[0].amount, (300 + 50 + 63) * 100, 'amount comes from the cart, not from the client');
-  assert.equal(pay.body.total, 413);
+  assert.equal(h.razorpayCalls[0].amount, (300 + 50) * 100, 'amount comes from the cart, not from the client');
+  assert.equal(pay.body.total, 350);
 
   const live = await h.models.LiveOrder.findOne({ razorpayOrderId: pay.body.orderId });
   assert.equal(live.status, 'created');
-  assert.equal(live.amount, 413);
+  assert.equal(live.amount, 350);
 
   // wrong signature
   const badSig = await app.api('POST', '/api/payment/verify', { razorpayOrderId: pay.body.orderId, razorpayPaymentId: 'pay_1', razorpaySignature: 'f'.repeat(64) }, buyer.token);
@@ -191,7 +191,7 @@ test('online flow: server-priced Razorpay order -> signature verified -> exactly
   }, buyer.token);
   assert.equal(order.status, 201, JSON.stringify(order.body));
   assert.equal(order.body.isPaid, true);
-  assert.equal(order.body.totalPrice, 413);
+  assert.equal(order.body.totalPrice, 350);
   assert.equal(order.body.paymentInfo.razorpayPaymentId, 'pay_1', 'payment ids come from the verified record, not the client');
   assert.equal(await stockOf(p), 4);
 
@@ -239,12 +239,12 @@ test('payment: empty cart / masala rejected; promocode discount flows into the c
   h.razorpayCalls.length = 0;
   const pay = await app.api('POST', '/api/payment/create-order', { cartItems: [{ product: String(p._id), quantity: 1 }], promocode: { code } }, buyer.token);
   assert.equal(pay.status, 200, JSON.stringify(pay.body));
-  assert.equal(h.razorpayCalls[0].amount, Math.round((600 + 0 + 108 - 100) * 100));
+  assert.equal(h.razorpayCalls[0].amount, Math.round((600 + 0 - 100) * 100));
 
   await app.api('POST', '/api/payment/verify', { razorpayOrderId: pay.body.orderId, razorpayPaymentId: 'pay_3', razorpaySignature: h.razorpaySignature(pay.body.orderId, 'pay_3') }, buyer.token);
   const order = await app.api('POST', '/api/orders', { items: [{ product: String(p._id), quantity: 1 }], shippingAddress: h.address, paymentInfo: { method: 'Online', razorpayOrderId: pay.body.orderId } }, buyer.token);
   assert.equal(order.status, 201, JSON.stringify(order.body));
-  assert.equal(order.body.totalPrice, 608);
+  assert.equal(order.body.totalPrice, 500);
   assert.equal(order.body.promocodeDiscount, 100);
   assert.equal((await h.models.Promocode.findOne({ code })).usageCount, 1);
 });

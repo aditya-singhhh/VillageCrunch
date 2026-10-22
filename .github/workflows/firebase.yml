@@ -108,6 +108,7 @@ jobs:
           cd backend && npm ci --omit=dev
           node scripts/seedProducts.js
           node scripts/seedPromocodes.js
+          node scripts/seedSettings.js
 
       - name: Create admin
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'create-admin'

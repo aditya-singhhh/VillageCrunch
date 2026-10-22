@@ -75,7 +75,13 @@ const Checkout = () => {
       });
     } catch (_) { /* ignore */ }
   }, [cartItems]); // eslint-disable-line react-hooks/exhaustive-deps
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, loading: authLoading } = useAuth();
+
+  // Orders belong to an account: send visitors who aren't logged in to log in first,
+  // instead of letting them fill the whole form and fail at the end.
+  useEffect(() => {
+    if (!authLoading && !user) navigate('/login?redirect=/checkout', { replace: true });
+  }, [authLoading, user]);
 
   // Get promocode data from navigation state (from Cart page)
   const [appliedPromocode, setAppliedPromocode] = useState(location.state?.appliedPromocode || null);
@@ -130,7 +136,8 @@ const Checkout = () => {
         // Use fallback values if settings fetch fails
         setSettings({
           pricing: {
-            taxRate: 18,
+            taxRate: 5,
+            pricesIncludeTax: true,
             shippingCharges: {
               standard: {
                 rate: 50,
@@ -225,9 +232,11 @@ const Checkout = () => {
      settings?.pricing?.shippingCharges?.standard?.rate ?? 50);
   
   const tax = orderTotals?.tax?.amount ?? 
-    (subtotal * (settings?.pricing?.taxRate ?? 18) / 100);
+    (settings?.pricing?.pricesIncludeTax === false ? (subtotal * (settings?.pricing?.taxRate ?? 5) / 100) : (subtotal * (settings?.pricing?.taxRate ?? 5) / (100 + (settings?.pricing?.taxRate ?? 5))));
   
   const promocodeDiscount = orderTotals?.discount?.amount ?? 0;
+  const taxIncluded = (orderTotals?.tax?.inclusive ?? settings?.pricing?.pricesIncludeTax) !== false;
+  const taxAdded = taxIncluded ? 0 : tax;
   
   // Add COD charges if payment method is COD
   const codCharges = paymentMethod === 'cod' ? (settings?.pricing?.codCharges ?? 0) : 0;
@@ -235,7 +244,7 @@ const Checkout = () => {
   // Server totals exclude COD unless requested; add the COD charge for the chosen method
   const total = orderTotals
     ? orderTotals.total - (orderTotals.codCharge || 0) + codCharges
-    : subtotal + shipping + tax + codCharges - promocodeDiscount;
+    : subtotal + shipping + taxAdded + codCharges - promocodeDiscount;
 
   const handleChange = (e) => {
     setShippingInfo({
@@ -393,8 +402,8 @@ const Checkout = () => {
         currency: paymentOrderData.currency,
         order_id: paymentOrderData.orderId,
         name: 'VillageCrunch',
-        description: 'Premium Indian Dry Fruits & Snacks',
-        image: 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=200&h=200&fit=crop',
+        description: 'Thekua, makhana & sattu from Bihar',
+        image: `${window.location.origin}/favicon.svg`,
         
         // Enable all payment methods
         config: {
@@ -659,7 +668,7 @@ const Checkout = () => {
         <div className="flex justify-between"><dt className="text-ink-soft">Subtotal</dt><dd className="tabular-nums">{formatINR(subtotal)}</dd></div>
         <div className="flex justify-between"><dt className="text-ink-soft">Shipping</dt><dd className={`tabular-nums ${shipping === 0 ? 'text-leaf font-medium' : ''}`}>{shipping === 0 ? 'Free' : formatINR(shipping)}</dd></div>
         {taxRate > 0 && (
-          <div className="flex justify-between"><dt className="text-ink-soft">GST ({taxRate}%)</dt><dd className="tabular-nums">{formatINR(tax)}</dd></div>
+          <div className={`flex justify-between ${taxIncluded ? 'text-sm text-ink-mute' : ''}`}><dt className={taxIncluded ? '' : 'text-ink-soft'}>{taxIncluded ? 'Includes' : ''} GST ({taxRate}%)</dt><dd className="tabular-nums">{formatINR(tax)}</dd></div>
         )}
         {paymentMethod === 'cod' && codCharges > 0 && (
           <div className="flex justify-between"><dt className="text-ink-soft">COD charges</dt><dd className="tabular-nums">{formatINR(codCharges)}</dd></div>

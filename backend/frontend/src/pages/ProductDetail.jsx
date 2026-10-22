@@ -566,8 +566,8 @@ const ProductDetail = () => {
               </div>
               <p className="text-sm text-ink-mute mt-1">
                 {perUnit && <span>{perUnit}</span>}
-                {perUnit && taxRate > 0 && <span> &middot; </span>}
-                {taxRate > 0 && <span>+ {taxRate}% GST at checkout</span>}
+                {perUnit && <span> &middot; </span>}
+                <span>{settings?.pricing?.pricesIncludeTax === false && taxRate > 0 ? `+ ${taxRate}% GST at checkout` : 'Inclusive of all taxes'}</span>
               </p>
             </div>
 

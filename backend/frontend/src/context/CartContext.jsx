@@ -7,7 +7,8 @@ import {
   updateCartItem as apiUpdateCartItem, 
   removeFromCart as apiRemoveFromCart, 
   clearCart as apiClearCart,
-  syncCart as apiSyncCart 
+  syncCart as apiSyncCart,
+  getProduct as apiGetProduct
 } from '../utils/api';
 import { trackAddToCart } from '../utils/analytics';
 
@@ -15,6 +16,31 @@ const CartContext = createContext();
 
 const isRestrictedProduct = (product) => product?.category?.toLowerCase() === 'masala';
 const filterRestrictedCartItems = (items = []) => items.filter((item) => !isRestrictedProduct(item));
+// Carts keep a copy of each product from when it was added. Refresh name, price and
+// photo from the live catalogue, and drop products that no longer exist, so the cart
+// never shows a different price from what checkout charges.
+const LIVE_FIELDS = ['name', 'price', 'originalPrice', 'image', 'images', 'weight', 'category', 'stock', 'inStock'];
+const refreshFromCatalogue = async (items = []) => {
+  const ids = [...new Set(items.map((i) => i._id || i.product?._id || i.product).filter(Boolean).map(String))];
+  if (!ids.length) return items;
+  const live = {};
+  await Promise.all(ids.map(async (id) => {
+    try { live[id] = await apiGetProduct(id); } catch (e) { live[id] = e?.response?.status === 404 ? null : undefined; }
+  }));
+  return items
+    .filter((i) => {
+      const p = live[String(i._id || i.product?._id || i.product)];
+      return p !== null && !(p && p.isActive === false);
+    })
+    .map((i) => {
+      const p = live[String(i._id || i.product?._id || i.product)];
+      if (!p) return i;
+      const fresh = {};
+      for (const k of LIVE_FIELDS) if (p[k] !== undefined) fresh[k] = p[k];
+      return { ...i, ...fresh };
+    });
+};
+
 const MASALA_BLOCKED_MESSAGE = 'Masala items are coming soon and cannot be purchased yet';
 
 export const useCart = () => {
@@ -41,7 +67,9 @@ export const CartProvider = ({ children }) => {
       try {
         setLoading(true);
         const cartData = await getCart();
-        setCartItems(filterRestrictedCartItems(cartData.items || []));
+        const items = filterRestrictedCartItems(cartData.items || []);
+        setCartItems(items);
+        refreshFromCatalogue(items).then(setCartItems).catch(() => {});
       } catch (error) {
         console.error('Error loading cart:', error);
         // Fall back to local storage if API fails
@@ -61,6 +89,7 @@ export const CartProvider = ({ children }) => {
         const filteredItems = filterRestrictedCartItems(JSON.parse(savedCart));
         setCartItems(filteredItems);
         localStorage.setItem('cart', JSON.stringify(filteredItems));
+        refreshFromCatalogue(filteredItems).then(setCartItems).catch(() => {});
       }
     }
   };
@@ -113,6 +142,11 @@ export const CartProvider = ({ children }) => {
     } else {
       // User not logged in - use local state with cartItemId
       setCartItems(prev => {
+        const existing = prev.find((i) => i._id === product._id);
+        if (existing) {
+          toast.success('Added to cart', { duration: 1500 });
+          return prev.map((i) => (i === existing ? { ...i, quantity: (i.quantity || 1) + quantity } : i));
+        }
         const timestamp = new Date().getTime();
         const newItem = {
           ...product,

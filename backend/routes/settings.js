@@ -21,6 +21,7 @@ router.get('/', async (req, res) => {
           currency: settings.pricing.currency,
           currencySymbol: settings.pricing.currencySymbol,
           taxRate: settings.pricing.taxRate,
+          pricesIncludeTax: settings.pricing.pricesIncludeTax !== false,
           shippingCharges: settings.pricing.shippingCharges,
           codCharges: settings.pricing.codCharges,
         },
@@ -143,6 +144,7 @@ router.post('/calculate-order-total', async (req, res) => {
       tax: {
         rate: pricing.taxRate,
         amount: pricing.tax,
+        inclusive: pricing.taxInclusive,
       },
       codCharge: pricing.codCharge,
       discount: {
