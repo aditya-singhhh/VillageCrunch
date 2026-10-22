@@ -85,7 +85,7 @@ const Footer = () => (
         </Section>
       </div>
 
-      <div className="mt-5 pt-4 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-[13px] text-[#D9C7AE]">
+      <div className="mt-5 pt-4 pb-16 md:pb-0 md:pr-20 border-t border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-[13px] text-[#D9C7AE]">
         <p>&copy; {new Date().getFullYear()} VillageCrunch. All rights reserved.</p>
         <p>UPI · Cards · COD</p>
       </div>

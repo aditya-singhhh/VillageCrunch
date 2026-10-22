@@ -9,7 +9,7 @@ const { sendSMS } = require('../config/sms');
 
 // Generate JWT
 const generateToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
+  jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '180d' });
 
 // Fields that must never be sent to clients
 const SENSITIVE_FIELDS = '-password -resetPasswordToken -resetPasswordExpire -resetPasswordOTP -resetPasswordOTPExpire -resetPasswordOTPAttempts';
