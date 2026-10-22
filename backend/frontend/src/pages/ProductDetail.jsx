@@ -13,6 +13,7 @@ import ProductCard from '../components/ProductCard';
 import useStoreSettings from '../hooks/useStoreSettings';
 import { formatINR, formatCategory, discountPercent, unitPrice, averageRating } from '../utils/format';
 import { imgSrc, imgProps } from '../utils/img';
+import { trackViewItem } from '../utils/analytics';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -20,6 +21,11 @@ const ProductDetail = () => {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const [product, setProduct] = useState(null);
+  // Product page view, for Meta / Google ad optimisation
+  useEffect(() => {
+    if (!product?._id) return;
+    try { trackViewItem({ productId: product._id, name: product.name, category: product.category, price: product.price }); } catch (_) { /* ignore */ }
+  }, [product?._id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);

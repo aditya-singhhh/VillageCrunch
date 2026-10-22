@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -7,6 +7,7 @@ import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-reac
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
 import { imgSrc, imgProps } from '../utils/img';
+import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
 
 // Utility function to wait for Razorpay to load
 const waitForRazorpay = () => {
@@ -62,6 +63,18 @@ const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartItems, getCartTotal, clearCart } = useCart();
+  // Tell Meta / Google once that checkout started (for ad optimisation)
+  const checkoutTracked = useRef(false);
+  useEffect(() => {
+    if (checkoutTracked.current || !cartItems?.length) return;
+    checkoutTracked.current = true;
+    try {
+      trackBeginCheckout({
+        value: getCartTotal(),
+        items: cartItems.map((i) => ({ productId: i._id, name: i.name, category: i.category, quantity: i.quantity, price: i.price })),
+      });
+    } catch (_) { /* ignore */ }
+  }, [cartItems]); // eslint-disable-line react-hooks/exhaustive-deps
   const { user, updateUser } = useAuth();
 
   // Get promocode data from navigation state (from Cart page)
@@ -328,6 +341,14 @@ const Checkout = () => {
       try {
         const order = await createOrder(orderData);
 
+        try {
+          trackPurchase({
+            orderId: order._id,
+            value: Number(order.totalPrice) || getCartTotal(),
+            items: cartItems.map((i) => ({ productId: i._id, name: i.name, category: i.category, quantity: i.quantity, price: i.price })),
+          });
+        } catch (_) { /* tracking must never block an order */ }
+
         // Clear cart and redirect
         clearCart();
         toast.success('Order placed successfully! You can pay at delivery. 🎉');
@@ -509,6 +530,14 @@ const Checkout = () => {
             };
 
             const order = await createOrder(orderData);
+
+            try {
+              trackPurchase({
+                orderId: order._id,
+                value: Number(order.totalPrice) || getCartTotal(),
+                items: cartItems.map((i) => ({ productId: i._id, name: i.name, category: i.category, quantity: i.quantity, price: i.price })),
+              });
+            } catch (_) { /* tracking must never block an order */ }
 
             // Clear cart and redirect
             clearCart();

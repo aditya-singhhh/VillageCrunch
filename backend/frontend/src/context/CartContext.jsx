@@ -9,6 +9,7 @@ import {
   clearCart as apiClearCart,
   syncCart as apiSyncCart 
 } from '../utils/api';
+import { trackAddToCart } from '../utils/analytics';
 
 const CartContext = createContext();
 
@@ -92,6 +93,9 @@ export const CartProvider = ({ children }) => {
       toast.error(MASALA_BLOCKED_MESSAGE);
       return;
     }
+    try {
+      trackAddToCart({ productId: product._id, name: product.name, category: product.category, quantity, price: product.price });
+    } catch (_) { /* tracking must never block the cart */ }
 
     if (user) {
       // User is logged in - use API
