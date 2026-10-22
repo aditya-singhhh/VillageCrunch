@@ -68,6 +68,21 @@ export const AuthProvider = ({ children }) => {
     return { user: data, localCart };
   };
 
+  // Phone OTP: idToken comes from Firebase after the SMS code is confirmed.
+  // Returns { needName: true } for a new number until a name is supplied.
+  const loginWithPhone = async (idToken, name) => {
+    const localCartString = localStorage.getItem('cart');
+    const localCart = localCartString ? JSON.parse(localCartString) : [];
+    const res = await axios.post('/api/auth/phone', { idToken, name });
+    if (res.data.needName) return { needName: true };
+    const data = res.data;
+    setUser(data);
+    localStorage.setItem('user', JSON.stringify(data));
+    localStorage.setItem('token', data.token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+    return { user: data, localCart, isNew: res.status === 201 };
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -81,7 +96,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, login, loginWithPhone, register, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

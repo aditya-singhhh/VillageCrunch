@@ -27,6 +27,7 @@ const createTransporter = () => {
 
 // Send password reset email
 const sendPasswordResetEmail = async (email, resetToken, userName) => {
+  if (!email || /@phone\.villagecrunch\.in$/i.test(email)) return { success: false, skipped: true };
   try {
     const transporter = createTransporter();
 
@@ -215,6 +216,8 @@ const sendPasswordResetEmail = async (email, resetToken, userName) => {
 
 // Send order confirmation email (bonus feature)
 const sendOrderConfirmationEmail = async (email, orderData) => {
+  // Customers who signed up with phone OTP have a placeholder address; nothing to send
+  if (!email || /@phone\.villagecrunch\.in$/i.test(email)) return { success: false, skipped: true };
   try {
     const transporter = createTransporter();
 
