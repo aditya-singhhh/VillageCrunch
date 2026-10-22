@@ -21,7 +21,17 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     
-    if (storedUser && token) {
+    // A login lasts 180 days. If the saved one has expired, start logged out (instead of
+    // looking logged in and then failing at checkout).
+    let expired = false;
+    try {
+      const { exp } = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      expired = !!exp && exp * 1000 < Date.now();
+    } catch (_) { expired = !token; }
+    if (storedUser && token && expired) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+    } else if (storedUser && token) {
       setUser(JSON.parse(storedUser));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }

@@ -77,11 +77,7 @@ const Login = () => {
           autoComplete="current-password"
         />
 
-        <div className="flex items-center justify-between gap-3">
-          <label className="flex items-center gap-3 min-h-[44px] cursor-pointer">
-            <input type="checkbox" className="w-6 h-6 rounded border-[#CDBBA4]" />
-            <span className="text-ink whitespace-nowrap">Remember me</span>
-          </label>
+        <div className="flex items-center justify-end">
           <Link to="/forgot-password" className="btn-ghost h-11 whitespace-nowrap px-0">Forgot password?</Link>
         </div>
 
