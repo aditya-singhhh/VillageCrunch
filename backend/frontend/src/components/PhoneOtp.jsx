@@ -26,6 +26,7 @@ const friendly = (err) => {
   if (code.includes('code-expired')) return 'The code has expired. Please send a new one.';
   if (code.includes('too-many-requests')) return 'Too many tries. Please wait a few minutes and try again.';
   if (code.includes('invalid-phone-number')) return 'Please enter a valid 10-digit mobile number.';
+  if (code.includes('operation-not-allowed')) return 'OTP is temporarily unavailable. Please log in with email & password for now.';
   if (code.includes('quota-exceeded')) return 'We could not send an SMS right now. Please use password login for now.';
   return err?.response?.data?.message || 'Something went wrong. Please try again.';
 };
