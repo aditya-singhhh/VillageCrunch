@@ -281,12 +281,12 @@ const AIChatbot = () => {
       ]);
       return '💰 **Best Prices!**\n\n' +
         '🌰 Makhana: ₹199-299\n' +
-        '🍪 Thekua: ₹199-249\n' +
-        '🥜 Dry Fruits: ₹249+\n\n' +
+        '🍪 Thekua: ₹219 (200 g) · ₹399 (400 g) · ₹1,099 (pack of 3)\n' +
+        '🎁 Diwali gift boxes: ₹899-999\n\n' +
         '🎉 **Offers:**\n' +
         '✅ Free shipping over ₹500\n' +
-        '✅ 10% off first order (FIRST10)\n' +
-        '✅ Bulk discounts available';
+        '✅ First order: free delivery on ₹499+ (code FIRST)\n' +
+        '✅ Corporate gifting rates for 25+ boxes';
     }
 
     // Delivery - Quick answer

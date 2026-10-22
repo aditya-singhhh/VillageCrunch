@@ -1,8 +1,8 @@
 /**
- * Create the starter promocodes if they don't exist yet. Safe to re-run.
+ * Create the starter promocodes, or bring an existing one's terms up to date. Safe to re-run.
  * Runs with the "seed-products" workflow action.
  *
- *   FIRST  free delivery on an order of ₹399 or more, once per customer, until 16 Nov 2026
+ *   FIRST  free delivery on an order of ₹499 or more, once per customer, until 16 Nov 2026
  */
 const db = require('../db');
 const Promocode = require('../models/Promocode');
@@ -12,11 +12,11 @@ const CODES = [
   {
     code: 'FIRST',
     name: 'First order: free delivery',
-    description: 'Free delivery on orders of ₹399 or more. Once per customer.',
+    description: 'Free delivery on orders of ₹499 or more. Once per customer.',
     type: 'freeShipping',
     value: 0,
     applicableOn: 'all',
-    minOrderValue: 399,
+    minOrderValue: 499,
     userUsageLimit: 1,
     isActive: true,
     startDate: new Date('2026-10-22T00:00:00+05:30'),
@@ -30,8 +30,12 @@ const CODES = [
     const owner = (await User.findOne({ role: 'admin' })) || (await User.findOne({}));
     if (!owner) throw new Error('No user exists yet to own the promocodes; register an account first.');
     for (const c of CODES) {
-      if (await Promocode.findOne({ code: c.code })) {
-        console.log(`Promocode ${c.code} already exists, left unchanged.`);
+      const existing = await Promocode.findOne({ code: c.code });
+      if (existing) {
+        // keep usage counts; refresh the terms
+        for (const k of ['name', 'description', 'minOrderValue', 'userUsageLimit', 'endDate']) existing[k] = c[k];
+        await existing.save();
+        console.log(`::notice::Promocode ${c.code} updated (min ₹${c.minOrderValue}).`);
         continue;
       }
       await Promocode.create({ ...c, createdBy: owner._id });
