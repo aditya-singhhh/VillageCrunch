@@ -716,8 +716,9 @@
     "featured": true,
     "isActive": true,
     "rating": 4.8,
-    "image": "/packaging/gift-heritage.jpg",
+    "image": "/packaging/gift-heritage-box.jpg",
     "images": [
+      "/packaging/gift-heritage-box.jpg",
       "/packaging/gift-heritage.jpg",
       "/packaging/gift-lid-heritage.jpg",
       "/packaging/real-thekua-basket.jpg",
@@ -760,8 +761,9 @@
     "featured": true,
     "isActive": true,
     "rating": 4.8,
-    "image": "/packaging/gift-healthy.jpg",
+    "image": "/packaging/gift-healthy-box.jpg",
     "images": [
+      "/packaging/gift-healthy-box.jpg",
       "/packaging/gift-healthy.jpg",
       "/packaging/gift-lid-healthy.jpg",
       "/packaging/makhana-range.jpg",
