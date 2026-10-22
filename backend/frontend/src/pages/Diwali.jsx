@@ -76,7 +76,7 @@ export default function Diwali() {
             </div>
             <p className="mt-5 inline-flex items-center gap-2 text-sm text-[#E9C77F]"><Truck className="w-4 h-4" aria-hidden="true" /> Diwali se pehle delivery ke liye {LAST_ORDER} tak order kijiye</p>
           </div>
-          <img src={imgSrc('/packaging/gift-heritage.jpg', 1200)} alt="Bihar Heritage Gift Box with thekua, makhana, a clay diya and a card"
+          <img src={imgSrc('/packaging/gift-heritage-box.jpg', 1200)} alt="Bihar Heritage Gift Box, a maroon box with Madhubani-style art tied with red-and-yellow mauli thread"
             width="1200" height="1200" className="w-full rounded-lg shadow-raised" />
         </div>
       </section>
