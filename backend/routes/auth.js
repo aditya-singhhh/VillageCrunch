@@ -232,8 +232,16 @@ router.put('/profile', protect, async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     user.name = req.body.name || user.name;
-    user.email = req.body.email ? String(req.body.email).toLowerCase() : user.email;
-    user.phone = req.body.phone || user.phone;
+    if (req.body.email && String(req.body.email).toLowerCase() !== user.email) {
+      const email = String(req.body.email).toLowerCase().trim();
+      if (!isValidEmail(email)) return res.status(400).json({ message: 'Please enter a valid email' });
+      const taken = await User.findOne({ email });
+      if (taken && String(taken._id) !== String(user._id)) {
+        return res.status(400).json({ message: 'That email is already used by another account' });
+      }
+      user.email = email;
+    }
+    // The mobile number is the login (OTP), so it can't be changed here without verification.
     
     // Handle addresses with phone number validation
     if (req.body.addresses) {
