@@ -8,6 +8,7 @@ import { claimGhar, getGharStatus, getMyGhar } from '../utils/api';
 import { imgSrc } from '../utils/img';
 import '@fontsource/kalam/400.css';
 import '@fontsource/kalam/700.css';
+import { fbPixel } from '../utils/analytics';
 
 /* ------------------------------------------------------------------ */
 /* Chhath "Ghar" campaign — villagecrunch.in/ghar                       */
@@ -139,6 +140,7 @@ function BoxForm({ status, onDone }) {
         nominatedBy: params.get('from') || undefined,
         address: { street: f.street, city: f.city, state: f.state, pincode: f.pincode },
       });
+      try { fbPixel('Lead', { content_name: 'Ghar Chhath box' }); } catch (_) { /* ignore */ }
       onDone(res);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Kuch gadbad hui. Dobara koshish kijiye.');
