@@ -265,7 +265,7 @@ test('Settings is a single fixed document', async () => {
   const b = await Settings.getSettings();
   assert.equal(a._id, 'main');
   assert.equal(String(a._id), String(b._id));
-  assert.equal(a.pricing.taxRate, 18);
+  assert.equal(a.pricing.taxRate, 5);
   a.pricing.taxRate = 12;
   await a.save();
   assert.equal((await Settings.getSettings()).pricing.taxRate, 12);

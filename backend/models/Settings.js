@@ -17,7 +17,12 @@ const settingsSchema = new mongoose.Schema({
     },
     taxRate: {
       type: Number,
-      default: 18,
+      default: 5,
+    },
+    // Product prices are MRP, inclusive of GST; tax is shown but not added at checkout
+    pricesIncludeTax: {
+      type: Boolean,
+      default: true,
     },
     shippingCharges: {
       standard: {

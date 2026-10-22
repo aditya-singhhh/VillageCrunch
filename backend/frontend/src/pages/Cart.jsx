@@ -51,7 +51,8 @@ const Cart = () => {
         // Use fallback values if settings fetch fails
         setSettings({
           pricing: {
-            taxRate: 18,
+            taxRate: 5,
+            pricesIncludeTax: true,
             shippingCharges: {
               standard: {
                 rate: 50,
@@ -75,11 +76,13 @@ const Cart = () => {
      settings?.pricing?.shippingCharges?.standard?.rate ?? 50);
   
   const tax = orderTotals?.tax?.amount ?? 
-    (subtotal * (settings?.pricing?.taxRate ?? 18) / 100);
+    (settings?.pricing?.pricesIncludeTax === false ? (subtotal * (settings?.pricing?.taxRate ?? 5) / 100) : (subtotal * (settings?.pricing?.taxRate ?? 5) / (100 + (settings?.pricing?.taxRate ?? 5))));
   
   const promocodeDiscount = orderTotals?.discount?.amount ?? 0;
+  const taxIncluded = (orderTotals?.tax?.inclusive ?? settings?.pricing?.pricesIncludeTax) !== false;
+  const taxAdded = taxIncluded ? 0 : tax;
   
-  const total = orderTotals?.total ?? (subtotal + shipping + tax - promocodeDiscount);
+  const total = orderTotals?.total ?? (subtotal + shipping + taxAdded - promocodeDiscount);
 
   // Apply promocode
   const applyPromocode = async () => {
@@ -399,7 +402,7 @@ const Cart = () => {
                 )}
                 <div className="flex justify-between"><dt className="text-ink-soft">Shipping</dt><dd className={`tabular-nums ${shipping === 0 ? 'text-leaf font-medium' : ''}`}>{shipping === 0 ? 'Free' : formatINR(shipping)}</dd></div>
                 {settings?.pricing?.taxRate > 0 && (
-                  <div className="flex justify-between"><dt className="text-ink-soft">GST ({settings.pricing.taxRate}%)</dt><dd className="tabular-nums">{formatINR(tax)}</dd></div>
+                  <div className={`flex justify-between ${taxIncluded ? 'text-sm text-ink-mute' : ''}`}><dt className={taxIncluded ? '' : 'text-ink-soft'}>{taxIncluded ? 'Includes' : ''} GST ({settings.pricing.taxRate}%)</dt><dd className="tabular-nums">{formatINR(tax)}</dd></div>
                 )}
               </dl>
               <div className="border-t border-line mt-4 pt-4 flex justify-between items-baseline">

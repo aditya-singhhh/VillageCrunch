@@ -2,7 +2,7 @@
  * Create the starter promocodes, or bring an existing one's terms up to date. Safe to re-run.
  * Runs with the "seed-products" workflow action.
  *
- *   FIRST  free delivery on an order of ₹499 or more, once per customer, until 16 Nov 2026
+ *   FIRST  free delivery on an order of ₹399 or more (site-wide free delivery starts at ₹500), once per customer, until 16 Nov 2026
  */
 const db = require('../db');
 const Promocode = require('../models/Promocode');
@@ -12,11 +12,11 @@ const CODES = [
   {
     code: 'FIRST',
     name: 'First order: free delivery',
-    description: 'Free delivery on orders of ₹499 or more. Once per customer.',
+    description: 'Free delivery on your first order from ₹399. Once per customer.',
     type: 'freeShipping',
     value: 0,
     applicableOn: 'all',
-    minOrderValue: 499,
+    minOrderValue: 399,
     userUsageLimit: 1,
     isActive: true,
     startDate: new Date('2026-10-22T00:00:00+05:30'),

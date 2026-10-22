@@ -129,11 +129,16 @@ async function priceCart({
     if (promo.type === 'freeShipping') shipping = 0;
   }
 
-  // Tax is charged on subtotal + shipping (matches Settings / checkout display)
-  const tax = round2(((subtotal + shipping) * (settings.pricing.taxRate || 0)) / 100);
+  // Prices on the site are MRP, inclusive of GST (Legal Metrology rules). By default the
+  // tax is the GST already contained in the amount; it is shown, never added on top.
+  // Set pricing.pricesIncludeTax = false to go back to adding tax at checkout.
+  const rate = Number(settings.pricing.taxRate) || 0;
+  const inclusive = settings.pricing.pricesIncludeTax !== false;
+  const taxable = subtotal + shipping;
+  const tax = inclusive ? round2((taxable * rate) / (100 + rate)) : round2((taxable * rate) / 100);
   const codCharge = paymentMethod === 'cod' ? Number(settings.pricing.codCharges) || 0 : 0;
 
-  const gross = subtotal + shipping + tax + codCharge;
+  const gross = subtotal + shipping + (inclusive ? 0 : tax) + codCharge;
   discount = Math.min(round2(discount), round2(gross));
   const total = round2(Math.max(0, gross - discount));
 
@@ -144,6 +149,7 @@ async function priceCart({
     shippingConfig,
     tax,
     taxRate: settings.pricing.taxRate,
+    taxInclusive: inclusive,
     codCharge,
     discount,
     promo,
