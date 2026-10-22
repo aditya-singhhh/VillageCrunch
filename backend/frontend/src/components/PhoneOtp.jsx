@@ -56,31 +56,57 @@ const PhoneOtp = ({ onDone, cta = 'Continue' }) => {
 
   useEffect(() => () => { try { verifier.current?.clear(); } catch (_) { /* ignore */ } }, []);
 
+  // Warm up while the customer types their number: load Firebase and the invisible
+  // bot check now, so tapping "Send OTP" only has to send the SMS.
+  const warming = useRef(null);
+  const warm = () => {
+    if (!warming.current) {
+      warming.current = (async () => {
+        const fb = await getFirebaseAuth();
+        if (!verifier.current) {
+          verifier.current = new fb.RecaptchaVerifier(fb.auth, 'otp-recaptcha', { size: 'invisible' });
+          await verifier.current.render();
+        }
+        return fb;
+      })().catch((e) => { warming.current = null; verifier.current = null; throw e; });
+    }
+    return warming.current;
+  };
+  useEffect(() => { warm().catch(() => {}); }, []);
+
+  const [sending, setSending] = useState(false);
+  const sendPromise = useRef(null);
+
+  // Opens the code screen straight away; the SMS goes out in the background.
   const sendCode = async () => {
     const ten = phone.replace(/\D/g, '').slice(-10);
     if (!/^[6-9]\d{9}$/.test(ten)) {
       toast.error('Please enter a valid 10-digit mobile number');
       return;
     }
-    setBusy(true);
-    try {
-      const fb = await getFirebaseAuth();
-      if (!verifier.current) {
-        verifier.current = new fb.RecaptchaVerifier(fb.auth, 'otp-recaptcha', { size: 'invisible' });
-      }
+    setStep('code');
+    setCode('');
+    setSending(true);
+    setResendIn(30);
+    setTimeout(() => codeInput.current?.focus(), 50);
+    const p = (async () => {
+      const fb = await warm();
       confirmation.current = await fb.signInWithPhoneNumber(fb.auth, `+91${ten}`, verifier.current);
-      setStep('code');
-      setCode('');
-      setResendIn(30);
-      toast.success(`Code sent to +91 ${ten}`);
-      setTimeout(() => codeInput.current?.focus(), 50);
+    })();
+    sendPromise.current = p;
+    try {
+      await p;
     } catch (err) {
       console.error('OTP send failed', err);
       try { verifier.current?.clear(); } catch (_) { /* ignore */ }
       verifier.current = null;
+      warming.current = null;
+      setStep('phone');
+      setResendIn(0);
       toast.error(friendly(err));
+      warm().catch(() => {});
     } finally {
-      setBusy(false);
+      setSending(false);
     }
   };
 
@@ -103,6 +129,8 @@ const PhoneOtp = ({ onDone, cta = 'Continue' }) => {
     }
     setBusy(true);
     try {
+      if (sendPromise.current) await sendPromise.current; // code typed before the send finished
+      if (!confirmation.current) return;
       const cred = await confirmation.current.confirm(code);
       idToken.current = await cred.user.getIdToken();
       await finish();
@@ -112,6 +140,12 @@ const PhoneOtp = ({ onDone, cta = 'Continue' }) => {
       setBusy(false);
     }
   };
+
+  // Submit as soon as all 6 digits are in (typed or autofilled from the SMS)
+  useEffect(() => {
+    if (step === 'code' && code.length === 6 && !busy) verifyCode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, step]);
 
   const saveName = async (e) => {
     e.preventDefault();
@@ -153,7 +187,7 @@ const PhoneOtp = ({ onDone, cta = 'Continue' }) => {
             <p className="field-help">We'll send you a 6-digit code by SMS. No password needed.</p>
           </div>
           <button type="submit" disabled={busy} aria-busy={busy} className="btn-primary w-full">
-            {busy ? 'Sending code...' : 'Send OTP'}
+            Send OTP
           </button>
         </form>
       )}
@@ -161,7 +195,9 @@ const PhoneOtp = ({ onDone, cta = 'Continue' }) => {
       {step === 'code' && (
         <form onSubmit={verifyCode} className="space-y-4">
           <div>
-            <label htmlFor="otp-code" className="field-label">Enter the code sent to +91 {phone}</label>
+            <label htmlFor="otp-code" className="field-label">
+              {sending ? `Sending code to +91 ${phone}...` : `Enter the code sent to +91 ${phone}`}
+            </label>
             <input
               id="otp-code"
               ref={codeInput}
@@ -177,13 +213,13 @@ const PhoneOtp = ({ onDone, cta = 'Continue' }) => {
             />
           </div>
           <button type="submit" disabled={busy} aria-busy={busy} className="btn-primary w-full">
-            {busy ? 'Checking...' : cta}
+            {busy ? (sending ? 'Waiting for SMS...' : 'Checking...') : cta}
           </button>
           <div className="flex items-center justify-between text-sm">
             <button type="button" className="btn-ghost h-11 px-0" onClick={() => { setStep('phone'); setCode(''); }}>
               Change number
             </button>
-            <button type="button" className="btn-ghost h-11 px-0" disabled={resendIn > 0 || busy} onClick={sendCode}>
+            <button type="button" className="btn-ghost h-11 px-0" disabled={resendIn > 0 || busy || sending} onClick={sendCode}>
               {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend code'}
             </button>
           </div>
