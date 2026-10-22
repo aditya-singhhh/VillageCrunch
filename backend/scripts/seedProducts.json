@@ -719,10 +719,10 @@
     "image": "/packaging/gift-heritage-box.jpg",
     "images": [
       "/packaging/gift-heritage-box.jpg",
-      "/packaging/gift-heritage.jpg",
-      "/packaging/gift-lid-heritage.jpg",
       "/packaging/real-thekua-basket.jpg",
-      "/packaging/makhana-range.jpg"
+      "/packaging/pack-400.jpg",
+      "/packaging/makhana-range.jpg",
+      "/packaging/real-thekua-mould.jpg"
     ],
     "description": "A keepsake rigid box with original Madhubani-style art from Bihar. Inside: Thekua 400 g (jaggery & desi ghee, no maida), Phool Makhana 250 g, Roasted Makhana Himalayan Salt & Pepper 75 g, a clay diya and a story card. Add your own message at checkout. Contains wheat and milk. No preservatives.",
     "ingredients": [
@@ -764,9 +764,8 @@
     "image": "/packaging/gift-healthy-box.jpg",
     "images": [
       "/packaging/gift-healthy-box.jpg",
-      "/packaging/gift-healthy.jpg",
-      "/packaging/gift-lid-healthy.jpg",
       "/packaging/makhana-range.jpg",
+      "/packaging/pack-200.jpg",
       "/packaging/real-thekua-basket.jpg"
     ],
     "description": "A lighter Diwali gift, led by makhana. Inside: Phool Makhana 250 g, two Roasted Makhana Himalayan Salt & Pepper 75 g, Thekua 200 g (jaggery & desi ghee, no maida), a clay diya and a story card, in a rigid box with Madhubani-style art. Contains wheat and milk. No preservatives.",
