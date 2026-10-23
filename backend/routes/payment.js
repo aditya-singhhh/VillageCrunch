@@ -24,6 +24,9 @@ const safeEqual = (a, b) => {
 //          from the cart; any amount sent by the client is ignored.
 // @access  Private
 router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (req, res) => {
+  if (!onlinePaymentsEnabled()) {
+    return res.status(503).json({ message: 'Online payment is not available right now. Please choose cash on delivery.', code: 'PAYMENTS_OFF' });
+  }
   try {
     if (!razorpay) {
       return res.status(503).json({
@@ -170,8 +173,15 @@ router.post('/verify', protect, async (req, res) => {
 // @route   GET /api/payment/key
 // @desc    Get Razorpay public key id
 // @access  Public
+const onlinePaymentsEnabled = () => {
+  const id = process.env.RAZORPAY_KEY_ID || '';
+  const secret = process.env.RAZORPAY_KEY_SECRET || '';
+  return /^rzp_(live|test)_/.test(id) && !/placeholder/i.test(id + secret) && secret.length > 8;
+};
+
 router.get('/key', (req, res) => {
-  res.json({ key: process.env.RAZORPAY_KEY_ID });
+  const enabled = onlinePaymentsEnabled();
+  res.json({ key: enabled ? process.env.RAZORPAY_KEY_ID : null, enabled });
 });
 
 module.exports = router;

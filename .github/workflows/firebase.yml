@@ -67,6 +67,9 @@ jobs:
 
       - name: Deploy
         if: github.event_name == 'push' || contains(inputs.action, 'deploy')
+        env:
+          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+          RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
         run: |
           set -o pipefail
           ./scripts/deploy-firebase.sh 2>&1 | tee /tmp/deploy.log || {

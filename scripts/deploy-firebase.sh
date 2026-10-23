@@ -17,7 +17,26 @@ SITE_URL="${SITE_URL:-https://${PROJECT_ID}.web.app}"
 TARGET="${1:-all}"
 cd "$(dirname "$0")/.."
 
+# Razorpay keys live in Secret Manager. When the RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET GitHub
+# secrets are set, push them as new secret versions (only if they changed).
+sync_razorpay_secrets() {
+  [ -n "${RAZORPAY_KEY_ID:-}" ] && [ -n "${RAZORPAY_KEY_SECRET:-}" ] || {
+    echo "::warning title=Online payments off::Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET as GitHub secrets to turn on UPI/card payments. Cash on delivery works meanwhile."
+    return 0
+  }
+  for pair in "vc-razorpay-key-id:RAZORPAY_KEY_ID" "vc-razorpay-key-secret:RAZORPAY_KEY_SECRET"; do
+    name="${pair%%:*}"; var="${pair##*:}"; val="${!var}"
+    cur=$(gcloud secrets versions access latest --secret "$name" --project "$PROJECT_ID" 2>/dev/null || true)
+    if [ "$cur" != "$val" ]; then
+      printf '%s' "$val" | gcloud secrets versions add "$name" --data-file=- --project "$PROJECT_ID" >/dev/null
+      echo "::notice title=Razorpay::updated $name"
+    fi
+  done
+  case "$RAZORPAY_KEY_ID" in rzp_live_*) echo "::notice title=Razorpay::LIVE keys active";; *) echo "::notice title=Razorpay::TEST keys active (no real money)";; esac
+}
+
 deploy_backend() {
+  sync_razorpay_secrets
   echo "==> Deploying Cloud Run service ${SERVICE} (${REGION})"
   gcloud run deploy "$SERVICE" --quiet \
     --project "$PROJECT_ID" --region "$REGION" \

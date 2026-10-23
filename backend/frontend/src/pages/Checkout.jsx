@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses } from '../utils/api';
+import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey } from '../utils/api';
 import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
@@ -107,6 +107,17 @@ const Checkout = () => {
 
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
+  // Online payment shows only when real Razorpay keys are configured on the server
+  const [onlineEnabled, setOnlineEnabled] = useState(true);
+  useEffect(() => {
+    getRazorpayKey()
+      .then((d) => {
+        const on = d?.enabled !== false && !!d?.key;
+        setOnlineEnabled(on);
+        if (!on) setPaymentMethod('cod');
+      })
+      .catch(() => {});
+  }, []);
   
 
 
@@ -831,6 +842,7 @@ const Checkout = () => {
             <section className="panel" aria-labelledby="co-pay">
               <div id="co-pay">{sectionHead(3, 'Payment')}</div>
               <div className="space-y-3" role="radiogroup" aria-label="Payment method">
+                {onlineEnabled && (
                 <label className={`flex items-start gap-3 p-4 border-[1.5px] rounded-lg cursor-pointer transition-colors min-h-[64px] ${
                   paymentMethod === 'razorpay' ? 'border-action bg-action-tint' : 'border-line hover:border-sand'
                 }`}>
@@ -841,6 +853,7 @@ const Checkout = () => {
                     <span className="block text-sm text-ink-soft">Secure payment by Razorpay</span>
                   </span>
                 </label>
+                )}
                 <label className={`flex items-start gap-3 p-4 border-[1.5px] rounded-lg cursor-pointer transition-colors min-h-[64px] ${
                   paymentMethod === 'cod' ? 'border-action bg-action-tint' : 'border-line hover:border-sand'
                 }`}>
@@ -866,7 +879,7 @@ const Checkout = () => {
 
             {/* Trust row */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-ink-soft px-1">
-              <span className="inline-flex items-center gap-1.5 min-h-[32px]"><Lock className="w-4 h-4 text-leaf" aria-hidden="true" /> Payments secured by Razorpay</span>
+              {onlineEnabled && <span className="inline-flex items-center gap-1.5 min-h-[32px]"><Lock className="w-4 h-4 text-leaf" aria-hidden="true" /> Payments secured by Razorpay</span>}
               <Link to="/returns-policy" className="inline-flex items-center min-h-[32px] hover:text-action underline underline-offset-2">7-day returns</Link>
               <a href="tel:+916203009518" className="inline-flex items-center gap-1.5 min-h-[32px] hover:text-action"><Phone className="w-4 h-4" aria-hidden="true" /> Need help? Call us</a>
             </div>
