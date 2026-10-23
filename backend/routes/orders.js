@@ -38,7 +38,7 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
   // Cash on delivery is offered only while online payment isn't set up
   {
     const id = process.env.RAZORPAY_KEY_ID || '';
-    const online = /^rzp_(live|test)_/.test(id) && !/placeholder/i.test(id + (process.env.RAZORPAY_KEY_SECRET || ''));
+    const online = process.env.ONLINE_PAYMENTS === 'on' && (/^rzp_live_/.test(id) || (process.env.ALLOW_TEST_PAYMENTS === 'true' && /^rzp_test_/.test(id))) && !/placeholder/i.test(id + (process.env.RAZORPAY_KEY_SECRET || ''));
     const method = req.body?.paymentInfo?.method;
     if (online && method === 'cod' && process.env.NODE_ENV !== 'test') {
       return res.status(400).json({ message: 'Cash on delivery is not available. Please pay online.', code: 'COD_OFF' });

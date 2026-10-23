@@ -30,7 +30,7 @@ deploy_backend() {
     --cpu 1 --memory 512Mi --timeout 60 \
     --add-volume "name=uploads,type=cloud-storage,bucket=${BUCKET}" \
     --add-volume-mount "volume=uploads,mount-path=/data/uploads" \
-    --set-env-vars "NODE_ENV=production,FIREBASE_PROJECT_ID=${PROJECT_ID},FRONTEND_URL=${SITE_URL},UPLOAD_DIR=/data/uploads,TRUST_PROXY=${TRUST_PROXY:-2}" \
+    --set-env-vars "NODE_ENV=production,FIREBASE_PROJECT_ID=${PROJECT_ID},FRONTEND_URL=${SITE_URL},UPLOAD_DIR=/data/uploads,TRUST_PROXY=${TRUST_PROXY:-2},ONLINE_PAYMENTS=${ONLINE_PAYMENTS:-off}" \
     --set-secrets "JWT_SECRET=vc-jwt-secret:latest,RAZORPAY_KEY_ID=vc-razorpay-key-id:latest,RAZORPAY_KEY_SECRET=vc-razorpay-key-secret:latest"
 }
 

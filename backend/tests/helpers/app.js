@@ -5,6 +5,8 @@
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-test-secret-test-secret-123';
 process.env.NODE_ENV = 'test';
 process.env.RAZORPAY_KEY_ID = 'rzp_test_key';
+process.env.ONLINE_PAYMENTS = 'on';
+process.env.ALLOW_TEST_PAYMENTS = 'true';
 process.env.RAZORPAY_KEY_SECRET = 'rzp_test_secret';
 
 const http = require('node:http');

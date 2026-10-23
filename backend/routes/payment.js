@@ -176,7 +176,7 @@ router.post('/verify', protect, async (req, res) => {
 const onlinePaymentsEnabled = () => {
   const id = process.env.RAZORPAY_KEY_ID || '';
   const secret = process.env.RAZORPAY_KEY_SECRET || '';
-  return /^rzp_(live|test)_/.test(id) && !/placeholder/i.test(id + secret) && secret.length > 8;
+  return process.env.ONLINE_PAYMENTS === 'on' && (/^rzp_live_/.test(id) || (process.env.ALLOW_TEST_PAYMENTS === 'true' && /^rzp_test_/.test(id))) && !/placeholder/i.test(id + secret) && secret.length > 8;
 };
 
 router.get('/key', (req, res) => {

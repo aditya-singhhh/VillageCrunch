@@ -9,8 +9,13 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const dist = path.join(here, '..', 'dist');
 const SITE = 'https://villagecrunch.in';
 const base = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
-const products = JSON.parse(fs.readFileSync(path.join(here, '..', '..', 'scripts', 'seedProducts.json'), 'utf8'))
-  .filter((p) => p.isActive !== false);
+// The product list lives in backend/scripts. It isn't present in every build (e.g. the
+// server's Docker build only copies the frontend), so skip product pages when it's missing.
+const seedFile = [path.join(here, '..', '..', 'scripts', 'seedProducts.json')].find((f) => fs.existsSync(f));
+const products = seedFile
+  ? JSON.parse(fs.readFileSync(seedFile, 'utf8')).filter((p) => p.isActive !== false)
+  : [];
+if (!seedFile) console.log('prerender-meta: product list not found, writing key pages only');
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const clip = (s, n = 158) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s; };
