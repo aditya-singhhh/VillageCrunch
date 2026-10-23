@@ -65,16 +65,23 @@ jobs:
         if: github.event_name == 'push' || contains(inputs.action, 'deploy')
         run: cd backend && npm ci && npm test
 
-      - name: Deploy
+      - name: Sync Razorpay keys
         if: github.event_name == 'push' || contains(inputs.action, 'deploy')
         env:
           RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
           RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
+        run: ./scripts/sync-razorpay-keys.sh
+
+      - name: Deploy
+        if: github.event_name == 'push' || contains(inputs.action, 'deploy')
         run: |
           set -o pipefail
           ./scripts/deploy-firebase.sh 2>&1 | tee /tmp/deploy.log || {
             # surface the end of the log as an annotation so it is readable without opening the log
-            tail -n 25 /tmp/deploy.log | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > /tmp/tail.txt
+            # also fetch the end of the failed Cloud Build log (container build errors live there)
+            B=$(grep -i 'cloud-build' /tmp/deploy.log | grep -oE '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' | tail -1)
+            [ -n "$B" ] && gcloud builds log "$B" --project "$PROJECT_ID" --region asia-south1 2>/dev/null | grep -v '^\s*$' | tail -n 30 >> /tmp/deploy.log
+            tail -n 40 /tmp/deploy.log | sed 's/::/: /g' | cut -c1-220 | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}' > /tmp/tail.txt
             echo "::error title=Deploy failed::$(cat /tmp/tail.txt)"
             exit 1
           }
