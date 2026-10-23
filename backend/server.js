@@ -165,6 +165,7 @@ app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/seo', require('./routes/seo'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/ghar', require('./routes/ghar'));
+app.use('/api/pincode', require('./routes/pincode'));
 
 // --- Health Check ---
 let healthCache = { at: 0, ok: false };

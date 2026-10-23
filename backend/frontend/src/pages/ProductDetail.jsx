@@ -452,7 +452,7 @@ const ProductDetail = () => {
           </ol>
         </nav>
 
-        <div className="grid md:grid-cols-[55fr_45fr] gap-6 md:gap-10 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] gap-6 md:gap-10 items-start [&>*]:min-w-0">
           {/* Gallery */}
           <div className="md:flex md:gap-4 md:flex-row-reverse">
             <div

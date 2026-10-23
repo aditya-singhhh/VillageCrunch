@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { MapPin, Plus, Package, ChevronRight, LogOut, Pencil } from 'lucide-react';
-import { addAddress, updateAddress, deleteAddress, getUserAddresses, getMyOrders } from '../utils/api';
+import { addAddress, updateAddress, deleteAddress, getUserAddresses, getMyOrders, lookupPincode } from '../utils/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
@@ -69,11 +69,14 @@ const Profile = () => {
   };
 
   const handleAddressChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setAddressData({
-      ...addressData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    const { name, type, checked } = e.target;
+    const value = name === 'pincode' ? e.target.value.replace(/\D/g, '').slice(0, 6) : e.target.value;
+    setAddressData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    if (name === 'pincode' && value.length === 6) {
+      lookupPincode(value).then((r) => {
+        if (r) setAddressData((prev) => (prev.pincode === value ? { ...prev, city: prev.city || r.city, state: prev.state || r.state } : prev));
+      });
+    }
   };
 
   const updateProfile = async () => {

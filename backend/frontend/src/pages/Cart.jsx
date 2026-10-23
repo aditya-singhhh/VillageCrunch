@@ -271,7 +271,7 @@ const Cart = () => {
       <div className="container-page pt-6 md:pt-10">
         <h1 className="page-title mb-5 md:mb-8">Your cart</h1>
 
-        <div className="grid lg:grid-cols-[8fr_4fr] gap-6 lg:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] gap-6 lg:gap-10 items-start [&>*]:min-w-0">
           {/* Items */}
           <div className="space-y-5">
             {shipping > 0 && freeThreshold > 0 && remainingForFree > 0 && (
@@ -342,7 +342,7 @@ const Cart = () => {
                     <CheckCircle className="w-5 h-5 text-leaf flex-shrink-0" aria-hidden="true" />
                     <div className="min-w-0">
                       <p className="font-semibold text-leaf truncate">{appliedPromocode.code}</p>
-                      {appliedPromocode.description && <p className="text-sm text-ink-soft truncate">{appliedPromocode.description}</p>}
+                      {appliedPromocode.description && <p className="text-sm text-ink-soft">{appliedPromocode.description}</p>}
                     </div>
                   </div>
                   <button onClick={removePromocode} className="w-11 h-11 inline-flex items-center justify-center text-ink-soft hover:text-berry flex-shrink-0" aria-label={`Remove promo code ${appliedPromocode.code}`}>
