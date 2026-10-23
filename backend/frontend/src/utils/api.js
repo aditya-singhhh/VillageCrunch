@@ -592,3 +592,13 @@ export const downloadGharCsv = async (type) => (await api.get('/ghar/claims.csv'
 
 // Export the axios instance as default
 export default api;
+
+// PIN code -> { city, state } (India Post directory, via our API). Returns null when unknown.
+export const lookupPincode = async (pin) => {
+  try {
+    const { data } = await axios.get(`${API_URL}/pincode/${pin}`);
+    return data;
+  } catch (_) {
+    return null;
+  }
+};

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey } from '../utils/api';
+import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey, lookupPincode } from '../utils/api';
 import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
@@ -257,11 +257,25 @@ const Checkout = () => {
     ? orderTotals.total - (orderTotals.codCharge || 0) + codCharges
     : subtotal + shipping + taxAdded + codCharges - promocodeDiscount;
 
+  // Typing a 6-digit PIN fills city and state (unless the customer typed their own)
+  const pinFill = useRef({ city: '', state: '' });
   const handleChange = (e) => {
-    setShippingInfo({
-      ...shippingInfo,
-      [e.target.name]: e.target.value,
-    });
+    const { name } = e.target;
+    const value = name === 'pincode' ? e.target.value.replace(/\D/g, '').slice(0, 6) : e.target.value;
+    setShippingInfo((prev) => ({ ...prev, [name]: value }));
+    if (name === 'pincode' && value.length === 6) {
+      lookupPincode(value).then((r) => {
+        if (!r) return;
+        setShippingInfo((prev) => {
+          if (prev.pincode !== value) return prev;
+          const next = { ...prev };
+          if (!prev.city || prev.city === pinFill.current.city) next.city = r.city;
+          if (!prev.state || prev.state === pinFill.current.state) next.state = r.state;
+          pinFill.current = { city: r.city, state: r.state };
+          return next;
+        });
+      });
+    }
   };
 
   const handleAddressSelect = (address, index) => {
@@ -727,7 +741,7 @@ const Checkout = () => {
           <div className="px-4 pb-4">{summaryRows}</div>
         </details>
 
-        <div className="grid lg:grid-cols-[7fr_5fr] gap-6 lg:gap-10 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] [&>*]:min-w-0 gap-6 lg:gap-10 items-start">
           <form id="checkout-form" onSubmit={handlePayment} className="space-y-5 max-w-xl lg:max-w-none">
             {/* 1. Contact */}
             <section className="panel" aria-labelledby="co-contact">
