@@ -854,6 +854,7 @@ const Checkout = () => {
                   </span>
                 </label>
                 )}
+                {!onlineEnabled && (
                 <label className={`flex items-start gap-3 p-4 border-[1.5px] rounded-lg cursor-pointer transition-colors min-h-[64px] ${
                   paymentMethod === 'cod' ? 'border-action bg-action-tint' : 'border-line hover:border-sand'
                 }`}>
@@ -867,6 +868,7 @@ const Checkout = () => {
                     </span>
                   </span>
                 </label>
+                )}
               </div>
 
               <button type="submit" disabled={loading} aria-busy={loading} className="btn-primary w-full mt-6 hidden lg:inline-flex">
