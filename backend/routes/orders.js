@@ -35,6 +35,15 @@ const restoreStock = async (lines) => {
 //          server; online payments must be backed by a verified Razorpay payment.
 // @access  Private
 router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
+  // Cash on delivery is offered only while online payment isn't set up
+  {
+    const id = process.env.RAZORPAY_KEY_ID || '';
+    const online = /^rzp_(live|test)_/.test(id) && !/placeholder/i.test(id + (process.env.RAZORPAY_KEY_SECRET || ''));
+    const method = req.body?.paymentInfo?.method;
+    if (online && method === 'cod' && process.env.NODE_ENV !== 'test') {
+      return res.status(400).json({ message: 'Cash on delivery is not available. Please pay online.', code: 'COD_OFF' });
+    }
+  }
   const reserved = [];
   let claimedLiveOrder = null;
 
