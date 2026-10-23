@@ -26,6 +26,8 @@ import About from './pages/About';
 import ContactUs from './pages/ContactUs';
 import ShippingPolicy from './pages/ShippingPolicy';
 import ReturnsPolicy from './pages/ReturnsPolicy';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import Admin from './pages/Admin';
 import Wishlist from './pages/Wishlist';
 import CustomerSupport from './pages/CustomerSupport';
@@ -77,6 +79,9 @@ const Shell = () => {
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/shipping-policy" element={<ShippingPolicy />} />
                 <Route path="/returns-policy" element={<ReturnsPolicy />} />
+                <Route path="/refund-policy" element={<ReturnsPolicy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
               </Routes>
       </main>
       {!isAdmin && <Footer />}

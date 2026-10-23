@@ -13,7 +13,9 @@ const SHOP = [
 ];
 const HELP = [
   { to: '/shipping-policy', label: 'Shipping policy' },
-  { to: '/returns-policy', label: 'Returns & refunds' },
+  { to: '/returns-policy', label: 'Cancellation & refunds' },
+  { to: '/terms', label: 'Terms & conditions' },
+  { to: '/privacy', label: 'Privacy policy' },
   { to: '/contact', label: 'Contact us' },
   { to: '/about', label: 'About us' },
   { to: '/support', label: 'Support' },
