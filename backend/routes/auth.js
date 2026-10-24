@@ -83,6 +83,38 @@ const userPayload = (user) => ({
   token: generateToken(user._id),
 });
 
+// 🧩 GUEST CHECKOUT
+// Name + mobile number, no OTP or password. Creates a light account for that number so the
+// order can be tracked. If the number already has an account we don't hand it out (that
+// would expose someone's orders); the customer logs in instead.
+router.post('/guest', async (req, res) => {
+  try {
+    const name = typeof req.body?.name === 'string' ? req.body.name.trim().replace(/\s+/g, ' ').slice(0, 60) : '';
+    const ten = String(req.body?.phone || '').replace(/\D/g, '').slice(-10);
+    if (name.length < 2) return res.status(400).json({ message: 'Please enter your name' });
+    if (!/^[6-9]\d{9}$/.test(ten)) return res.status(400).json({ message: 'Please enter a valid 10-digit mobile number' });
+
+    const existing = (await User.findOne({ phone: ten })) || (await User.findOne({ phone: `+91${ten}` }));
+    if (existing) {
+      return res.status(409).json({
+        message: 'This number already has an account. Please log in to place your order.',
+        code: 'ACCOUNT_EXISTS',
+      });
+    }
+    const user = await User.create({
+      name,
+      email: `${ten}@phone.villagecrunch.in`, // placeholder until they add an email
+      password: crypto.randomBytes(24).toString('hex'),
+      phone: ten,
+      role: 'user',
+    });
+    res.status(201).json(userPayload(user));
+  } catch (error) {
+    console.error('Guest checkout error:', error.message);
+    res.status(500).json({ message: 'Could not continue. Please try again.' });
+  }
+});
+
 router.post('/phone', async (req, res) => {
   try {
     const { idToken, name } = req.body || {};

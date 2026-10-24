@@ -226,10 +226,8 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    if (!user) {
-      navigate('/login?redirect=/checkout');
-    } else {
-      // Pass applied promocode to checkout
+ {
+      // Guests can check out too (name + phone at checkout)
       navigate('/checkout', { 
         state: { 
           appliedPromocode,
