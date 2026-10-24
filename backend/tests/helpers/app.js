@@ -28,6 +28,7 @@ setDb(fake);
 /* ---- outbound stubs ------------------------------------------------------------ */
 const sent = { sms: [], emails: [] };
 const razorpayCalls = [];
+const razorpayPaid = {};
 const stub = (rel, exports) => {
   const p = require.resolve(rel);
   require.cache[p] = { id: p, filename: p, loaded: true, exports };
@@ -48,6 +49,8 @@ stub('../../config/razorpay', {
       razorpayCalls.push(opts);
       return { id: `order_${razorpayCalls.length}_${Date.now()}`, amount: opts.amount, currency: opts.currency };
     },
+    // tests set razorpayPaid[orderId] = { id, amount } to simulate a captured payment
+    fetchPayments: async (orderId) => ({ items: razorpayPaid[orderId] ? [{ status: 'captured', ...razorpayPaid[orderId] }] : [] }),
   },
 });
 
@@ -151,4 +154,4 @@ const address = { name: 'Asha', phone: '9876543210', street: '1 MG Road', city: 
 const razorpaySignature = (orderId, paymentId) =>
   crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(`${orderId}|${paymentId}`).digest('hex');
 
-module.exports = { start, fake, models, sent, razorpayCalls, makeUser, makeAdmin, makeProduct, address, razorpaySignature, uniq };
+module.exports = { start, fake, models, sent, razorpayCalls, razorpayPaid, makeUser, makeAdmin, makeProduct, address, razorpaySignature, uniq };

@@ -34,7 +34,13 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (
       });
     }
 
-    const { cartItems, promocode } = req.body;
+    const { cartItems, promocode, shippingAddress, giftMessage } = req.body;
+    const clip = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
+    const ship = shippingAddress || {};
+    const shippingJson = JSON.stringify({
+      name: clip(ship.name, 100), phone: clip(ship.phone, 20), street: clip(ship.street, 300),
+      city: clip(ship.city, 100), state: clip(ship.state, 100), pincode: clip(ship.pincode, 6),
+    });
     const promocodeCode = typeof promocode === 'string' ? promocode : promocode?.code;
 
     const pricing = await priceCart({
@@ -98,6 +104,8 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (
           ['order_source', 'web'],
           ['promocode', promocodeCode ? String(promocodeCode).toUpperCase() : ''],
           ['cart_signature', cartSignature(pricing.lines)],
+          ['shipping', shippingJson],
+          ['gift_message', clip(giftMessage, 300)],
         ]),
       });
     } catch (dbError) {
@@ -167,6 +175,60 @@ router.post('/verify', protect, async (req, res) => {
   } catch (error) {
     console.error('Payment verification error:', error.message);
     res.status(500).json({ message: 'Error verifying payment' });
+  }
+});
+
+// @route   POST /api/payment/reconcile
+// @desc    Ask Razorpay directly whether the caller's recent checkouts were paid. Used when the
+//          payment window never reported success (UPI app switch, QR paid on another device,
+//          page closed). Paid ones are marked verified so POST /api/orders can turn them into
+//          orders. Body: { razorpayOrderId? } - without it, checks the last 24 hours.
+// @access  Private
+router.post('/reconcile', protect, async (req, res) => {
+  try {
+    if (!razorpay || typeof razorpay.orders?.fetchPayments !== 'function') {
+      return res.json({ payments: [] });
+    }
+    const wanted = typeof req.body?.razorpayOrderId === 'string' ? req.body.razorpayOrderId : null;
+    const since = Date.now() - 24 * 60 * 60 * 1000;
+    const mine = (await LiveOrder.find({ user: req.user._id }))
+      .filter((l) => (wanted ? l.razorpayOrderId === wanted : new Date(l.createdAt || 0).getTime() > since))
+      .filter((l) => l.status !== 'converted_to_order' && l.status !== 'cancelled')
+      .slice(-5);
+
+    const out = [];
+    for (const live of mine) {
+      if (!(live.paymentVerified && live.status === 'paid')) {
+        let captured = null;
+        try {
+          const r = await razorpay.orders.fetchPayments(live.razorpayOrderId);
+          captured = (r?.items || []).find((p) => p.status === 'captured' && Number(p.amount) === Math.round(live.amount * 100));
+        } catch (e) {
+          console.error('Razorpay fetchPayments failed:', e.message);
+        }
+        if (!captured) continue;
+        live.razorpayPaymentId = captured.id;
+        live.razorpaySignature = 'server-verified';
+        live.paymentVerified = true;
+        live.status = 'paid';
+        live.expiryTime = new Date(Date.now() + VERIFIED_RETENTION_MS);
+        await live.save();
+      }
+      let shipping = null;
+      try { shipping = JSON.parse(live.notes?.get('shipping') || 'null'); } catch (_) { shipping = null; }
+      out.push({
+        razorpayOrderId: live.razorpayOrderId,
+        razorpayPaymentId: live.razorpayPaymentId,
+        amount: live.amount,
+        items: live.cartItems.map((c) => ({ product: String(c.productId), name: c.name, quantity: c.quantity, price: c.price, image: c.image, weight: c.weight })),
+        shippingAddress: shipping && shipping.street && shipping.pincode ? shipping : null,
+        giftMessage: live.notes?.get('gift_message') || '',
+      });
+    }
+    res.json({ payments: out });
+  } catch (error) {
+    console.error('Payment reconcile error:', error.message);
+    res.status(500).json({ message: 'Could not check payment status' });
   }
 });
 

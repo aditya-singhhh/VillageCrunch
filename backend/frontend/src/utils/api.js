@@ -146,12 +146,25 @@ export const getOrderStats = async () => {
 
 // ✅ Payments
 // The server computes the amount from the cart; only items + promocode are sent.
-export const createPaymentOrder = async (cartItems, promocode = null) => {
+export const createPaymentOrder = async (cartItems, promocode = null, extra = {}) => {
   const { data } = await axios.post(`${API_URL}/payment/create-order`, {
     cartItems: cartItems.map((i) => ({ productId: i._id || i.productId || i.product, quantity: i.quantity })),
     promocode: promocode?.code || null,
+    shippingAddress: extra.shippingAddress,
+    giftMessage: extra.giftMessage,
   });
   return data;
+};
+
+// Ask the server to check with Razorpay whether a checkout was paid (when the payment
+// window never reported back). Returns { payments: [...] } of paid, not-yet-placed orders.
+export const reconcilePayments = async (razorpayOrderId) => {
+  try {
+    const { data } = await axios.post(`${API_URL}/payment/reconcile`, razorpayOrderId ? { razorpayOrderId } : {});
+    return data;
+  } catch (_) {
+    return { payments: [] };
+  }
 };
 
 export const verifyPayment = async (paymentData) => {

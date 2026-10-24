@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey, lookupPincode } from '../utils/api';
+import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey, lookupPincode, reconcilePayments } from '../utils/api';
 import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
@@ -396,6 +396,90 @@ const Checkout = () => {
     }
   };
 
+  // ---- Paid-order completion (shared by the payment window, polling and recovery) ----
+  const placingRef = useRef(false);
+  const pollRef = useRef(null);
+  const rzpRef = useRef(null);
+  const [recovered, setRecovered] = useState(null); // a paid checkout that still needs an address
+
+  const stopPolling = () => {
+    if (pollRef.current) { clearInterval(pollRef.current.timer); document.removeEventListener('visibilitychange', pollRef.current.onVis); }
+    pollRef.current = null;
+  };
+
+  // Turn a verified payment into an order. `paid` may carry the server's copy of the cart
+  // and address (recovery); otherwise the current cart and form are used.
+  const finishPaidOrder = async (paid) => {
+    if (placingRef.current) return;
+    placingRef.current = true;
+    stopPolling();
+    try { rzpRef.current?.close(); } catch (_) { /* already closed */ }
+    setLoading(true);
+    const address = paid.shippingAddress || shippingInfo;
+    try {
+      const items = paid.items
+        ? paid.items.map((i) => ({ product: i.product, name: i.name, quantity: i.quantity, price: i.price, image: i.image, weight: i.weight }))
+        : cartItems.map((i) => ({ product: i._id, name: i.name, image: i.image || i.images?.[0] || '', quantity: Number(i.quantity), price: Number(i.price), weight: i.weight || '' }));
+      const order = await createOrder({
+        items,
+        giftMessage: paid.giftMessage || (isGift ? giftMessage : undefined),
+        shippingAddress: {
+          name: String(address.name || '').trim(), phone: String(address.phone || '').trim(),
+          street: String(address.street || '').trim(), city: String(address.city || '').trim(),
+          state: String(address.state || '').trim(), pincode: String(address.pincode || '').trim(),
+        },
+        paymentInfo: { method: 'Online', razorpayOrderId: paid.razorpayOrderId },
+      });
+      try {
+        trackPurchase({
+          orderId: order._id,
+          value: Number(order.totalPrice) || getCartTotal(),
+          items: items.map((i) => ({ productId: i.product, name: i.name, quantity: i.quantity, price: i.price })),
+        });
+      } catch (_) { /* tracking must never block an order */ }
+      try { localStorage.removeItem('vc_pending_payment'); } catch (_) { /* ignore */ }
+      clearCart();
+      setRecovered(null);
+      toast.success('Payment received. Order placed! 🎉');
+      navigate(`/order/${order._id}`);
+    } catch (error) {
+      placingRef.current = false;
+      setLoading(false);
+      const msg = error.response?.data?.message || 'We could not place the order';
+      toast.error(`Your payment is safe. ${msg} Call or WhatsApp +91 62030 09518 with payment ID ${paid.razorpayPaymentId || paid.razorpayOrderId}.`, { duration: 12000 });
+    }
+  };
+
+  // Poll our server (which asks Razorpay) until this checkout is paid, or until `ms` pass.
+  const startPolling = (razorpayOrderId, ms = 20 * 60 * 1000) => {
+    stopPolling();
+    try { localStorage.setItem('vc_pending_payment', JSON.stringify({ razorpayOrderId, at: Date.now() })); } catch (_) { /* ignore */ }
+    const until = Date.now() + ms;
+    const check = async () => {
+      if (placingRef.current) return;
+      if (Date.now() > until) { stopPolling(); return; }
+      const r = await reconcilePayments(razorpayOrderId);
+      const paid = r.payments?.find((x) => x.razorpayOrderId === razorpayOrderId);
+      if (paid) await finishPaidOrder({ ...paid, shippingAddress: paid.shippingAddress || shippingInfo });
+    };
+    const onVis = () => { if (document.visibilityState === 'visible') check(); };
+    document.addEventListener('visibilitychange', onVis);
+    pollRef.current = { timer: setInterval(check, 4000), onVis };
+  };
+  useEffect(() => () => stopPolling(), []);
+
+  // On opening checkout: was an earlier payment completed without an order? Finish it.
+  useEffect(() => {
+    if (!user) return;
+    reconcilePayments().then((r) => {
+      const paid = r.payments?.[0];
+      if (!paid) return;
+      if (paid.shippingAddress) finishPaidOrder(paid);
+      else setRecovered(paid);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const handlePayment = async (e) => {
     e.preventDefault();
     
@@ -418,7 +502,10 @@ const Checkout = () => {
       await waitForRazorpay();
       
       // Create Razorpay order
-      const paymentOrderData = await createPaymentOrder(cartItems, appliedPromocode);
+      const paymentOrderData = await createPaymentOrder(cartItems, appliedPromocode, {
+        shippingAddress: shippingInfo,
+        giftMessage: isGift ? giftMessage : undefined,
+      });
 
       // Razorpay options with all payment methods
       const options = {
@@ -474,113 +561,15 @@ const Checkout = () => {
         
         // Handler for successful payment
         handler: async function (response) {
+          stopPolling();
           try {
-            // Save new address if user is using a new address and wants to save it
-            if (useNewAddress && saveNewAddress) {
-              try {
-                const savedAddress = await saveAddress({
-                  street: shippingInfo.street,
-                  city: shippingInfo.city,
-                  state: shippingInfo.state,
-                  pincode: shippingInfo.pincode,
-                  phone: shippingInfo.phone,
-                  saveAddress: true
-                });
-                
-                // Refresh user profile to get updated addresses
-                try {
-                  const updatedProfile = await getUserProfile();
-                  updateUser(updatedProfile);
-                } catch (profileError) {
-                  // Silent error handling for profile refresh
-                }
-                
-                if (savedAddress.message.includes('already exists')) {
-                  toast.success('Address already in your saved addresses!', { duration: 2000 });
-                } else {
-                  toast.success('Address saved for future orders!', { duration: 2000 });
-                }
-              } catch (addressError) {
-                // Don't fail the order if address saving fails
-                toast.error('Address could not be saved, but order will continue');
-              }
-            }
-
-            // Verify payment
             await verifyPayment({
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
             });
-
-            // Create order in database
-            // Validate cart items before creating order
-            const validatedItems = cartItems.map(item => {
-              if (!item._id || !item.quantity || !item.price) {
-                throw new Error(`Invalid item structure: ${JSON.stringify(item)}`);
-              }
-              return {
-                product: item._id,
-                name: item.name || 'Unknown Product',
-                image: item.image || item.images?.[0] || '',
-                quantity: parseInt(item.quantity),
-                price: parseFloat(item.price),
-                weight: item.weight || '',
-              };
-            });
-            
-            // Validate shipping info
-            if (!shippingInfo.name || !shippingInfo.phone) {
-              throw new Error('Name and phone number are required for shipping');
-            }
-            
-            const orderData = {
-              items: validatedItems,
-              giftMessage: isGift ? giftMessage : undefined,
-              shippingAddress: {
-                name: shippingInfo.name.trim(),
-                phone: shippingInfo.phone.trim(),
-                street: shippingInfo.street.trim(),
-                city: shippingInfo.city.trim(),
-                state: shippingInfo.state.trim(),
-                pincode: shippingInfo.pincode.trim(),
-              },
-              paymentInfo: {
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-                method: 'Online',
-              },
-              itemsPrice: parseFloat(subtotal) || 0,
-              shippingPrice: parseFloat(shipping) || 0,
-              taxPrice: parseFloat(tax) || 0,
-              totalPrice: parseFloat(total) || 0,
-              promocode: appliedPromocode ? {
-                code: appliedPromocode.code,
-                discount: parseFloat(promocodeDiscount) || 0,
-                description: appliedPromocode.description
-              } : null,
-              promocodeDiscount: parseFloat(promocodeDiscount) || 0,
-            };
-
-            const order = await createOrder(orderData);
-
-            try {
-              trackPurchase({
-                orderId: order._id,
-                value: Number(order.totalPrice) || getCartTotal(),
-                items: cartItems.map((i) => ({ productId: i._id, name: i.name, category: i.category, quantity: i.quantity, price: i.price })),
-              });
-            } catch (_) { /* tracking must never block an order */ }
-
-            // Clear cart and redirect
-            clearCart();
-            toast.success('Order placed successfully! 🎉');
-            navigate(`/order/${order._id}`);
-          } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Order creation failed';
-            toast.error(`Payment successful but order creation failed: ${errorMessage}. Please contact support with payment ID: ${response.razorpay_payment_id}`);
-          }
+          } catch (_) { /* the server can still confirm it with Razorpay below */ }
+          await finishPaidOrder({ razorpayOrderId: response.razorpay_order_id, razorpayPaymentId: response.razorpay_payment_id });
         },
         
         // Prefill customer details
@@ -605,7 +594,8 @@ const Checkout = () => {
         // Modal options
         modal: {
           ondismiss: function() {
-            toast.error('Payment cancelled');
+            // A UPI payment can still complete after the window closes; keep checking briefly
+            startPolling(paymentOrderData.orderId, 3 * 60 * 1000);
             setLoading(false);
           },
           escape: true,
@@ -627,9 +617,12 @@ const Checkout = () => {
       }
 
       const razorpay = new window.Razorpay(options);
-      
+      rzpRef.current = razorpay;
+
       // Open Razorpay checkout
       razorpay.open();
+      // Don't rely only on the payment window: keep asking our server (which asks Razorpay)
+      startPolling(paymentOrderData.orderId);
 
       // Handle payment failure
       razorpay.on('payment.failed', function (response) {
@@ -742,6 +735,27 @@ const Checkout = () => {
         </details>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] [&>*]:min-w-0 gap-6 lg:gap-10 items-start">
+          {recovered && (
+            <div className="mb-5 rounded-lg border border-leaf/40 bg-leaf-tint p-4 lg:col-span-2" role="alert">
+              <p className="font-semibold text-ink">We received your payment of {formatINR(recovered.amount)}.</p>
+              <p className="text-sm text-ink-soft mt-1">Check your delivery address below, then tap the button to place this order. You won't be charged again.</p>
+              <button
+                type="button"
+                className="btn-primary mt-3"
+                disabled={loading}
+                onClick={() => {
+                  if (!shippingInfo.name || !shippingInfo.phone || !shippingInfo.street || !shippingInfo.city || !/^[1-9][0-9]{5}$/.test(shippingInfo.pincode || '')) {
+                    toast.error('Please fill your delivery address first');
+                    document.getElementById('co-address')?.scrollIntoView({ behavior: 'smooth' });
+                    return;
+                  }
+                  finishPaidOrder({ ...recovered, shippingAddress: shippingInfo });
+                }}
+              >
+                Place my paid order
+              </button>
+            </div>
+          )}
           <form id="checkout-form" onSubmit={handlePayment} className="space-y-5 max-w-xl lg:max-w-none">
             {/* 1. Contact */}
             <section className="panel" aria-labelledby="co-contact">
