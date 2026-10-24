@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey, lookupPincode } from '../utils/api';
+import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey, lookupPincode, syncCart } from '../utils/api';
 import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
@@ -75,13 +75,9 @@ const Checkout = () => {
       });
     } catch (_) { /* ignore */ }
   }, [cartItems]); // eslint-disable-line react-hooks/exhaustive-deps
-  const { user, updateUser, loading: authLoading } = useAuth();
+  const { user, updateUser, startGuestSession, adoptSession } = useAuth();
 
-  // Orders belong to an account: send visitors who aren't logged in to log in first,
-  // instead of letting them fill the whole form and fail at the end.
-  useEffect(() => {
-    if (!authLoading && !user) navigate('/login?redirect=/checkout', { replace: true });
-  }, [authLoading, user]);
+  // Guests can check out with just name + phone; an account is created for them at payment.
 
   // Get promocode data from navigation state (from Cart page)
   const [appliedPromocode, setAppliedPromocode] = useState(location.state?.appliedPromocode || null);
@@ -207,28 +203,14 @@ const Checkout = () => {
         // No saved addresses, user must enter new address
         setUseNewAddress(true);
         setSelectedAddress(null);
-        setShippingInfo({
-          name: user?.name || '',
-          phone: user?.phone || '',
-          street: '',
-          city: '',
-          state: '',
-          pincode: '',
-        });
+        setShippingInfo((prev) => ({ ...prev, name: prev.name || user?.name || '', phone: prev.phone || user?.phone || '' }));
       }
     } catch (error) {
       // Fallback to empty state
       setAddresses([]);
       setUseNewAddress(true);
       setSelectedAddress(null);
-      setShippingInfo({
-        name: user?.name || '',
-        phone: user?.phone || '',
-        street: '',
-        city: '',
-        state: '',
-        pincode: '',
-      });
+      setShippingInfo((prev) => ({ ...prev, name: prev.name || user?.name || '', phone: prev.phone || user?.phone || '' }));
     }
   };
 
@@ -404,6 +386,25 @@ const Checkout = () => {
         !shippingInfo.city || !shippingInfo.state || !shippingInfo.pincode) {
       toast.error('Please fill all shipping details');
       return;
+    }
+
+    // Not logged in: create a guest account from name + phone, carry the cart over, continue.
+    if (!user) {
+      setLoading(true);
+      try {
+        const data = await startGuestSession(shippingInfo.name, shippingInfo.phone);
+        try { await syncCart(cartItems); } catch (_) { /* the payment uses this page's cart anyway */ }
+        adoptSession(data);
+      } catch (err) {
+        setLoading(false);
+        if (err.response?.data?.code === 'ACCOUNT_EXISTS') {
+          toast.error('This number already has an account. Please log in to continue.', { duration: 6000 });
+          navigate('/login?redirect=/checkout');
+        } else {
+          toast.error(err.response?.data?.message || 'Could not continue. Please try again.');
+        }
+        return;
+      }
     }
 
     if (paymentMethod === 'cod') {
@@ -746,6 +747,12 @@ const Checkout = () => {
             {/* 1. Contact */}
             <section className="panel" aria-labelledby="co-contact">
               <div id="co-contact">{sectionHead(1, 'Contact')}</div>
+              {!user && (
+                <p className="-mt-1 mb-4 text-sm text-ink-soft">
+                  No login needed, just your name and mobile number.{' '}
+                  <Link to="/login?redirect=/checkout" className="text-action font-medium underline underline-offset-2">Already have an account? Log in</Link>
+                </p>
+              )}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="co-name" className="field-label">Full name <span className="text-ink-mute font-normal">(required)</span></label>

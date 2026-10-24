@@ -139,6 +139,7 @@ app.use(
     '/api/auth/admin/login',
     '/api/auth/register',
     '/api/auth/phone',
+    '/api/auth/guest',
     '/api/auth/forgot-password',
     '/api/auth/verify-otp',
     '/api/auth/reset-password',

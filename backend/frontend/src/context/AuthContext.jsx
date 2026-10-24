@@ -83,6 +83,21 @@ export const AuthProvider = ({ children }) => {
     return { user: data, localCart, isNew: res.status === 201 };
   };
 
+  // Guest checkout: name + phone, no OTP/password. Sets the token for API calls but not the
+  // logged-in user yet, so the caller can move the local cart to the account first.
+  const startGuestSession = async (name, phone) => {
+    const { data } = await axios.post('/api/auth/guest', { name, phone });
+    localStorage.setItem('token', data.token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+    return data;
+  };
+  const adoptSession = (data) => {
+    setUser(data);
+    localStorage.setItem('user', JSON.stringify(data));
+    localStorage.setItem('token', data.token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
@@ -96,7 +111,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, loginWithPhone, register, logout, updateUser, loading }}>
+    <AuthContext.Provider value={{ user, login, loginWithPhone, startGuestSession, adoptSession, register, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

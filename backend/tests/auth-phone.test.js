@@ -51,3 +51,23 @@ test('phone OTP: rejects non-Indian numbers', async () => {
   const res = await app.api('POST', '/api/auth/phone', { idToken: tok('+14155550123'), name: 'Sam' });
   assert.equal(res.status, 400);
 });
+
+test('guest checkout: name + phone creates an account and token; existing numbers must log in', async () => {
+  const ten = `9${String(Date.now()).slice(-9)}`;
+  assert.equal((await app.api('POST', '/api/auth/guest', { name: 'A', phone: ten })).status, 400);
+  assert.equal((await app.api('POST', '/api/auth/guest', { name: 'Asha', phone: '12345' })).status, 400);
+  const g = await app.api('POST', '/api/auth/guest', { name: ' Asha  Devi ', phone: `+91 ${ten}` });
+  assert.equal(g.status, 201, JSON.stringify(g.body));
+  assert.equal(g.body.name, 'Asha Devi');
+  assert.equal(g.body.phone, ten);
+  assert.ok(g.body.token);
+  assert.equal((await app.api('GET', '/api/orders/myorders', undefined, g.body.token)).status, 200);
+  // same number again (or a password account) -> log in instead, no token handed out
+  const again = await app.api('POST', '/api/auth/guest', { name: 'Someone', phone: ten });
+  assert.equal(again.status, 409);
+  assert.equal(again.body.code, 'ACCOUNT_EXISTS');
+  assert.equal(again.body.token, undefined);
+  // the same phone can later log in with OTP and lands in the same account
+  const otp = await app.api('POST', '/api/auth/phone', { idToken: tok(`+91${ten}`) });
+  assert.equal(String(otp.body._id), String(g.body._id));
+});
