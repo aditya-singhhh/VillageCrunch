@@ -91,6 +91,11 @@ const settingsSchema = new mongoose.Schema({
   },
 
   // Notifications - SIMPLIFIED TO MATCH FRONTEND
+  // Phone alerts (ntfy topic is generated on first use)
+  alerts: {
+    ntfyTopic: String,
+  },
+
   notifications: {
     orderConfirmation: {
       type: Boolean,

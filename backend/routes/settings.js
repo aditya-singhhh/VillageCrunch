@@ -10,6 +10,18 @@ const MASALA_BLOCKED_MESSAGE = 'Masala items are coming soon and cannot be purch
 // @route   GET /api/settings
 // @desc    Get all settings
 // @access  Public (for basic settings like currency, tax) / Private (for sensitive settings)
+// @route GET /api/settings/alerts  (admin) - the ntfy topic to subscribe to on the phone
+router.get('/alerts', protect, admin, async (req, res) => {
+  const topic = await require('../services/alerts').getTopic();
+  res.json({ topic, url: `https://ntfy.sh/${topic}` });
+});
+
+// @route POST /api/settings/alerts/test  (admin) - send a test alert
+router.post('/alerts/test', protect, admin, async (req, res) => {
+  const ok = await require('../services/alerts').push('Test alert - VillageCrunch', 'Order alerts are working. You will get one of these for every new order.', { tags: 'white_check_mark' });
+  res.json({ ok });
+});
+
 router.get('/', async (req, res) => {
   try {
     const settings = await Settings.getSettings();
