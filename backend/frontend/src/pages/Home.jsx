@@ -87,7 +87,7 @@ const Home = () => {
   const trust = [
     { icon: Truck, text: freeShippingThreshold ? `Free delivery ${formatINR(freeShippingThreshold)}+` : 'Delivery across India' },
     { icon: Leaf, text: 'Natural · no preservatives' },
-    { icon: Banknote, text: 'Cash on delivery' },
+    { icon: Banknote, text: 'Secure UPI payment' },
     { icon: RefreshCw, text: 'Easy returns' },
   ];
 

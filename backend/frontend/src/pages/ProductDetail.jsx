@@ -18,7 +18,7 @@ import { trackViewItem } from '../utils/analytics';
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { user } = useAuth();
   const [product, setProduct] = useState(null);
   // Product page view, for Meta / Google ad optimisation
@@ -409,7 +409,9 @@ const ProductDetail = () => {
     </div>
   );
 
-  const addLabel = added ? 'Added' : `Add to cart \u00b7 ${formatINR(product.price * quantity)}`;
+  const inCart = !!product?._id && (cartItems || []).some((i) => i._id === product._id);
+  const goToCart = () => navigate('/cart');
+  const addLabel = added ? 'Added ✓' : `Add to cart \u00b7 ${formatINR(product.price * quantity)}`;
 
   return (
     <div className="pb-6 md:pb-12">
@@ -634,14 +636,20 @@ const ProductDetail = () => {
                 </div>
               ) : (
                 <div className="flex gap-3">
-                  {canBuy && stepper}
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={outOfStock}
-                    className="btn-primary flex-1"
-                  >
-                    {outOfStock ? 'Out of stock' : (<><ShoppingCart className="w-5 h-5" aria-hidden="true" /> {addLabel}</>)}
-                  </button>
+                  {canBuy && !(inCart && !added) && stepper}
+                  {inCart && !added ? (
+                    <button onClick={goToCart} className="btn-primary flex-1">
+                      <ShoppingCart className="w-5 h-5" aria-hidden="true" /> In your cart · Go to checkout
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={outOfStock}
+                      className="btn-primary flex-1"
+                    >
+                      {outOfStock ? 'Out of stock' : (<><ShoppingCart className="w-5 h-5" aria-hidden="true" /> {addLabel}</>)}
+                    </button>
+                  )}
                   {user && product._id && (
                     <button
                       onClick={handleToggleWishlist}
@@ -686,7 +694,7 @@ const ProductDetail = () => {
               </li>
               <li className="flex flex-col items-center gap-1.5 text-[13px] leading-4 text-ink-soft">
                 <CreditCard className="w-6 h-6 text-leaf" strokeWidth={1.75} aria-hidden="true" />
-                UPI, card or COD
+                Secure UPI &amp; card
               </li>
             </ul>
 
@@ -772,10 +780,18 @@ const ProductDetail = () => {
           <p className="text-sm font-medium text-ink-soft text-center py-3">Coming soon. Not available for purchase yet.</p>
         ) : (
           <div className="flex items-center gap-3">
-            {canBuy && stepper}
-            <button onClick={handleAddToCart} disabled={outOfStock} className="btn-primary flex-1 px-3">
-              {outOfStock ? 'Out of stock' : addLabel}
-            </button>
+            {inCart && !added ? (
+              <button onClick={goToCart} className="btn-primary flex-1 px-3">
+                In your cart · Go to checkout →
+              </button>
+            ) : (
+              <>
+                {canBuy && stepper}
+                <button onClick={handleAddToCart} disabled={outOfStock} className="btn-primary flex-1 px-3">
+                  {outOfStock ? 'Out of stock' : addLabel}
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
