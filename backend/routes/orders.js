@@ -229,6 +229,9 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
       }
     }
 
+    // 🔔 Instant phone alert to the shop owner (independent of email/SMS below)
+    require('../services/alerts').newOrderAlert(order).catch(() => {});
+
     // 📧📱 Send notifications (don't let notification failures affect order creation)
     try {
       // Send confirmation to customer

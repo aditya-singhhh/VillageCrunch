@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import LeadsPanel from '../components/LeadsPanel';
+import OrderAlertsCard from '../components/OrderAlertsCard';
 import {
   Package,
   Truck,
@@ -1039,6 +1040,8 @@ const saveSettings = async (e) => {
       <div className="max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-10">
         <h1 className="page-title mb-1">Admin dashboard</h1>
         <p className="text-ink-soft mb-6">Manage orders and customer inquiries</p>
+
+        <OrderAlertsCard />
 
         {/* Tab Navigation */}
         <div className="border-b border-line mb-6 md:mb-8 overflow-x-auto scrollbar-none snap-x">
