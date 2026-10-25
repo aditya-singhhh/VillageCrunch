@@ -14,6 +14,8 @@ import useStoreSettings from '../hooks/useStoreSettings';
 import { formatINR, formatCategory, discountPercent, unitPrice, averageRating } from '../utils/format';
 import { imgSrc, imgProps } from '../utils/img';
 import { trackViewItem } from '../utils/analytics';
+import ImageLightbox from '../components/ImageLightbox';
+import ThekuaStory from '../components/ThekuaStory';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -44,6 +46,7 @@ const ProductDetail = () => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [isTogglingWishlist, setIsTogglingWishlist] = useState(false);
   const [added, setAdded] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
   const [descOpen, setDescOpen] = useState(false);
   const { settings } = useStoreSettings();
 
@@ -474,7 +477,8 @@ const ProductDetail = () => {
                   height="800"
                   fetchpriority="high"
                   decoding="async"
-                  className={`w-full h-full object-cover select-none ${outOfStock ? 'opacity-60' : ''}`}
+                  className={`w-full h-full object-cover select-none cursor-zoom-in ${outOfStock ? 'opacity-60' : ''}`}
+                  onClick={() => { setIsAutoPlaying(false); setLightbox(true); }}
                   onError={(e) => {
                     e.target.src = '/placeholder-product.jpg';
                   }}
@@ -571,7 +575,8 @@ const ProductDetail = () => {
               {!outOfStock && ['thekua', 'gifts'].includes(product.category) && (
                 <p className="mt-2 text-sm text-ink-soft">
                   <span className="font-medium text-ink">Made fresh in desi ghee after you order</span> · ships in 1–2 days ·{' '}
-                  <span className="font-medium text-leaf">code FIRST = free delivery</span>
+                  <button type="button" onClick={() => toast.success('FIRST is applied automatically at checkout on your first order', { duration: 3000 })}
+                    className="font-medium text-leaf underline decoration-dotted underline-offset-4">first order: free delivery</button>
                 </p>
               )}
             </div>
@@ -733,6 +738,8 @@ const ProductDetail = () => {
           </div>
         </div>
 
+        {product.category === 'thekua' && <ThekuaStory />}
+
         {/* Reviews */}
         <section id="reviews" className="mt-10 md:mt-14 scroll-mt-24" aria-label="Customer reviews">
           {showReviewForm && (
@@ -770,6 +777,8 @@ const ProductDetail = () => {
         )}
 
       </div>
+
+      {lightbox && <ImageLightbox images={images} start={selectedImage} alt={product.name} onClose={() => setLightbox(false)} />}
 
       {/* Sticky buy bar (mobile) */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-line shadow-raised p-3 pb-[max(12px,env(safe-area-inset-bottom))]">

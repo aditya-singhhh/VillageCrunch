@@ -75,7 +75,7 @@ const AddedToCartSheet = () => {
         <p className="mt-3 flex items-center gap-2 text-[13px] text-ink-soft">
           <Truck className="w-4 h-4 text-leaf flex-shrink-0" aria-hidden="true" />
           {remaining > 0
-            ? <>First order? Code <b className="text-ink">FIRST</b> = free delivery</>
+            ? <>First order? <b className="text-ink">Free delivery</b>, applied at checkout</>
             : <>Free delivery on this order</>}
         </p>
 

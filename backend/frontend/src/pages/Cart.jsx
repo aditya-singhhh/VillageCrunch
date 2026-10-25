@@ -3,7 +3,8 @@ import { Plus, Minus, ShoppingBag, Tag, CheckCircle, XCircle, Lock, X } from 'lu
 import { formatINR } from '../utils/format';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { tryAutoFirst, markAutoPromoRemoved } from '../utils/autoPromo';
 import { validatePromocode, calculateOrderTotal, getSettings } from '../utils/api';
 import toast from 'react-hot-toast';
 import { imgSrc, imgProps } from '../utils/img';
@@ -69,6 +70,14 @@ const Cart = () => {
 
     fetchSettingsAndCalculate();
   }, [cartItems, appliedPromocode]);
+
+  // First order? Apply FIRST (free delivery) automatically; the server checks eligibility
+  const autoTried = useRef(false);
+  useEffect(() => {
+    if (appliedPromocode || autoTried.current || !cartItems.length) return;
+    autoTried.current = true;
+    tryAutoFirst(cartItems, user?._id).then((p) => { if (p) setAppliedPromocode((cur) => cur || p); });
+  }, [cartItems, appliedPromocode, user]);
 
   // Use calculated order totals if available, otherwise fallback to settings-based calculation
   const shipping = orderTotals?.shipping?.cost ?? 
@@ -202,6 +211,7 @@ const Cart = () => {
 
   // Remove promocode
   const removePromocode = async () => {
+    if (appliedPromocode?.auto) markAutoPromoRemoved();
     try {
       // Recalculate without promocode
       const cartProducts = cartItems.map(item => ({
