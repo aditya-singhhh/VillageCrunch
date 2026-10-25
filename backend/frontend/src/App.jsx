@@ -88,8 +88,8 @@ const Shell = () => {
       {!isAdmin && <BottomNav />}
       {!isAdmin && <AIChatbot />}
       <Toaster
-        position="top-right"
-        containerStyle={{ top: 72 }}
+        position="bottom-center"
+        containerStyle={{ bottom: 96 }}
         toastOptions={{
           duration: 3000,
           style: { background: '#2B1D14', color: '#fff', borderRadius: '10px', fontSize: '15px' },

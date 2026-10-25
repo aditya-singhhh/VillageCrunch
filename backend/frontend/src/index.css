@@ -122,6 +122,8 @@
 .animate-drawer-left { animation: slideInLeft .25s ease-out both; }
 .animate-drawer-right { animation: slideInRight .25s ease-out both; }
 .animate-sheet-up { animation: sheetUp .25s ease-out both; }
+@keyframes badgeBump { 0% { transform: scale(1); } 40% { transform: scale(1.45); } 100% { transform: scale(1); } }
+.animate-badge-bump { animation: badgeBump .45s ease-out both; }
 
 /* Thin warm scrollbars */
 ::-webkit-scrollbar { width: 10px; height: 10px; }

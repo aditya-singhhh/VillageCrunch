@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import Logo from './Logo';
 import CartDrawer from './CartDrawer';
+import AddedToCartSheet, { CART_ADDED_EVENT } from './AddedToCartSheet';
 import MobileMenu from './MobileMenu';
 
 const SHOP_LINKS = [
@@ -56,6 +57,18 @@ const Navbar = () => {
 
   useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
 
+  // After "Add to cart": desktop slides the cart drawer open; the badge gives a small bump.
+  const [bump, setBump] = useState(false);
+  useEffect(() => {
+    const onAdded = () => {
+      setBump(true);
+      setTimeout(() => setBump(false), 450);
+      if (isDesktop()) setCartOpen(true);
+    };
+    window.addEventListener(CART_ADDED_EVENT, onAdded);
+    return () => window.removeEventListener(CART_ADDED_EVENT, onAdded);
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -80,7 +93,7 @@ const Navbar = () => {
   const cartBadge = count > 0 && (
     <span
       aria-hidden="true"
-      className="absolute top-0.5 right-0 min-w-[18px] h-[18px] px-1 rounded-full bg-action text-white text-[11px] leading-[18px] text-center font-semibold"
+      className={`absolute top-0.5 right-0 ${bump ? 'animate-badge-bump' : ''} min-w-[18px] h-[18px] px-1 rounded-full bg-action text-white text-[11px] leading-[18px] text-center font-semibold`}
     >
       {count}
     </span>
@@ -214,6 +227,7 @@ const Navbar = () => {
 
       <MobileMenu open={drawerOpen} onClose={() => setDrawerOpen(false)} links={[...SHOP_LINKS, { to: '/diwali', label: 'Diwali gift boxes' }, { to: '/ghar', label: 'Chhath: ghar se door? 🌅' }]} user={user} onLogout={handleLogout} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <AddedToCartSheet />
     </header>
   );
 };
