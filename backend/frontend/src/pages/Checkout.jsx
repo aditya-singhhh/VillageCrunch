@@ -8,6 +8,7 @@ import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
 import { imgSrc, imgProps } from '../utils/img';
 import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
+import { tryAutoFirst } from '../utils/autoPromo';
 
 // Utility function to wait for Razorpay to load
 const waitForRazorpay = () => {
@@ -116,6 +117,16 @@ const Checkout = () => {
   }, []);
   
 
+
+  // Came straight here (e.g. from "Checkout →")? Apply FIRST automatically if eligible
+  const autoTried = useRef(false);
+  useEffect(() => {
+    if (appliedPromocode || autoTried.current || !cartItems.length) return;
+    autoTried.current = true;
+    tryAutoFirst(cartItems, user?._id).then((p) => {
+      if (p) { setAppliedPromocode((cur) => cur || p); setOrderTotals(null); }
+    });
+  }, [cartItems, appliedPromocode, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch settings and recalculate if no order totals from cart
   useEffect(() => {

@@ -111,7 +111,12 @@ const ReviewList = ({ productId, onWriteReview }) => {
     return user && review.helpfulUsers?.includes(user._id);
   };
 
+  // No reviews yet: show nothing, unless this shopper can write the first one
+  if (!loading && reviews.length === 0 && !onWriteReview) return null;
+
   if (loading) {
+    return null;
+    // eslint-disable-next-line no-unreachable
     return (
       <div className="space-y-4">
         {[...Array(3)].map((_, i) => (
