@@ -14,7 +14,7 @@ on:
       action:
         description: What to run
         type: choice
-        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate, seed-products, connect-domain]
+        options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate, seed-products, connect-domain, order-check]
         default: bootstrap-and-deploy
 
 concurrency:
@@ -126,6 +126,14 @@ jobs:
           node scripts/seedProducts.js
           node scripts/seedPromocodes.js
           node scripts/seedSettings.js
+
+      - name: Order check (no personal data)
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'order-check'
+        env:
+          FIREBASE_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+        run: |
+          cd backend && npm ci --omit=dev
+          node scripts/orderCheck.js
 
       - name: Create admin
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'create-admin'
