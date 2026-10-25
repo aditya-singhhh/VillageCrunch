@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import LeadsPanel from '../components/LeadsPanel';
 import {
   Package,
   Truck,
@@ -1065,6 +1066,17 @@ const saveSettings = async (e) => {
               Contact Management
             </button>
             <button
+              onClick={() => setActiveTab('leads')}
+              className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
+                activeTab === 'leads'
+                  ? 'border-desi-gold text-desi-brown'
+                  : 'border-transparent text-ink-mute hover:text-ink-soft hover:border-[#CDBBA4]'
+              }`}
+            >
+              <MessageSquare className="w-5 h-5 inline-block mr-2" />
+              Abandoned checkouts
+            </button>
+            <button
               onClick={() => setActiveTab('products')}
               className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
                 activeTab === 'products'
@@ -1099,6 +1111,8 @@ const saveSettings = async (e) => {
             </button>
           </nav>
         </div>
+
+        {activeTab === 'leads' && <LeadsPanel />}
 
         {/* Orders Tab Content */}
         {activeTab === 'orders' && (
