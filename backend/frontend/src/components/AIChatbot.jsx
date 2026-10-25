@@ -330,7 +330,7 @@ const AIChatbot = () => {
         '3️⃣ Choose payment method\n' +
         '4️⃣ Confirm order\n\n' +
         '💳 **Payments:**\n' +
-        'UPI | Cards | COD | Net Banking';
+        'UPI | Cards | Net Banking';
     }
 
     // Returns - Clear
