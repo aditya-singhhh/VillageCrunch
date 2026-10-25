@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey, lookupPincode, syncCart } from '../utils/api';
+import { createOrder, createPaymentOrder, verifyPayment, calculateOrderTotal, getSettings, saveAddressFromCheckout, getUserProfile, getUserAddresses, getRazorpayKey, lookupPincode, saveCheckoutLead, syncCart } from '../utils/api';
 import { MapPin, Plus, CheckCircle, Lock, ChevronDown, Phone } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
@@ -241,6 +241,25 @@ const Checkout = () => {
 
   // Typing a 6-digit PIN fills city and state (unless the customer typed their own)
   const pinFill = useRef({ city: '', state: '' });
+  // Save the phone as soon as it's complete, so we can follow up if the order isn't finished
+  const leadSent = useRef('');
+  useEffect(() => {
+    const ten = (shippingInfo.phone || '').replace(/\D/g, '').slice(-10);
+    if (!/^[6-9]\d{9}$/.test(ten) || leadSent.current === ten) return undefined;
+    const t = setTimeout(() => {
+      leadSent.current = ten;
+      const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+      saveCheckoutLead({
+        phone: ten,
+        name: shippingInfo.name,
+        items: (cartItems || []).map((i) => ({ productId: i._id, name: i.name, quantity: i.quantity, price: i.price })),
+        total: getCartTotal(),
+        source: /Instagram/i.test(ua) ? 'instagram' : /FBAN|FBAV|FB_IAB/i.test(ua) ? 'facebook' : 'web',
+      });
+    }, 800);
+    return () => clearTimeout(t);
+  }, [shippingInfo.phone]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleChange = (e) => {
     const { name } = e.target;
     const value = name === 'pincode' ? e.target.value.replace(/\D/g, '').slice(0, 6) : e.target.value;
@@ -755,14 +774,14 @@ const Checkout = () => {
               )}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
+                  <label htmlFor="co-phone" className="field-label">Mobile number <span className="text-ink-mute font-normal">(for delivery updates)</span></label>
+                  <input id="co-phone" type="tel" inputMode="numeric" name="phone" value={shippingInfo.phone} onChange={handleChange} required
+                    autoComplete="tel-national" maxLength={10} className="input-field" readOnly={readOnlyAddress} />
+                </div>
+                <div>
                   <label htmlFor="co-name" className="field-label">Full name <span className="text-ink-mute font-normal">(required)</span></label>
                   <input id="co-name" type="text" name="name" value={shippingInfo.name} onChange={handleChange} required
                     autoComplete="name" className="input-field" readOnly={readOnlyAddress} />
-                </div>
-                <div>
-                  <label htmlFor="co-phone" className="field-label">Phone number <span className="text-ink-mute font-normal">(required)</span></label>
-                  <input id="co-phone" type="tel" inputMode="numeric" name="phone" value={shippingInfo.phone} onChange={handleChange} required
-                    autoComplete="tel-national" maxLength={10} className="input-field" readOnly={readOnlyAddress} />
                 </div>
               </div>
             </section>
@@ -871,11 +890,14 @@ const Checkout = () => {
                     onChange={(e) => setPaymentMethod(e.target.value)} className="mt-0.5 w-5 h-5 text-action focus:ring-action" />
                   <span>
                     <span className="block font-medium text-ink">UPI / Cards / Net banking</span>
-                    <span className="block text-sm text-ink-soft">Secure payment by Razorpay</span>
+                    <span className="block text-sm text-ink-soft">
+                      Secure payment by Razorpay
+                      {settings?.pricing?.codCharges > 0 && <span className="text-leaf font-medium"> · no extra charge</span>}
+                    </span>
                   </span>
                 </label>
                 )}
-                {!onlineEnabled && (
+                {(
                 <label className={`flex items-start gap-3 p-4 border-[1.5px] rounded-lg cursor-pointer transition-colors min-h-[64px] ${
                   paymentMethod === 'cod' ? 'border-action bg-action-tint' : 'border-line hover:border-sand'
                 }`}>

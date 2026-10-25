@@ -146,7 +146,7 @@ app.use(
   ],
   authRateLimit
 );
-app.use(['/api/contact', '/api/promocodes/validate'], (req, res, next) =>
+app.use(['/api/contact', '/api/promocodes/validate', '/api/leads'], (req, res, next) =>
   req.method === 'POST' ? publicFormRateLimit(req, res, next) : next()
 );
 
@@ -167,6 +167,7 @@ app.use('/api/seo', require('./routes/seo'));
 app.use('/api/support', require('./routes/support'));
 app.use('/api/ghar', require('./routes/ghar'));
 app.use('/api/pincode', require('./routes/pincode'));
+app.use('/api/leads', require('./routes/leads'));
 
 // --- Health Check ---
 let healthCache = { at: 0, ok: false };

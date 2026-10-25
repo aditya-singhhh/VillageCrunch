@@ -594,6 +594,11 @@ export const downloadGharCsv = async (type) => (await api.get('/ghar/claims.csv'
 export default api;
 
 // PIN code -> { city, state } (India Post directory, via our API). Returns null when unknown.
+/** Save the shopper's phone (and cart) as soon as it's typed at checkout. Never throws. */
+export const saveCheckoutLead = async (lead) => {
+  try { await axios.post(`${API_URL}/leads`, lead); } catch (_) { /* ignore */ }
+};
+
 export const lookupPincode = async (pin) => {
   try {
     const { data } = await axios.get(`${API_URL}/pincode/${pin}`);
@@ -602,3 +607,7 @@ export const lookupPincode = async (pin) => {
     return null;
   }
 };
+
+// ✅ Checkout leads (admin)
+export const getLeads = async () => (await api.get('/leads')).data;
+export const updateLead = async (id, status) => (await api.put(`/leads/${id}`, { status })).data;

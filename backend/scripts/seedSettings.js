@@ -11,9 +11,9 @@ const Settings = require('../models/Settings');
   await db.connect();
   try {
     const s = await Settings.getSettings();
-    s.pricing = { ...s.toObject().pricing, taxRate: 0, pricesIncludeTax: true };
+    s.pricing = { ...s.toObject().pricing, taxRate: 0, pricesIncludeTax: true, codCharges: 49 };
     await s.save();
-    console.log('::notice::Pricing: prices are final, no tax added at checkout.');
+    console.log('::notice::Pricing: prices are final, no tax added at checkout. COD charge ₹49.');
   } finally {
     await db.disconnect();
   }
