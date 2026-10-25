@@ -569,6 +569,12 @@ const ProductDetail = () => {
                 {perUnit && <span> &middot; </span>}
                 <span>{settings?.pricing?.pricesIncludeTax === false && taxRate > 0 ? `+ ${taxRate}% GST at checkout` : 'Inclusive of all taxes'}</span>
               </p>
+              {!outOfStock && ['thekua', 'gifts'].includes(product.category) && (
+                <p className="mt-2 text-sm text-ink-soft">
+                  <span className="font-medium text-ink">Made fresh in desi ghee after you order</span> · ships in 1–2 days ·{' '}
+                  <span className="font-medium text-leaf">code FIRST = free delivery</span>
+                </p>
+              )}
             </div>
 
             {/* Pack sizes and bundles */}
@@ -608,12 +614,6 @@ const ProductDetail = () => {
                 {outOfStock ? 'Out of stock' : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
               </span>
             </div>
-            {!outOfStock && ['thekua', 'gifts'].includes(product.category) && (
-              <p className="mt-2 text-sm text-ink-soft">
-                <span className="font-medium text-ink">Made fresh after you order</span>{product.category === 'thekua' ? ' in desi ghee' : ''} · ships in 1–2 days
-              </p>
-            )}
-
             {/* Description */}
             {product.description && (
               <div className="mt-4">
