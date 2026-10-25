@@ -215,10 +215,7 @@ const ProductDetail = () => {
       return;
     }
     
-    for (let i = 0; i < quantity; i++) {
-      addToCart(product);
-    }
-    toast.success('Added to cart', { duration: 1500 });
+    addToCart(product, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };

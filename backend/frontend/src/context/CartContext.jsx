@@ -51,6 +51,11 @@ export const useCart = () => {
   return context;
 };
 
+// Tell the page an item went into the cart (the sheet / drawer shows it; no toast).
+const announceAdded = (product, quantity) => {
+  try { window.dispatchEvent(new CustomEvent('vc:cart-added', { detail: { product, quantity } })); } catch (_) { /* ignore */ }
+};
+
 export const CartProvider = ({ children }) => {
   const { user } = useAuth();
   const [cartItems, setCartItems] = useState([]);
@@ -102,7 +107,6 @@ export const CartProvider = ({ children }) => {
         setCartItems(syncResult.cart.items || []);
         // Clear local storage after successful sync
         localStorage.removeItem('cart');
-        toast.success('Cart synced successfully!');
       } catch (error) {
         console.error('Error syncing cart:', error);
         toast.error('Failed to sync cart');
@@ -132,7 +136,7 @@ export const CartProvider = ({ children }) => {
         setLoading(true);
         const result = await apiAddToCart(product._id, quantity);
         setCartItems(result.cart.items || []);
-        toast.success('Added to cart', { duration: 1500 });
+        announceAdded(product, quantity);
       } catch (error) {
         console.error('Error adding to cart:', error);
         toast.error(error.response?.data?.message || 'Failed to add item to cart');
@@ -144,7 +148,6 @@ export const CartProvider = ({ children }) => {
       setCartItems(prev => {
         const existing = prev.find((i) => i._id === product._id);
         if (existing) {
-          toast.success('Added to cart', { duration: 1500 });
           return prev.map((i) => (i === existing ? { ...i, quantity: (i.quantity || 1) + quantity } : i));
         }
         const timestamp = new Date().getTime();
@@ -153,9 +156,9 @@ export const CartProvider = ({ children }) => {
           cartItemId: `${product._id}_${timestamp}`,
           quantity
         };
-        toast.success('Added to cart', { duration: 1500 });
         return [...prev, newItem];
       });
+      announceAdded(product, quantity);
     }
   };
 
@@ -169,7 +172,6 @@ export const CartProvider = ({ children }) => {
         const result = await apiUpdateCartItem(itemIdentifier, quantity);
         setCartItems(result.cart.items || []);
         if (quantity === 0) {
-          toast.success('Item removed from cart');
         }
       } catch (error) {
         console.error('Error updating cart:', error);
@@ -181,7 +183,6 @@ export const CartProvider = ({ children }) => {
       // User not logged in - use local state (itemIdentifier is cartItemId)
       if (quantity === 0) {
         setCartItems(prev => prev.filter(item => item.cartItemId !== itemIdentifier));
-        toast.success('Item removed from cart');
       } else {
         setCartItems(prev =>
           prev.map(item =>
@@ -201,7 +202,6 @@ export const CartProvider = ({ children }) => {
         setLoading(true);
         const result = await apiRemoveFromCart(itemIdentifier);
         setCartItems(result.cart.items || []);
-        toast.success('Item removed from cart');
       } catch (error) {
         console.error('Error removing from cart:', error);
         toast.error(error.response?.data?.message || 'Failed to remove item');
@@ -211,7 +211,6 @@ export const CartProvider = ({ children }) => {
     } else {
       // User not logged in - use local state (itemIdentifier is cartItemId)
       setCartItems(prev => prev.filter(item => item.cartItemId !== itemIdentifier));
-      toast.success('Removed from cart');
     }
   };
 
@@ -222,7 +221,6 @@ export const CartProvider = ({ children }) => {
         setLoading(true);
         await apiClearCart();
         setCartItems([]);
-        toast.success('Cart cleared');
       } catch (error) {
         console.error('Error clearing cart:', error);
         toast.error('Failed to clear cart');
