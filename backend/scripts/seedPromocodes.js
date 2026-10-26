@@ -22,6 +22,21 @@ const CODES = [
     startDate: new Date('2026-10-22T00:00:00+05:30'),
     endDate: new Date('2026-11-16T23:59:59+05:30'),
   },
+  {
+    // Given by the "get 15% off" pop-up in exchange for a WhatsApp number
+    code: 'WELCOME15',
+    name: 'Welcome: 15% off + free delivery',
+    description: '15% off + free delivery on your first order from ₹399. Once per customer.',
+    type: 'percentage',
+    value: 15,
+    includesFreeShipping: true,
+    applicableOn: 'all',
+    minOrderValue: 399,
+    userUsageLimit: 1,
+    isActive: true,
+    startDate: new Date('2026-10-26T00:00:00+05:30'),
+    endDate: new Date('2026-12-31T23:59:59+05:30'),
+  },
 ];
 
 (async () => {
@@ -33,7 +48,7 @@ const CODES = [
       const existing = await Promocode.findOne({ code: c.code });
       if (existing) {
         // keep usage counts; refresh the terms
-        for (const k of ['name', 'description', 'minOrderValue', 'userUsageLimit', 'endDate']) existing[k] = c[k];
+        for (const k of ['name', 'description', 'value', 'includesFreeShipping', 'minOrderValue', 'userUsageLimit', 'endDate']) existing[k] = c[k];
         await existing.save();
         console.log(`::notice::Promocode ${c.code} updated (min ₹${c.minOrderValue}).`);
         continue;

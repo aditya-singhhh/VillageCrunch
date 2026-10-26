@@ -10,6 +10,7 @@ import ScrollProgressBar from './components/ScrollProgressBar';
 import AIChatbot from './components/AIChatbot';
 import BottomNav from './components/BottomNav';
 import AnnouncementBar from './components/AnnouncementBar';
+import WelcomePopup from './components/WelcomePopup';
 import AnalyticsSetup from './utils/analytics.jsx';
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -50,6 +51,7 @@ const Shell = () => {
   return (
     <div className={`flex flex-col min-h-screen ${isAdmin ? 'bg-paper' : 'bg-brand-dark'} ${bottomPad}`}>
       {!isAdmin && <AnnouncementBar />}
+      {!isAdmin && <WelcomePopup />}
       <Navbar />
       <main id="main" className="flex-grow bg-paper min-h-[60vh]">
         <Routes>

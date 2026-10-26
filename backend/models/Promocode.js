@@ -59,6 +59,11 @@ const promocodeSchema = new mongoose.Schema({
     type: Number,
     default: 1, // How many times one user can use this code
   },
+  // A percentage/fixed code can also make delivery free
+  includesFreeShipping: {
+    type: Boolean,
+    default: false,
+  },
   isActive: {
     type: Boolean,
     default: true,
