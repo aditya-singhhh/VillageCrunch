@@ -126,7 +126,7 @@ async function priceCart({
     );
     if (!result.valid) throw new PricingError(result.message || 'Promocode cannot be applied', 'PROMO_REJECTED');
     discount = Number(result.discount) || 0;
-    if (promo.type === 'freeShipping') shipping = 0;
+    if (promo.type === 'freeShipping' || promo.includesFreeShipping) shipping = 0;
   }
 
   // Prices on the site are MRP, inclusive of GST (Legal Metrology rules). By default the
