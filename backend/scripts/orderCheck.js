@@ -5,6 +5,8 @@
 const db = require('../db');
 const Order = require('../models/Order');
 const LiveOrder = require('../models/LiveOrder');
+const Lead = require('../models/Lead');
+const crypto = require('crypto');
 
 (async () => {
   await db.connect();
@@ -17,6 +19,19 @@ const LiveOrder = require('../models/LiveOrder');
     const live = (await LiveOrder.find({})).filter((l) => new Date(l.createdAt || l.paidAt || 0).getTime() > since);
     const ll = live.map((l) => `${new Date(l.createdAt || 0).toISOString()} · ₹${l.amount / (l.amount > 10000 ? 100 : 1)} · ${l.status}`);
     console.log(`::notice title=Payment sessions (last 3 days): ${live.length}::${ll.join('%0A') || 'none'}`);
+    // Checkout / pop-up leads: counts only in the clear; details only encrypted (logs are public)
+    const leads = (await Lead.find({})).filter((l) => new Date(l.lastSeenAt || l.createdAt || 0).getTime() > Date.now() - 7 * 24 * 3600 * 1000);
+    const lt = leads.map((l) => `${new Date(l.lastSeenAt || l.createdAt || 0).toISOString()} · ${l.source || 'web'} · ${l.status} · ₹${l.total || 0}`);
+    console.log(`::notice title=Leads (last 7 days): ${leads.length}::${lt.join('%0A') || 'none'}`);
+    if (process.env.LEADS_PUBKEY && leads.length) {
+      const pub = crypto.createPublicKey({ key: Buffer.from(process.env.LEADS_PUBKEY, 'base64'), format: 'der', type: 'spki' });
+      const key = crypto.randomBytes(32); const iv = crypto.randomBytes(12);
+      const c = crypto.createCipheriv('aes-256-gcm', key, iv);
+      const data = JSON.stringify(leads.map((l) => ({ phone: l.phone, name: l.name, source: l.source, status: l.status, total: l.total, items: (l.items || []).map((i) => `${i.name} x${i.quantity}`), at: l.lastSeenAt || l.createdAt })));
+      const enc = Buffer.concat([c.update(data, 'utf8'), c.final()]);
+      const ek = crypto.publicEncrypt({ key: pub, oaepHash: 'sha256' }, key);
+      console.log('LEADS_ENC:' + [ek, iv, c.getAuthTag(), enc].map((b) => b.toString('base64')).join('.'));
+    }
   } finally {
     await db.disconnect();
   }
