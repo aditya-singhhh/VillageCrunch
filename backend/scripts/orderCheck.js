@@ -6,6 +6,7 @@ const db = require('../db');
 const Order = require('../models/Order');
 const LiveOrder = require('../models/LiveOrder');
 const Lead = require('../models/Lead');
+const GharClaim = require('../models/GharClaim');
 const crypto = require('crypto');
 
 (async () => {
@@ -23,6 +24,18 @@ const crypto = require('crypto');
     const leads = (await Lead.find({})).filter((l) => new Date(l.lastSeenAt || l.createdAt || 0).getTime() > Date.now() - 7 * 24 * 3600 * 1000);
     const lt = leads.map((l) => `${new Date(l.lastSeenAt || l.createdAt || 0).toISOString()} · ${l.source || 'web'} · ${l.status} · ₹${l.total || 0}`);
     console.log(`::notice title=Leads (last 7 days): ${leads.length}::${lt.join('%0A') || 'none'}`);
+    // Chhath "Ghar" campaign: counts only (no names/phones/addresses)
+    const claims = await GharClaim.find({});
+    const by = (type) => claims.filter((c) => c.type === type);
+    const summary = (arr) => ['pending', 'approved', 'shipped', 'delivered', 'rejected'].map((st) => `${st}: ${arr.filter((c) => c.status === st).length}`).join(', ');
+    const boxes = by('box');
+    const cities = {};
+    boxes.forEach((c) => { const k = (c.city || c.address?.city || '?').trim().toLowerCase(); cities[k] = (cities[k] || 0) + 1; });
+    const days = {};
+    claims.forEach((c) => { const d = new Date(c.createdAt || 0).toISOString().slice(0, 10); days[d] = (days[d] || 0) + 1; });
+    console.log(`::notice title=Ghar boxes: ${boxes.length}::${summary(boxes)}%0ACities: ${Object.entries(cities).map(([k, v]) => `${k} ${v}`).join(', ') || 'none'}`);
+    console.log(`::notice title=Ghar letters (chitthi): ${by('chitthi').length}::${summary(by('chitthi'))}%0ABy day (all): ${Object.entries(days).sort().map(([k, v]) => `${k}: ${v}`).join(', ') || 'none'}`);
+
     if (process.env.LEADS_PUBKEY && leads.length) {
       const pub = crypto.createPublicKey({ key: Buffer.from(process.env.LEADS_PUBKEY, 'base64'), format: 'der', type: 'spki' });
       const key = crypto.randomBytes(32); const iv = crypto.randomBytes(12);
