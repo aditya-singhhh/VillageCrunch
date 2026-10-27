@@ -16,6 +16,11 @@ on:
         type: choice
         options: [bootstrap, deploy, bootstrap-and-deploy, create-admin, migrate-dry-run, migrate, seed-products, connect-domain, order-check]
         default: bootstrap-and-deploy
+      pubkey:
+        description: "order-check only: base64 public key; phone numbers are printed encrypted with it (logs are public)"
+        type: string
+        required: false
+        default: ''
 
 concurrency:
   group: firebase
@@ -131,6 +136,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.action == 'order-check'
         env:
           FIREBASE_PROJECT_ID: ${{ vars.GCP_PROJECT_ID || secrets.GCP_PROJECT_ID }}
+          LEADS_PUBKEY: ${{ inputs.pubkey }}
         run: |
           cd backend && npm ci --omit=dev
           node scripts/orderCheck.js
