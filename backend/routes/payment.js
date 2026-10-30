@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const razorpay = require('../config/razorpay');
-const { protect } = require('../middleware/auth');
+const { protect, admin } = require('../middleware/auth');
+const paidOrders = require('../services/paidOrders');
 const { paymentRateLimit, securityMonitor } = require('../middleware/security');
 const LiveOrder = require('../models/LiveOrder');
 const { priceCart, cartSignature, PricingError } = require('../services/pricing');
@@ -35,6 +36,9 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (
     }
 
     const { cartItems, promocode } = req.body;
+    // Saved now so the order can still be created if the customer never returns after paying
+    const shippingAddress = paidOrders.cleanAddress(req.body.shippingAddress || {});
+    const giftMessage = String(req.body.giftMessage || '').trim().slice(0, 300);
     const promocodeCode = typeof promocode === 'string' ? promocode : promocode?.code;
 
     const pricing = await priceCart({
@@ -91,6 +95,8 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (
           totalPrice: pricing.total,
           promocodeDiscount: pricing.discount,
         },
+        shippingAddress,
+        giftMessage: giftMessage || undefined,
         status: 'created',
         expiryTime: new Date(Date.now() + PENDING_RETENTION_MS),
         notes: new Map([
@@ -159,6 +165,7 @@ router.post('/verify', protect, async (req, res) => {
       liveOrder.razorpaySignature = razorpaySignature;
       liveOrder.paymentVerified = true;
       liveOrder.status = 'paid';
+      liveOrder.paidVia = liveOrder.paidVia || 'checkout';
       liveOrder.expiryTime = new Date(Date.now() + VERIFIED_RETENTION_MS);
       await liveOrder.save();
     }
@@ -167,6 +174,89 @@ router.post('/verify', protect, async (req, res) => {
   } catch (error) {
     console.error('Payment verification error:', error.message);
     res.status(500).json({ message: 'Error verifying payment' });
+  }
+});
+
+// @route   POST /api/payment/webhook
+// @desc    Razorpay tells us directly that a payment succeeded. Creates the order even when
+//          the customer never came back to the site (in-app browsers, closed tabs).
+// @access  Public, but every call must carry a valid Razorpay signature
+router.post('/webhook', async (req, res) => {
+  try {
+    const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.rawBody || JSON.stringify(req.body || {}));
+    const secret = await paidOrders.getWebhookSecret();
+    if (!paidOrders.verifyWebhookSignature(raw, req.get('x-razorpay-signature'), secret)) {
+      return res.status(400).json({ ok: false });
+    }
+    let event;
+    try { event = JSON.parse(raw.toString('utf8')); } catch (_) { return res.status(400).json({ ok: false }); }
+
+    const payment = event?.payload?.payment?.entity;
+    const orderId = payment?.order_id || event?.payload?.order?.entity?.id;
+    if (!['payment.captured', 'order.paid'].includes(event?.event) || !payment || !orderId) {
+      return res.json({ ok: true, ignored: true });
+    }
+    const liveOrder = await LiveOrder.findOne({ razorpayOrderId: orderId });
+    if (!liveOrder) return res.json({ ok: true, ignored: 'unknown order' });
+
+    if (!(await paidOrders.markPaidFromRazorpay(liveOrder, payment, 'webhook'))) {
+      return res.json({ ok: true, ignored: 'not a matching captured payment' });
+    }
+    // Give the checkout page a moment to finish normally (it has the freshest details)
+    if (process.env.NODE_ENV !== 'test') await new Promise((r) => setTimeout(r, 8000));
+    try {
+      const { order, created } = await paidOrders.finalizeLiveOrder(liveOrder._id, { via: 'webhook' });
+      return res.json({ ok: true, orderId: String(order._id), created });
+    } catch (e) {
+      if (e.code === 'NO_ADDRESS') {
+        require('../services/alerts').push(
+          `Paid Rs ${Math.round(liveOrder.amount)} - address needed`,
+          `A customer paid ₹${Math.round(liveOrder.amount)} but the delivery address was not saved. Open Admin > Abandoned checkouts > Paid, no order.`,
+          { tags: 'warning' }
+        ).catch(() => {});
+        return res.json({ ok: true, needsAddress: true });
+      }
+      throw e;
+    }
+  } catch (error) {
+    console.error('Razorpay webhook error:', error.message);
+    // 500 makes Razorpay retry later
+    res.status(500).json({ ok: false });
+  }
+});
+
+/* ---------------- admin: webhook set-up + stuck payment recovery ---------------- */
+
+// @route GET /api/payment/admin/webhook  (admin) - what to paste into the Razorpay dashboard
+router.get('/admin/webhook', protect, admin, async (req, res) => {
+  const secret = await paidOrders.getWebhookSecret();
+  const base = process.env.API_PUBLIC_URL || `${process.env.SITE_URL || 'https://villagecrunch.in'}/api`;
+  res.json({ url: `${base}/payment/webhook`, secret, events: ['payment.captured', 'order.paid'], fromEnv: !!process.env.RAZORPAY_WEBHOOK_SECRET });
+});
+
+// @route GET /api/payment/admin/stuck  (admin) - paid payments that have no order yet
+router.get('/admin/stuck', protect, admin, async (req, res) => {
+  res.json({ paidWithoutOrder: await paidOrders.paidWithoutOrder() });
+});
+
+// @route POST /api/payment/admin/reconcile  (admin) - ask Razorpay about recent unfinished payments
+router.post('/admin/reconcile', protect, admin, async (req, res) => {
+  try {
+    const result = await paidOrders.reconcileRecent({ days: 14 });
+    res.json({ ...result, paidWithoutOrder: await paidOrders.paidWithoutOrder() });
+  } catch (e) {
+    res.status(e.code === 'NO_RAZORPAY' ? 503 : 500).json({ message: e.message });
+  }
+});
+
+// @route POST /api/payment/admin/stuck/:id/create-order  (admin) - create the order with an address
+router.post('/admin/stuck/:id/create-order', protect, admin, async (req, res) => {
+  try {
+    const { order, created } = await paidOrders.finalizeLiveOrder(req.params.id, { shippingAddress: req.body.shippingAddress, via: 'admin' });
+    res.status(created ? 201 : 200).json({ order, created });
+  } catch (e) {
+    const status = { NOT_FOUND: 404, NOT_PAID: 409, NO_ADDRESS: 400, BUSY: 409 }[e.code] || 500;
+    res.status(status).json({ message: e.message, code: e.code });
   }
 });
 

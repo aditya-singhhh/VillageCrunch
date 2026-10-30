@@ -86,6 +86,10 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
         { new: true }
       );
       if (!liveOrder) {
+        // The Razorpay webhook may already have created this order: return it instead of an error
+        const done = await LiveOrder.findOne({ razorpayOrderId, user: req.user._id, status: 'converted_to_order' });
+        const existing = done?.finalOrderId ? await Order.findById(String(done.finalOrderId)) : null;
+        if (existing) return res.status(200).json(existing);
         return res.status(402).json({
           message: 'We could not find a verified payment for this order. If you were charged, please contact support.',
           code: 'PAYMENT_NOT_VERIFIED',

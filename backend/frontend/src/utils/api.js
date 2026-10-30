@@ -146,10 +146,14 @@ export const getOrderStats = async () => {
 
 // ✅ Payments
 // The server computes the amount from the cart; only items + promocode are sent.
-export const createPaymentOrder = async (cartItems, promocode = null) => {
+// The delivery address is sent too, so the order can still be created if the customer
+// pays but never comes back to the site (the server is told by Razorpay directly).
+export const createPaymentOrder = async (cartItems, promocode = null, extra = {}) => {
   const { data } = await axios.post(`${API_URL}/payment/create-order`, {
     cartItems: cartItems.map((i) => ({ productId: i._id || i.productId || i.product, quantity: i.quantity })),
     promocode: promocode?.code || null,
+    shippingAddress: extra.shippingAddress,
+    giftMessage: extra.giftMessage,
   });
   return data;
 };
@@ -613,3 +617,8 @@ export const getLeads = async () => (await api.get('/leads')).data;
 export const updateLead = async (id, status) => (await api.put(`/leads/${id}`, { status })).data;
 export const getOrderAlerts = async () => (await api.get('/settings/alerts')).data;
 export const testOrderAlert = async () => (await api.post('/settings/alerts/test', {})).data;
+// Online payments: webhook set-up and recovery of paid payments that have no order
+export const getPaymentWebhookInfo = async () => (await api.get('/payment/admin/webhook')).data;
+export const getStuckPayments = async () => (await api.get('/payment/admin/stuck')).data;
+export const reconcilePayments = async () => (await api.post('/payment/admin/reconcile', {})).data;
+export const createOrderForPayment = async (id, shippingAddress) => (await api.post(`/payment/admin/stuck/${id}/create-order`, { shippingAddress })).data;

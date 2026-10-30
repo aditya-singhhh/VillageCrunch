@@ -96,6 +96,8 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' }, // product images are embedded cross-origin
   })
 );
+// Razorpay webhook needs the exact raw body to check its signature
+app.use('/api/payment/webhook', express.raw({ type: '*/*', limit: '200kb' }));
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 // Strip query operators ({"$gt": ""}) from user input and block HTTP parameter pollution

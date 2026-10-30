@@ -57,6 +57,18 @@ const liveOrderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order',
   },
+  // Saved when payment starts, so a paid order can be created even if the customer never
+  // comes back to the site after paying (Facebook/Instagram in-app browsers, closed tabs).
+  shippingAddress: {
+    name: String,
+    phone: String,
+    street: String,
+    city: String,
+    state: String,
+    pincode: String,
+  },
+  giftMessage: String,
+  paidVia: String, // 'checkout' | 'webhook' | 'reconcile' | 'admin'
   notes: {
     type: Map,
     of: String,
