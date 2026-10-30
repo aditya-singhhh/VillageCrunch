@@ -92,6 +92,10 @@ const settingsSchema = new mongoose.Schema({
 
   // Notifications - SIMPLIFIED TO MATCH FRONTEND
   // Phone alerts (ntfy topic is generated on first use)
+  // Razorpay webhook signing secret (generated on first use, pasted into Razorpay dashboard)
+  payments: {
+    webhookSecret: String,
+  },
   alerts: {
     ntfyTopic: String,
   },

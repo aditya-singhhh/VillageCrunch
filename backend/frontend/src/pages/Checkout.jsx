@@ -449,7 +449,17 @@ const Checkout = () => {
       await waitForRazorpay();
       
       // Create Razorpay order
-      const paymentOrderData = await createPaymentOrder(cartItems, appliedPromocode);
+      const paymentOrderData = await createPaymentOrder(cartItems, appliedPromocode, {
+        shippingAddress: {
+          name: (shippingInfo.name || '').trim(),
+          phone: (shippingInfo.phone || '').trim(),
+          street: (shippingInfo.street || '').trim(),
+          city: (shippingInfo.city || '').trim(),
+          state: (shippingInfo.state || '').trim(),
+          pincode: (shippingInfo.pincode || '').trim(),
+        },
+        giftMessage: isGift ? giftMessage : undefined,
+      });
 
       // Razorpay options with all payment methods
       const options = {

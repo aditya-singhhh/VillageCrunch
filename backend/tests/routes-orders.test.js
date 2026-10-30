@@ -199,10 +199,12 @@ test('online flow: server-priced Razorpay order -> signature verified -> exactly
   assert.equal(finalLive.status, 'converted_to_order');
   assert.equal(String(finalLive.finalOrderId), String(order.body._id));
 
-  // replaying the same payment cannot create a second order
+  // replaying the same payment cannot create a second order (it returns the existing one)
   const replay = await app.api('POST', '/api/orders', { items, shippingAddress: h.address, paymentInfo: { method: 'Online', razorpayOrderId: pay.body.orderId } }, buyer.token);
-  assert.equal(replay.status, 402);
+  assert.equal(replay.status, 200);
+  assert.equal(String(replay.body._id), String(order.body._id));
   assert.equal(await stockOf(p), 4);
+  assert.equal((await h.models.Order.find({})).filter((o) => o.paymentInfo?.razorpayOrderId === pay.body.orderId).length, 1);
 });
 
 test('online flow: a cart changed after payment is rejected without losing the payment', async () => {

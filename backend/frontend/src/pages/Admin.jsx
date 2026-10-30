@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import LeadsPanel from '../components/LeadsPanel';
 import OrderAlertsCard from '../components/OrderAlertsCard';
+import PaymentRecoveryCard from '../components/PaymentRecoveryCard';
 import {
   Package,
   Truck,
@@ -1042,6 +1043,7 @@ const saveSettings = async (e) => {
         <p className="text-ink-soft mb-6">Manage orders and customer inquiries</p>
 
         <OrderAlertsCard />
+        <PaymentRecoveryCard />
 
         {/* Tab Navigation */}
         <div className="border-b border-line mb-6 md:mb-8 overflow-x-auto scrollbar-none snap-x">

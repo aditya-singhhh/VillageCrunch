@@ -42,8 +42,10 @@ stub('../../config/sms', {
   sendCustomerOrderSMS: async () => {},
   sendSMS: async (phone, message) => void sent.sms.push({ phone, message }),
 });
+const razorpayPayments = {}; // orderId -> [payment]
 stub('../../config/razorpay', {
   orders: {
+    fetchPayments: async (orderId) => ({ items: razorpayPayments[orderId] || [] }),
     create: async (opts) => {
       razorpayCalls.push(opts);
       return { id: `order_${razorpayCalls.length}_${Date.now()}`, amount: opts.amount, currency: opts.currency };
@@ -78,6 +80,7 @@ const models = {
 
 function buildApp() {
   const app = express();
+  app.use('/api/payment/webhook', express.raw({ type: '*/*' }));
   app.use(express.json());
   app.use(mongoSanitize());
   const mount = (p, r) => app.use(p, require(r));
@@ -120,7 +123,15 @@ async function start() {
     try { json = text ? JSON.parse(text) : null; } catch (_) { json = text; }
     return { status: res.status, body: json };
   };
-  return { api, close: () => server.close() };
+  /** raw('POST', '/api/x', 'raw string body', { header: value }) -> { status, body } */
+  const raw = async (method, url, bodyText, headers = {}) => {
+    const res = await fetch(base + url, { method, headers: { 'Content-Type': 'application/json', ...headers }, body: bodyText });
+    const text = await res.text();
+    let json = null;
+    try { json = text ? JSON.parse(text) : null; } catch (_) { json = text; }
+    return { status: res.status, body: json };
+  };
+  return { api, raw, close: () => server.close() };
 }
 
 let seq = 0;
@@ -152,4 +163,4 @@ const address = { name: 'Asha', phone: '9876543210', street: '1 MG Road', city: 
 const razorpaySignature = (orderId, paymentId) =>
   crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET).update(`${orderId}|${paymentId}`).digest('hex');
 
-module.exports = { start, fake, models, sent, razorpayCalls, makeUser, makeAdmin, makeProduct, address, razorpaySignature, uniq };
+module.exports = { start, fake, models, sent, razorpayCalls, razorpayPayments, makeUser, makeAdmin, makeProduct, address, razorpaySignature, uniq };
