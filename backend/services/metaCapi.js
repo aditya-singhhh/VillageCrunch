@@ -76,6 +76,7 @@ async function sendPurchase(order, user = {}) {
     if (!order) return { ok: false, skipped: 'no order' };
     if (process.env.NODE_ENV === 'test' && !process.env.META_IN_TEST) return { ok: false, skipped: 'test' };
     if (order.tracking?.metaSentAt) return { ok: true, skipped: 'already sent' };
+    if (order.isTest) return { ok: false, skipped: 'test order' };
     const ageDays = (Date.now() - new Date(order.createdAt || Date.now()).getTime()) / 86400000;
     if (ageDays > 7) return { ok: false, skipped: 'older than 7 days' };
     const { token, pixelId } = await getConfig();

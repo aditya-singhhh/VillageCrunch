@@ -26,6 +26,8 @@ const orderSchema = new mongoose.Schema({
       weight: String,
     },
   ],
+  // Test orders are hidden from admin lists, totals and the customer's account (kept, not deleted)
+  isTest: { type: Boolean, default: false },
   // Ad attribution (Meta browser ids at checkout) and whether Meta was told about the sale
   tracking: {
     fbp: String,

@@ -131,6 +131,7 @@ const Admin = () => {
   const [contactFilterStatus, setContactFilterStatus] = useState('all');
   const [productFilterCategory, setProductFilterCategory] = useState('all');
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(null);
   const [savingProduct, setSavingProduct] = useState(false);
   const [addingProduct, setAddingProduct] = useState(false);
   const [expandedOrders, setExpandedOrders] = useState(new Set());
@@ -1500,6 +1501,24 @@ const saveSettings = async (e) => {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Remove test order (hidden, not deleted) */}
+              <div className="border-t pt-4 mb-4 flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-ink-soft">Test or dummy order? Remove it from lists, totals and the customer's account.</p>
+                <button
+                  onClick={async () => {
+                    if (confirmRemove !== selectedOrder._id) { setConfirmRemove(selectedOrder._id); return; }
+                    try {
+                      await axios.put(`${API_URL}/orders/${selectedOrder._id}/test`, { isTest: true }, { withCredentials: true });
+                      toast.success('Test order removed');
+                      setConfirmRemove(null); setShowModal(false); fetchOrders();
+                    } catch (e) { toast.error('Could not remove the order'); }
+                  }}
+                  className={`h-10 px-4 rounded-md text-sm font-semibold border-2 ${confirmRemove === selectedOrder._id ? 'bg-berry text-white border-berry' : 'border-berry text-berry hover:bg-berry-tint'}`}
+                >
+                  {confirmRemove === selectedOrder._id ? 'Tap again to remove' : 'Remove test order'}
+                </button>
               </div>
 
               {/* Status Update */}
