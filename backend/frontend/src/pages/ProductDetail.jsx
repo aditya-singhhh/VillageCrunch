@@ -16,6 +16,7 @@ import { imgSrc, imgProps } from '../utils/img';
 import { trackViewItem } from '../utils/analytics';
 import ImageLightbox from '../components/ImageLightbox';
 import ThekuaStory from '../components/ThekuaStory';
+import DeliveryEstimate from '../components/DeliveryEstimate';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -374,6 +375,13 @@ const ProductDetail = () => {
     ? allProducts.filter(p => p.packGroup === product.packGroup).sort((a, b) => (a.packOrder || 0) - (b.packOrder || 0))
     : [];
   const sizeOptions = packOptions.filter(p => !p.isBundle);
+  // Price per 100 g for each size, so the best-value pack can be shown clearly
+  const gramsOf = (w) => { const m = String(w || '').trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|gm|gms|gram|grams)$/); return m ? parseFloat(m[1]) * (m[2] === 'kg' ? 1000 : 1) : 0; };
+  const per100 = (o) => { const g = gramsOf(o.weight); return g && Number(o.price) ? (Number(o.price) / g) * 100 : null; };
+  const bestValue = sizeOptions.length > 1
+    ? sizeOptions.reduce((best, o) => (per100(o) && (!best || per100(o) < per100(best)) ? o : best), null)
+    : null;
+  const showBetterValue = bestValue && bestValue._id !== product._id && !product.isBundle && sizeOptions.some((o) => o._id === product._id);
   const bundleOptions = packOptions.filter(p => p.isBundle);
 
   const relatedProducts = allProducts
@@ -590,15 +598,18 @@ const ProductDetail = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {opts.map((o) => {
                         const active = o._id === product._id;
+                        const isBest = bestValue && o._id === bestValue._id;
+                        const unit = !o.isBundle && per100(o);
                         return (
                           <Link
                             key={o._id}
                             to={`/product/${o._id}`}
                             aria-current={active ? 'true' : undefined}
-                            className={`block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : 'border-line bg-white hover:border-brand/60'}`}
+                            className={`relative block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : isBest ? 'border-leaf bg-leaf-tint/40 hover:border-leaf' : 'border-line bg-white hover:border-brand/60'}`}
                           >
+                            {isBest && <span className="absolute -top-2.5 right-2 rounded-full bg-leaf px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">Best value</span>}
                             <span className="block text-sm font-semibold text-ink">{o.packLabel || o.weight}</span>
-                            <span className="block text-sm text-ink-soft">{formatINR(o.price)}</span>
+                            <span className="block text-sm text-ink-soft">{formatINR(o.price)}{unit ? <span className="text-xs text-ink-mute"> · {formatINR(unit)}/100 g</span> : null}</span>
                             {o.packNote && <span className="block text-xs font-semibold text-leaf">{o.packNote}</span>}
                           </Link>
                         );
@@ -618,6 +629,17 @@ const ProductDetail = () => {
                 {outOfStock ? 'Out of stock' : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
               </span>
             </div>
+            {showBetterValue && (
+              <Link to={`/product/${bestValue._id}`} className="mt-3 flex items-center justify-between gap-3 rounded-md border border-leaf/40 bg-leaf-tint/50 px-3 py-2 text-sm">
+                <span className="text-ink-soft">
+                  <b className="text-ink">{bestValue.packLabel || bestValue.weight}</b> for {formatINR(bestValue.price)}: just {formatINR(per100(bestValue))}/100 g{bestValue.packNote ? ` · ${bestValue.packNote}` : ''}
+                </span>
+                <span className="font-semibold text-leaf whitespace-nowrap">Choose →</span>
+              </Link>
+            )}
+
+            {!isMasalaProduct && <DeliveryEstimate />}
+
             {/* Description */}
             {product.description && (
               <div className="mt-4">
