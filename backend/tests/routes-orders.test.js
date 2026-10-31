@@ -295,3 +295,26 @@ test('live orders admin API: list is populated, stats are aggregated in JS', asy
   assert.ok(stats.body.totalOrders >= 1);
   assert.ok(stats.body.byStatus.created.count >= 1);
 });
+
+test('admin can hide a test order: gone from admin list, totals and the customer account; stock returned once; reversible', async () => {
+  const buyer = await h.makeUser();
+  const admin = await h.makeAdmin();
+  const p = await h.makeProduct({ price: 300, stock: 5 });
+  const o = await app.api('POST', '/api/orders', cod([{ product: String(p._id), quantity: 1 }]), buyer.token);
+  assert.equal(o.status, 201);
+  assert.equal(await stockOf(p), 4);
+  assert.equal((await app.api('PUT', `/api/orders/${o.body._id}/test`, { isTest: true }, buyer.token)).status, 403);
+  const r = await app.api('PUT', `/api/orders/${o.body._id}/test`, { isTest: true }, admin.token);
+  assert.equal(r.status, 200);
+  assert.equal(await stockOf(p), 5, 'stock returned');
+  await app.api('PUT', `/api/orders/${o.body._id}/test`, { isTest: true }, admin.token);
+  assert.equal(await stockOf(p), 5, 'not returned twice');
+  const list = await app.api('GET', '/api/orders', undefined, admin.token);
+  assert.equal(list.body.some((x) => String(x._id) === String(o.body._id)), false);
+  const withTest = await app.api('GET', '/api/orders?includeTest=1', undefined, admin.token);
+  assert.equal(withTest.body.some((x) => String(x._id) === String(o.body._id)), true, 'kept, not deleted');
+  const mine = await app.api('GET', '/api/orders/myorders', undefined, buyer.token);
+  assert.equal(mine.body.some((x) => String(x._id) === String(o.body._id)), false);
+  await app.api('PUT', `/api/orders/${o.body._id}/test`, { isTest: false }, admin.token);
+  assert.equal((await app.api('GET', '/api/orders', undefined, admin.token)).body.some((x) => String(x._id) === String(o.body._id)), true);
+});

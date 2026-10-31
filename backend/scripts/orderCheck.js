@@ -13,7 +13,7 @@ const crypto = require('crypto');
   await db.connect();
   try {
     const since = Date.now() - 3 * 24 * 3600 * 1000;
-    const orders = (await Order.find({})).filter((o) => new Date(o.createdAt).getTime() > since)
+    const orders = (await Order.find({})).filter((o) => !o.isTest && new Date(o.createdAt).getTime() > since)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     const lines = orders.map((o) => `${new Date(o.createdAt).toISOString()} · #${String(o.orderNumber || o._id).slice(-6)} · ₹${o.totalPrice ?? o.total ?? '?'} · ${o.paymentInfo?.method || '?'} · paid=${!!o.isPaid} · ${o.status}`);
     console.log(`::notice title=Orders (last 3 days): ${orders.length}::${lines.join('%0A') || 'none'}`);

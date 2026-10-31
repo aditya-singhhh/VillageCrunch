@@ -299,7 +299,7 @@ router.get('/myorders', protect, async (req, res) => {
     const orders = await Order.find({ user: req.user._id })
       .populate('items.product', 'name image')
       .sort({ createdAt: -1 });
-    res.json(orders);
+    res.json(orders.filter((o) => !o.isTest));
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -362,7 +362,27 @@ router.get('/', protect, admin, async (req, res) => {
       .populate('user', 'name email phone')
       .populate('items.product', 'name image price')
       .sort({ createdAt: -1 });
-    res.json(orders);
+    res.json(req.query.includeTest === '1' ? orders : orders.filter((o) => !o.isTest));
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// @route   PUT /api/orders/:id/test
+// @desc    Mark / unmark an order as a test order (hidden everywhere, not deleted) (Admin)
+// @access  Private/Admin
+router.put('/:id/test', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    const isTest = req.body?.isTest !== false;
+    // Hiding an order that still holds stock gives the stock back (once)
+    if (isTest && !order.isTest && order.status !== 'cancelled' && !order.isDelivered) {
+      await restoreStock(order.items.map((i) => ({ product: i.product, quantity: i.quantity })));
+    }
+    order.isTest = isTest;
+    await order.save();
+    res.json({ _id: order._id, isTest: order.isTest });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
