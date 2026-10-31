@@ -22,6 +22,31 @@ router.post('/alerts/test', protect, admin, async (req, res) => {
   res.json({ ok });
 });
 
+// @route GET /api/settings/meta-capi (admin) - is server-side Purchase tracking set up?
+router.get('/meta-capi', protect, admin, async (req, res) => {
+  const { token, pixelId } = await require('../services/metaCapi').getConfig();
+  res.json({ configured: !!token, pixelId, fromEnv: !!process.env.META_CAPI_TOKEN });
+});
+
+// @route PUT /api/settings/meta-capi (admin) - save the Conversions API token (never returned)
+router.put('/meta-capi', protect, admin, async (req, res) => {
+  const token = String(req.body?.token || '').trim();
+  const pixelId = String(req.body?.pixelId || '').trim();
+  if (token && !/^[A-Za-z0-9_-]{40,600}$/.test(token)) return res.status(400).json({ message: 'That does not look like a Meta access token' });
+  if (pixelId && !/^\d{10,20}$/.test(pixelId)) return res.status(400).json({ message: 'Pixel ID should be digits only' });
+  const s = await Settings.getSettings();
+  const cur = (s.toObject().metaCapi) || {};
+  s.metaCapi = { ...cur, ...(token ? { token } : {}), ...(pixelId ? { pixelId } : {}) };
+  await s.save();
+  const result = token ? await require('../services/metaCapi').backfill({ days: 7 }) : null;
+  res.json({ configured: !!(s.metaCapi.token), backfill: result });
+});
+
+// @route POST /api/settings/meta-capi/backfill (admin) - send recent orders Meta has not seen
+router.post('/meta-capi/backfill', protect, admin, async (req, res) => {
+  res.json(await require('../services/metaCapi').backfill({ days: 7 }));
+});
+
 router.get('/', async (req, res) => {
   try {
     const settings = await Settings.getSettings();
@@ -45,8 +70,11 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // Return all settings for admin
-    res.json(settings);
+    // Return all settings for admin (secrets removed)
+    const all = settings.toObject ? settings.toObject() : { ...settings };
+    if (all.metaCapi) all.metaCapi = { pixelId: all.metaCapi.pixelId, configured: !!all.metaCapi.token };
+    if (all.payments) all.payments = { webhookConfigured: !!all.payments.webhookSecret };
+    res.json(all);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

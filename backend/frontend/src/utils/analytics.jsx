@@ -29,11 +29,13 @@ export const event = (action, { event_category, event_label, value }) => {
 };
 
 // Facebook Pixel Helper Functions
-export const fbPixel = (eventType, data = {}) => {
+export const fbPixel = (eventType, data = {}, options) => {
   if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq('track', eventType, data);
+    if (options) window.fbq('track', eventType, data, options);
+    else window.fbq('track', eventType, data);
   }
 };
+
 
 // E-commerce tracking events
 export const trackPurchase = (purchaseData) => {
@@ -51,14 +53,14 @@ export const trackPurchase = (purchaseData) => {
     }))
   });
 
-  // Facebook Pixel Purchase
+  // Facebook Pixel Purchase (same event id as the server-side event, so Meta counts it once)
   fbPixel('Purchase', {
     value: purchaseData.value,
     currency: 'INR',
     content_ids: purchaseData.items.map(item => item.productId),
     content_type: 'product',
     num_items: purchaseData.items.length
-  });
+  }, { eventID: `order_${purchaseData.orderId}` });
 };
 
 export const trackAddToCart = (productData) => {
@@ -161,6 +163,17 @@ export const usePageTracking = () => {
     
     // Facebook Pixel page view
     fbPixel('PageView');
+
+    // Remember the ad click id (fbclid) so the order can be matched to the ad later,
+    // even if the visitor browses a few pages first.
+    try {
+      const id = new URLSearchParams(location.search).get('fbclid');
+      if (id) {
+        const fbc = `fb.1.${Date.now()}.${id}`;
+        sessionStorage.setItem('vc-fbc', fbc);
+        localStorage.setItem('vc-fbc', fbc);
+      }
+    } catch (_) { /* ignore */ }
     
   }, [location]);
 };

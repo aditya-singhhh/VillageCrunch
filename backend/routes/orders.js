@@ -179,6 +179,11 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
         : undefined,
       promocodeDiscount: round2(amounts.promocodeDiscount),
       status: 'confirmed',
+      tracking: (() => {
+        const t = require('../services/metaCapi').trackingFrom(req);
+        const lt = liveOrder?.tracking || {};
+        return { fbp: t.fbp || lt.fbp, fbc: t.fbc || lt.fbc, ip: t.ip || lt.ip, ua: t.ua || lt.ua };
+      })(),
     };
 
     if (method === 'cod') {
@@ -235,6 +240,8 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
 
     // 🔔 Instant phone alert to the shop owner (independent of email/SMS below)
     require('../services/alerts').newOrderAlert(order).catch(() => {});
+    // Tell Meta about the sale from the server (same event id as the browser pixel)
+    require('../services/metaCapi').sendPurchase(order, { name: req.user.name, email: req.user.email, phone: req.user.phone }).catch(() => {});
 
     // 📧📱 Send notifications (don't let notification failures affect order creation)
     try {
