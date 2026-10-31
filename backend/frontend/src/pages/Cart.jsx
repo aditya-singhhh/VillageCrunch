@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { tryAutoFirst, markAutoPromoRemoved } from '../utils/autoPromo';
+import FreeDeliveryNudge from '../components/FreeDeliveryNudge';
 import { validatePromocode, calculateOrderTotal, getSettings } from '../utils/api';
 import toast from 'react-hot-toast';
 import { imgSrc, imgProps } from '../utils/img';
@@ -72,10 +73,12 @@ const Cart = () => {
   }, [cartItems, appliedPromocode]);
 
   // First order? Apply FIRST (free delivery) automatically; the server checks eligibility
-  const autoTried = useRef(false);
+  // (tried again whenever the cart total changes, e.g. after topping up to the minimum)
+  const autoTried = useRef(null);
   useEffect(() => {
-    if (appliedPromocode || autoTried.current || !cartItems.length) return;
-    autoTried.current = true;
+    const total = cartItems.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+    if (appliedPromocode || autoTried.current === total || !cartItems.length) return;
+    autoTried.current = total;
     tryAutoFirst(cartItems, user?._id).then((p) => { if (p) setAppliedPromocode((cur) => cur || p); });
   }, [cartItems, appliedPromocode, user]);
 
@@ -271,7 +274,6 @@ const Cart = () => {
   }
 
   const freeThreshold = settings?.pricing?.shippingCharges?.standard?.freeShippingThreshold;
-  const remainingForFree = freeThreshold ? Math.max(0, freeThreshold - subtotal) : 0;
   const idOf = (item) => (user ? item._id : item.cartItemId);
 
   return (
@@ -282,14 +284,7 @@ const Cart = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)] gap-6 lg:gap-10 items-start [&>*]:min-w-0">
           {/* Items */}
           <div className="space-y-5">
-            {shipping > 0 && freeThreshold > 0 && remainingForFree > 0 && (
-              <div className="panel !p-4">
-                <p className="text-sm text-ink">Add <strong>{formatINR(remainingForFree)}</strong> more for free delivery</p>
-                <div className="mt-2 h-2 rounded-full bg-cream overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={freeThreshold} aria-valuenow={Math.min(subtotal, freeThreshold)} aria-label="Progress to free delivery">
-                  <div className="h-full bg-leaf" style={{ width: `${Math.min(100, (subtotal / freeThreshold) * 100)}%` }} />
-                </div>
-              </div>
-            )}
+            <FreeDeliveryNudge subtotal={subtotal} shipping={shipping} freeThreshold={freeThreshold} userId={user?._id} />
 
             <ul className="bg-white rounded-lg border border-line shadow-card divide-y divide-line">
               {cartItems.map((item) => (

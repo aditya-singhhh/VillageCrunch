@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { imgSrc, imgProps } from '../utils/img';
 import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
 import { tryAutoFirst } from '../utils/autoPromo';
+import FreeDeliveryNudge from '../components/FreeDeliveryNudge';
 
 // Utility function to wait for Razorpay to load
 const waitForRazorpay = () => {
@@ -119,10 +120,18 @@ const Checkout = () => {
 
 
   // Came straight here (e.g. from "Checkout →")? Apply FIRST automatically if eligible
-  const autoTried = useRef(false);
+  // Cart changed on this page (e.g. topped up for free delivery): recalculate the totals
+  const cartKey = cartItems.map((i) => `${i._id}x${i.quantity}`).join(',');
+  const lastCartKey = useRef(cartKey);
   useEffect(() => {
-    if (appliedPromocode || autoTried.current || !cartItems.length) return;
-    autoTried.current = true;
+    if (lastCartKey.current !== cartKey) { lastCartKey.current = cartKey; setOrderTotals(null); }
+  }, [cartKey]);
+
+  const autoTried = useRef(null);
+  useEffect(() => {
+    const cartTotal = cartItems.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+    if (appliedPromocode || autoTried.current === cartTotal || !cartItems.length) return;
+    autoTried.current = cartTotal;
     tryAutoFirst(cartItems, user?._id).then((p) => {
       if (p) { setAppliedPromocode((cur) => cur || p); setOrderTotals(null); }
     });
@@ -781,6 +790,10 @@ const Checkout = () => {
           </summary>
           <div className="px-4 pb-4">{summaryRows}</div>
         </details>
+
+        <div className="mb-5 max-w-xl lg:max-w-none">
+          <FreeDeliveryNudge subtotal={subtotal} shipping={shipping} freeThreshold={settings?.pricing?.shippingCharges?.standard?.freeShippingThreshold} userId={user?._id} compact />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] [&>*]:min-w-0 gap-6 lg:gap-10 items-start">
           <form id="checkout-form" onSubmit={handlePayment} className="space-y-5 max-w-xl lg:max-w-none">
