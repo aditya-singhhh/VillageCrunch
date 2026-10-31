@@ -154,6 +154,7 @@ async function finalizeLiveOrder(liveOrderId, { shippingAddress, via = 'webhook'
       })),
       shippingAddress: address,
       giftMessage: live.giftMessage || undefined,
+      tracking: live.tracking ? { fbp: live.tracking.fbp, fbc: live.tracking.fbc, ip: live.tracking.ip, ua: live.tracking.ua } : undefined,
       itemsPrice: round2(pb.itemsPrice ?? live.amount),
       shippingPrice: round2(pb.shippingPrice ?? 0),
       taxPrice: round2(pb.taxPrice ?? 0),
@@ -193,6 +194,7 @@ async function finalizeLiveOrder(liveOrderId, { shippingAddress, via = 'webhook'
   }
   try { require('../routes/leads').markConverted(address.phone || live.userInfo?.phone, order._id); } catch (_) { /* optional */ }
   require('./alerts').newOrderAlert(order).catch(() => {});
+  require('./metaCapi').sendPurchase(order, { name: live.userInfo?.name, email: live.userInfo?.email, phone: live.userInfo?.phone }).catch(() => {});
   notifyCustomer(order, live).catch(() => {});
 
   return { order, created: true };

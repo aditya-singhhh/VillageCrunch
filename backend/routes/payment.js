@@ -97,6 +97,7 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (
         },
         shippingAddress,
         giftMessage: giftMessage || undefined,
+        tracking: require('../services/metaCapi').trackingFrom(req),
         status: 'created',
         expiryTime: new Date(Date.now() + PENDING_RETENTION_MS),
         notes: new Map([

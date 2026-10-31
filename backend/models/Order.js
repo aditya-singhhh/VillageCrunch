@@ -26,6 +26,14 @@ const orderSchema = new mongoose.Schema({
       weight: String,
     },
   ],
+  // Ad attribution (Meta browser ids at checkout) and whether Meta was told about the sale
+  tracking: {
+    fbp: String,
+    fbc: String,
+    ip: String,
+    ua: String,
+    metaSentAt: Date,
+  },
   // Optional message printed on the gift card in the box
   giftMessage: { type: String, trim: true, maxlength: 300 },
   shippingAddress: {

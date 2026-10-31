@@ -68,6 +68,7 @@ const liveOrderSchema = new mongoose.Schema({
     pincode: String,
   },
   giftMessage: String,
+  tracking: { fbp: String, fbc: String, ip: String, ua: String },
   paidVia: String, // 'checkout' | 'webhook' | 'reconcile' | 'admin'
   notes: {
     type: Map,

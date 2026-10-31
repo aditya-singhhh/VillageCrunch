@@ -86,7 +86,7 @@ export const markReviewHelpful = async (productId, reviewId, helpful) => {
 
 // ✅ Orders (User)
 export const createOrder = async (orderData) => {
-  const { data } = await axios.post(`${API_URL}/orders`, orderData);
+  const { data } = await axios.post(`${API_URL}/orders`, { ...orderData, meta: storedMetaIds() });
   return data;
 };
 
@@ -144,6 +144,16 @@ export const getOrderStats = async () => {
   return data;
 };
 
+// Meta browser ids (_fbp/_fbc); _fbc is remembered from the ad click landing page
+const storedMetaIds = () => {
+  try {
+    const get = (n) => (document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)')) || [])[1];
+    let fbc = get('_fbc') && decodeURIComponent(get('_fbc'));
+    if (!fbc) fbc = sessionStorage.getItem('vc-fbc') || localStorage.getItem('vc-fbc') || undefined;
+    return { fbp: get('_fbp') ? decodeURIComponent(get('_fbp')) : undefined, fbc };
+  } catch (_) { return {}; }
+};
+
 // ✅ Payments
 // The server computes the amount from the cart; only items + promocode are sent.
 // The delivery address is sent too, so the order can still be created if the customer
@@ -154,6 +164,7 @@ export const createPaymentOrder = async (cartItems, promocode = null, extra = {}
     promocode: promocode?.code || null,
     shippingAddress: extra.shippingAddress,
     giftMessage: extra.giftMessage,
+    meta: storedMetaIds(),
   });
   return data;
 };
@@ -621,4 +632,6 @@ export const testOrderAlert = async () => (await api.post('/settings/alerts/test
 export const getPaymentWebhookInfo = async () => (await api.get('/payment/admin/webhook')).data;
 export const getStuckPayments = async () => (await api.get('/payment/admin/stuck')).data;
 export const reconcilePayments = async () => (await api.post('/payment/admin/reconcile', {})).data;
+export const getMetaCapi = async () => (await api.get('/settings/meta-capi')).data;
+export const saveMetaCapi = async (token) => (await api.put('/settings/meta-capi', { token })).data;
 export const createOrderForPayment = async (id, shippingAddress) => (await api.post(`/payment/admin/stuck/${id}/create-order`, { shippingAddress })).data;

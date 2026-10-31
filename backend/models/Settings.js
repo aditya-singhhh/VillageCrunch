@@ -96,6 +96,11 @@ const settingsSchema = new mongoose.Schema({
   payments: {
     webhookSecret: String,
   },
+  // Meta Conversions API (server-side Purchase events). The token is write-only from admin.
+  metaCapi: {
+    pixelId: String,
+    token: String,
+  },
   alerts: {
     ntfyTopic: String,
   },
