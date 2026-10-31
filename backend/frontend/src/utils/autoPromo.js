@@ -42,3 +42,19 @@ function pick(code, v) {
     auto: true,
   };
 }
+
+/**
+ * If the shopper can still get first-order free delivery but the cart is below its minimum,
+ * return that minimum (e.g. 399). Otherwise null (already applied, already used, or none).
+ */
+export async function firstOrderMinimum(cartItems = [], userId) {
+  try {
+    if (!cartItems.length) return null;
+    const subtotal = cartItems.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+    const products = cartItems.map((i) => ({ productId: i._id, quantity: i.quantity, price: i.price, category: i.category }));
+    const cats = [...new Set(cartItems.map((i) => i.category))];
+    const v = await validatePromocode(AUTO_CODE, subtotal, products, cats, userId);
+    if (!v?.valid && Number(v?.minOrderValue) > subtotal) return Number(v.minOrderValue);
+    return null;
+  } catch (_) { return null; }
+}
