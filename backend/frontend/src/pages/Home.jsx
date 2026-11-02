@@ -142,7 +142,7 @@ const Home = () => {
               <div className="p-5 md:p-10">
                 <p className="text-xs font-semibold tracking-[0.14em] uppercase text-brand">Jaggery &amp; desi ghee · no maida</p>
                 <h2 id="pack-title" className="font-display font-semibold text-2xl md:text-4xl text-ink mt-2">Gaon ka swad, shehar ke liye</h2>
-                <p className="text-ink/75 mt-3 max-w-md">Bihar&apos;s Chhath prasad, made with whole wheat atta, jaggery and desi ghee. Natural ingredients, no preservatives, direct to your home.</p>
+                <p className="text-ink/75 mt-3 max-w-md">Bihar&apos;s traditional thekua, the kind families make at home for Chhath. Whole wheat atta, jaggery and desi ghee. Natural ingredients, no preservatives, direct to your home.</p>
                 <ul className="mt-5 grid grid-cols-3 gap-3 max-w-md">
                   {[['200 g', 'thekua-200', '697a51ed6d805b30e09a52e1', '₹219'], ['400 g', 'thekua-400', '697a51ed6d805b30e09a52dc', '₹399'], ['800 g', 'thekua-800', '697a51ed6d805b30e09a52e2', '₹749']].map(([n, k, id, pr]) => (
                     <li key={k}>
