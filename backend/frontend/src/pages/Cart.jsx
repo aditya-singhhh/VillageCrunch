@@ -4,7 +4,8 @@ import { formatINR } from '../utils/format';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
-import { tryAutoFirst, markAutoPromoRemoved } from '../utils/autoPromo';
+import { tryAutoFirst, markAutoPromoRemoved, OFFER_CODES } from '../utils/autoPromo';
+import AvailableOffers from '../components/AvailableOffers';
 import FreeDeliveryNudge from '../components/FreeDeliveryNudge';
 import { validatePromocode, calculateOrderTotal, getSettings } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -97,8 +98,9 @@ const Cart = () => {
   const total = orderTotals?.total ?? (subtotal + shipping + taxAdded - promocodeDiscount);
 
   // Apply promocode
-  const applyPromocode = async () => {
-    if (!promocodeInput.trim()) {
+  const applyPromocode = async (codeArg) => {
+    const code = (typeof codeArg === 'string' ? codeArg : promocodeInput).trim().toUpperCase();
+    if (!code) {
       setPromocodeStatus({ type: 'error', message: 'Please enter a promocode' });
       return;
     }
@@ -116,7 +118,7 @@ const Cart = () => {
 
       // Validate promocode
       const validation = await validatePromocode(
-        promocodeInput.toUpperCase(),
+        code,
         subtotal,
         cartProducts,
         [...new Set(cartItems.map(item => item.category))], // unique categories
@@ -126,7 +128,7 @@ const Cart = () => {
       if (validation.valid) {
         // Calculate new order total with promocode object
         const promocodeData = {
-          code: promocodeInput.toUpperCase(),
+          code: code,
           type: validation.promocode.type || validation.promocode.discountType,
           discount: validation.discount
         };
@@ -138,7 +140,7 @@ const Cart = () => {
         );
 
         setAppliedPromocode({
-          code: promocodeInput.toUpperCase(),
+          code: code,
           description: validation.promocode.description,
           discount: validation.discount,
           discountType: validation.promocode.type || validation.promocode.discountType // Handle both field names
@@ -147,7 +149,7 @@ const Cart = () => {
         setPromocodeInput('');
         setPromocodeStatus(null); // Clear any previous status
         
-        toast.success(`Promocode applied! You saved ${formatINR(validation.discount)}`);
+        toast.success(validation.discount > 0 ? `Promocode applied! You saved ${formatINR(validation.discount)}` : `${code} applied`);
       } else {
         // Handle validation failure (valid: false)
         let statusMessage = '';
@@ -339,7 +341,15 @@ const Cart = () => {
               <h2 className="flex items-center gap-2 font-semibold text-ink mb-3">
                 <Tag className="w-4 h-4" aria-hidden="true" /> Have a promo code?
               </h2>
-              {appliedPromocode ? (
+              <AvailableOffers
+                cartItems={cartItems}
+                userId={user?._id}
+                appliedCode={appliedPromocode?.code}
+                onApply={(c) => applyPromocode(c)}
+                onRemove={removePromocode}
+                busy={promocodeLoading}
+              />
+              {appliedPromocode && OFFER_CODES.includes(appliedPromocode.code) ? null : appliedPromocode ? (
                 <div className="flex items-center justify-between gap-3 bg-leaf-tint border border-leaf/30 rounded-md px-3 py-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <CheckCircle className="w-5 h-5 text-leaf flex-shrink-0" aria-hidden="true" />
@@ -371,7 +381,7 @@ const Cart = () => {
                       disabled={promocodeLoading}
                     />
                     <button
-                      onClick={applyPromocode}
+                      onClick={() => applyPromocode()}
                       disabled={promocodeLoading || !promocodeInput.trim()}
                       className="btn-secondary flex-shrink-0 px-5"
                       aria-busy={promocodeLoading}
