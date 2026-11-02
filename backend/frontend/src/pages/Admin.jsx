@@ -35,6 +35,7 @@ import {
   Settings,
   BarChart3,
   ShoppingBag,
+  Copy,
 } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -61,6 +62,59 @@ import {
 } from '../utils/api';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
+
+/** Shipping label text for an order: name, address, pincode, phone. */
+const shippingLabel = (a = {}) => {
+  const line = [a.street, a.city, a.state].map((s) => String(s || '').trim()).filter(Boolean).join(', ');
+  return [a.name, `${line}${a.pincode ? ` - ${a.pincode}` : ''}`, a.phone ? `Ph: ${a.phone}` : '']
+    .filter((s) => String(s).trim()).join('\n');
+};
+
+const waNumber = (phone) => {
+  const d = String(phone || '').replace(/\D/g, '');
+  return d.length === 10 ? `91${d}` : d;
+};
+
+/** Delivery address shown right in the orders list, with copy / call / WhatsApp. */
+const OrderAddress = ({ address, compact = false }) => {
+  if (!address || !(address.street || address.city || address.pincode)) {
+    return <p className="text-xs text-action-dark">No delivery address</p>;
+  }
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(shippingLabel(address));
+      toast.success('Address copied');
+    } catch {
+      toast.error('Could not copy. Select the text instead.');
+    }
+  };
+  return (
+    <div className={compact ? 'mt-2 text-sm' : 'text-sm'}>
+      <p className="flex gap-1.5 text-ink-soft">
+        <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-leaf" aria-hidden="true" />
+        <span className="break-words select-text">
+          {[address.street, address.city, address.state].filter(Boolean).join(', ')}
+          {address.pincode && <> &ndash; <strong className="text-ink tabular-nums">{address.pincode}</strong></>}
+        </span>
+      </p>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        <button type="button" onClick={copy} className="btn-secondary btn-sm">
+          <Copy className="w-3.5 h-3.5" aria-hidden="true" /> Copy address
+        </button>
+        {address.phone && (
+          <>
+            <a href={`tel:${address.phone}`} className="btn-secondary btn-sm">
+              <Phone className="w-3.5 h-3.5" aria-hidden="true" /> Call
+            </a>
+            <a href={`https://wa.me/${waNumber(address.phone)}`} target="_blank" rel="noopener noreferrer" className="btn-secondary btn-sm">
+              <MessageSquare className="w-3.5 h-3.5" aria-hidden="true" /> WhatsApp
+            </a>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const Admin = () => {
   // ✅ Helper functions for image handling
@@ -1200,6 +1254,7 @@ const saveSettings = async (e) => {
                       </div>
                       <p className="font-semibold tabular-nums whitespace-nowrap">{formatINR(order.totalPrice)}</p>
                     </div>
+                    <OrderAddress address={order.shippingAddress} compact />
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${order.isPaid ? 'bg-leaf-tint text-leaf' : 'bg-action-tint text-action-dark'}`}>
                         {order.paymentInfo.method.toUpperCase()}
@@ -1244,6 +1299,7 @@ const saveSettings = async (e) => {
                           <p className="font-medium text-ink">{order.user?.name || order.shippingAddress?.name}</p>
                           <p className="text-sm text-ink-soft">{order.user?.email}</p>
                           <p className="text-sm text-ink-mute">{order.user?.phone || order.shippingAddress?.phone}</p>
+                          <div className="pt-1 max-w-xs"><OrderAddress address={order.shippingAddress} /></div>
                         </div>
                       </td>
                       <td className="px-4 py-4 text-sm">{new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
@@ -1392,9 +1448,7 @@ const saveSettings = async (e) => {
                     <div className="space-y-2 text-sm">
                       <p><strong>Deliver To:</strong> {selectedOrder.shippingAddress?.name}</p>
                       <p><Phone className="w-4 h-4 inline mr-2" />{selectedOrder.shippingAddress?.phone}</p>
-                      <p><MapPin className="w-4 h-4 inline mr-2" />
-                        {selectedOrder.shippingAddress?.street}, {selectedOrder.shippingAddress?.city}, {selectedOrder.shippingAddress?.state} - {selectedOrder.shippingAddress?.pincode}
-                      </p>
+                      <OrderAddress address={selectedOrder.shippingAddress} />
                       {selectedOrder.giftMessage && (
                         <p className="mt-2 rounded bg-cream px-3 py-2"><strong>🎁 Gift card message:</strong> {selectedOrder.giftMessage}</p>
                       )}
