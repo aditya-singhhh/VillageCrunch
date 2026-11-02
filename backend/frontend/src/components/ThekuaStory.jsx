@@ -4,7 +4,7 @@ import { imgProps } from '../utils/img';
 import useStoreSettings from '../hooks/useStoreSettings';
 
 const STEPS = [
-  ['Gud wala atta', 'Whole wheat atta, jaggery, coconut, saunf and elaichi. No maida, no refined sugar.'],
+  ['Gud wala atta', 'Whole wheat atta, jaggery, coconut, kishmish, saunf and elaichi. No maida, no refined sugar.'],
   ['Pressed in a wooden sancha', 'Each piece is pressed by hand in a wooden mould, the way it is made for Chhath at home.'],
   ['Fried in desi ghee after you order', 'We make your batch only after the order comes in, then pack and ship it in 1–2 days.'],
 ];
