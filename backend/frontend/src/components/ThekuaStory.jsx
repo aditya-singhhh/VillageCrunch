@@ -4,7 +4,7 @@ import { imgProps } from '../utils/img';
 import useStoreSettings from '../hooks/useStoreSettings';
 
 const STEPS = [
-  ['Gud wala atta', 'Whole wheat atta, jaggery, coconut, kishmish, saunf and elaichi. No maida, no refined sugar.'],
+  ['Gud wala atta', 'Whole wheat atta, jaggery, coconut, saunf and elaichi. No maida, no refined sugar.'],
   ['Pressed in a wooden sancha', 'Each piece is pressed by hand in a wooden mould, the way it is made for Chhath at home.'],
   ['Fried in desi ghee after you order', 'We make your batch only after the order comes in, then pack and ship it in 1–2 days.'],
 ];
@@ -13,7 +13,7 @@ const FAQ = (cod) => [
   ['When will it ship?', 'We fry your thekua fresh after the order comes in and dispatch it in 1–2 days. Enter your PIN code above to see the delivery date for your city.'],
   ['How do I pay? Is it safe?', <>Pay by <b>UPI, card or net banking</b> on Razorpay's secure page: we never see your card or UPI details. Prefer to pay when it arrives? <b>Cash on delivery</b> is available too{cod ? ` (₹${cod} extra)` : ''}. Choose it at checkout.</>],
   ['What if something is wrong with my order?', <>If your pack arrives damaged, broken or not as expected, send us a photo within 7 days of delivery. We will <b>send a fresh pack or refund you in full</b>, your choice. See our <Link to="/returns-policy" className="text-action underline underline-offset-2">returns policy</Link>.</>],
-  ['What is in it?', 'Whole wheat atta, jaggery (gur), desi ghee, dry coconut, kishmish (raisins), saunf and elaichi. Contains wheat and milk. No preservatives.'],
+  ['What is in it?', 'Whole wheat atta, jaggery (gur), desi ghee, dry coconut, saunf and elaichi. Contains wheat and milk. No preservatives.'],
   ['How should I store it?', 'Keep it in an airtight container in a cool, dry place, away from sunlight. Close the pack well after opening. Best within 45 days of the fry date on the pack.'],
 ];
 
