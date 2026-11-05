@@ -95,15 +95,17 @@ const parseKg = (w) => {
 /**
  * Weight (kg, incl. ~100 g packing) and box size (cm) for an order.
  * Couriers bill in 500 g slabs and also by volume (L x B x H / 5000).
- * Current box: 9.5 x 6.5 x 4.5 inch = 24.1 x 16.5 x 11.4 cm (0.91 kg by volume, so the 1 kg slab).
- * A box of 2,500 cm3 or less (e.g. 9 x 6.5 x 2.5 inch) would keep a 400 g order in the 0.5 kg slab.
+ * - Up to 0.5 kg (one 400 g pack): box cut down to 9.5 x 6.5 inch x 6 cm high
+ *   = 24.1 x 16.5 x 6 cm = 0.48 kg by volume, so it stays in the 0.5 kg slab.
+ * - Heavier (800 g, or 2+ packs): full box 9.5 x 6.5 x 4.5 inch = 24.1 x 16.5 x 11.4 cm (0.91 kg).
  * Weigh the packed parcel and edit the weight in admin if it is heavier.
  */
-const BOX = { length: 24.1, breadth: 16.5, height: 11.4 };
+const SMALL_BOX = { length: 24.1, breadth: 16.5, height: 6 };
+const BIG_BOX = { length: 24.1, breadth: 16.5, height: 11.4 };
 function parcelFor(order) {
   const contents = (order.items || []).reduce((s, i) => s + parseKg(i.weight) * (Number(i.quantity) || 1), 0);
   const weight = Math.max(0.5, Math.round((contents + 0.1) * 100) / 100);
-  return { weight, ...BOX };
+  return { weight, ...(weight <= 0.5 ? SMALL_BOX : BIG_BOX) };
 }
 
 const isCod = (order) => order.paymentInfo?.method === 'cod';

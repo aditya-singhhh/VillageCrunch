@@ -107,5 +107,7 @@ test('parcel weight comes from pack sizes plus packing', () => {
   assert.equal(sr.parseKg('400g'), 0.4);
   assert.equal(sr.parseKg('0.8 kg'), 0.8);
   assert.deepEqual(sr.parcelFor({ items: [{ weight: '800g', quantity: 1 }] }), { weight: 0.9, length: 24.1, breadth: 16.5, height: 11.4 });
-  assert.equal(sr.parcelFor({ items: [{ weight: '400g', quantity: 1 }] }).weight, 0.5);
+  assert.deepEqual(sr.parcelFor({ items: [{ weight: '400g', quantity: 1 }] }), { weight: 0.5, length: 24.1, breadth: 16.5, height: 6 });
+  const small = sr.parcelFor({ items: [{ weight: '400g', quantity: 1 }] });
+  assert.ok((small.length * small.breadth * small.height) / 5000 <= 0.5, 'small box stays in the 0.5 kg slab');
 });
