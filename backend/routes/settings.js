@@ -81,6 +81,63 @@ router.put('/shiprocket', protect, admin, async (req, res) => {
   res.json({ configured: !!(next.email && next.password), email: next.email || '', pickupLocation: next.pickupLocation || 'Home', pickupPincode: next.pickupPincode || '811212' });
 });
 
+// ---------- WhatsApp order updates (admin) ----------
+const waInfo = async () => {
+  const wa = require('../services/whatsapp');
+  const c = await wa.getConfig();
+  return {
+    configured: !!(c.token && c.phoneNumberId),
+    enabled: c.enabled,
+    phoneNumberId: c.phoneNumberId || '',
+    wabaId: c.wabaId || '',
+    supportPhone: c.supportPhone || '',
+    templates: Object.fromEntries(Object.entries(wa.TEMPLATES).map(([k, t]) => [k, { name: t.name, text: t.text }])),
+  };
+};
+
+// @route GET /api/settings/whatsapp (admin)
+router.get('/whatsapp', protect, admin, async (req, res) => {
+  const info = await waInfo();
+  if (req.query.status === '1' && info.configured) {
+    try { info.status = await require('../services/whatsapp').templateStatus(); } catch (_) { /* optional */ }
+  }
+  res.json(info);
+});
+
+// @route PUT /api/settings/whatsapp (admin) - token is write-only
+router.put('/whatsapp', protect, admin, async (req, res) => {
+  const b = req.body || {};
+  const token = String(b.token || '').trim();
+  const phoneNumberId = String(b.phoneNumberId || '').trim();
+  const wabaId = String(b.wabaId || '').trim();
+  const supportPhone = String(b.supportPhone || '').replace(/[^\d+ ]/g, '').trim();
+  if (token && !/^[A-Za-z0-9_-]{40,600}$/.test(token)) return res.status(400).json({ message: 'That does not look like a Meta access token' });
+  if (phoneNumberId && !/^\d{8,25}$/.test(phoneNumberId)) return res.status(400).json({ message: 'Phone number ID should be digits only' });
+  if (wabaId && !/^\d{8,25}$/.test(wabaId)) return res.status(400).json({ message: 'WhatsApp Business account ID should be digits only' });
+  const s = await Settings.getSettings();
+  const cur = s.toObject().whatsapp || {};
+  s.whatsapp = {
+    ...cur,
+    ...(token ? { token } : {}),
+    ...(phoneNumberId ? { phoneNumberId } : {}),
+    ...(wabaId ? { wabaId } : {}),
+    ...(supportPhone ? { supportPhone } : {}),
+    ...(typeof b.enabled === 'boolean' ? { enabled: b.enabled } : {}),
+  };
+  await s.save();
+  res.json(await waInfo());
+});
+
+// @route POST /api/settings/whatsapp/templates (admin) - submit the 3 templates to Meta
+router.post('/whatsapp/templates', protect, admin, async (req, res) => {
+  try { res.json(await require('../services/whatsapp').createTemplates()); } catch (e) { res.status(400).json({ message: e.message }); }
+});
+
+// @route POST /api/settings/whatsapp/test (admin) - send a sample message to a number
+router.post('/whatsapp/test', protect, admin, async (req, res) => {
+  try { res.json({ id: await require('../services/whatsapp').sendTest(req.body?.phone) }); } catch (e) { res.status(400).json({ message: e.message }); }
+});
+
 // @route POST /api/settings/meta-capi/backfill (admin) - send recent orders Meta has not seen
 router.post('/meta-capi/backfill', protect, admin, async (req, res) => {
   res.json(await require('../services/metaCapi').backfill({ days: 7 }));
@@ -112,6 +169,7 @@ router.get('/', async (req, res) => {
     // Return all settings for admin (secrets removed)
     const all = settings.toObject ? settings.toObject() : { ...settings };
     if (all.metaCapi) all.metaCapi = { pixelId: all.metaCapi.pixelId, configured: !!all.metaCapi.token };
+    if (all.whatsapp) all.whatsapp = { phoneNumberId: all.whatsapp.phoneNumberId, configured: !!all.whatsapp.token };
     if (all.shiprocket) all.shiprocket = { email: all.shiprocket.email, pickupLocation: all.shiprocket.pickupLocation, configured: !!all.shiprocket.password };
     if (all.payments) all.payments = { webhookConfigured: !!all.payments.webhookSecret };
     res.json(all);

@@ -84,6 +84,12 @@ const orderSchema = new mongoose.Schema({
   isDelivered: { type: Boolean, default: false },
   deliveredAt: Date,
   trackingNumber: String,
+  // When each automatic WhatsApp update was sent (each goes at most once)
+  notified: {
+    placed: Date,
+    shipped: Date,
+    delivered: Date,
+  },
   // Courier booking made through Shiprocket from the admin page
   shiprocket: {
     orderId: String,
