@@ -127,7 +127,8 @@ function orderPayload(order, cfg, parcel, user = {}) {
     billing_pincode: a.pincode,
     billing_state: a.state,
     billing_country: 'India',
-    billing_email: user.email || 'orders@villagecrunch.in',
+    // phone-only accounts have a placeholder address; never send that to the courier
+    billing_email: (user.email && !/@phone\.villagecrunch\.in$/i.test(user.email)) ? user.email : (process.env.SHIPROCKET_FALLBACK_EMAIL || 'orders@villagecrunch.in'),
     billing_phone: phone,
     shipping_is_billing: true,
     order_items: (order.items || []).map((i) => ({
