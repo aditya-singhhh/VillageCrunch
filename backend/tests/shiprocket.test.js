@@ -106,6 +106,6 @@ test('couriers listed cheapest first; booking marks shipped, saves AWB, and is n
 test('parcel weight comes from pack sizes plus packing', () => {
   assert.equal(sr.parseKg('400g'), 0.4);
   assert.equal(sr.parseKg('0.8 kg'), 0.8);
-  assert.deepEqual(sr.parcelFor({ items: [{ weight: '800g', quantity: 1 }] }), { weight: 0.95, length: 25, breadth: 20, height: 12 });
-  assert.equal(sr.parcelFor({ items: [{ weight: '400g', quantity: 1 }] }).weight, 0.55);
+  assert.deepEqual(sr.parcelFor({ items: [{ weight: '800g', quantity: 1 }] }), { weight: 0.9, length: 22, breadth: 18, height: 10 });
+  assert.equal(sr.parcelFor({ items: [{ weight: '400g', quantity: 1 }] }).weight, 0.5);
 });

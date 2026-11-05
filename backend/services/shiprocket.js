@@ -92,12 +92,17 @@ const parseKg = (w) => {
   return m[2] === 'kg' ? n : n / 1000;
 };
 
-/** Weight (kg, incl. ~150 g packing) and box size (cm) for an order. */
+/**
+ * Weight (kg, incl. ~100 g packing) and box size (cm) for an order.
+ * Couriers bill in 500 g slabs and also by volume (L x B x H / 5000), so a 400 g pack
+ * is declared 0.5 kg in an 18x14x8 box (0.40 kg by volume) to stay in the first slab.
+ * Weigh the packed parcel and edit the weight in admin if it is heavier.
+ */
 function parcelFor(order) {
   const contents = (order.items || []).reduce((s, i) => s + parseKg(i.weight) * (Number(i.quantity) || 1), 0);
-  const weight = Math.max(0.5, Math.round((contents + 0.15) * 100) / 100);
-  const big = weight > 0.7;
-  return { weight, length: big ? 25 : 20, breadth: big ? 20 : 15, height: big ? 12 : 10 };
+  const weight = Math.max(0.5, Math.round((contents + 0.1) * 100) / 100);
+  const big = weight > 0.5;
+  return { weight, length: big ? 22 : 18, breadth: big ? 18 : 14, height: big ? 10 : 8 };
 }
 
 const isCod = (order) => order.paymentInfo?.method === 'cod';
