@@ -53,15 +53,26 @@
     <!-- Performance and Resource Hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://checkout.razorpay.com" />
+    <link rel="dns-prefetch" href="//checkout.razorpay.com" />
     <link rel="dns-prefetch" href="//www.google-analytics.com" />
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-    
-    <!-- Load Razorpay script -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+    <!-- Non-blocking: text shows at once in a fallback font, then swaps -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" /></noscript>
+
+    <!-- Product pages: start loading the product while the app code downloads -->
+    <script>
+      (function () {
+        var m = location.pathname.match(/^\/product\/([a-f0-9]{24})\/?$/i);
+        if (m && window.fetch) {
+          window.__vcProduct = { id: m[1], p: fetch('/api/products/' + m[1], { credentials: 'include' }).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; }) };
+        }
+      })();
+    </script>
+    <!-- Razorpay loads on the cart/checkout pages only (see Checkout.jsx) -->
     
     <!-- Google Analytics (to be configured) -->
     <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script> -->

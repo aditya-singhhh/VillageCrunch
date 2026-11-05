@@ -477,7 +477,7 @@ const ProductDetail = () => {
                 }
               }}
             >
-              <div className="aspect-square bg-cream rounded-lg overflow-hidden">
+              <div className="aspect-[5/4] md:aspect-square bg-cream rounded-lg overflow-hidden">
                 <img
                   {...imgProps(images[selectedImage], '(min-width: 1024px) 50vw, 100vw')}
                   alt={product.name}
@@ -581,11 +581,21 @@ const ProductDetail = () => {
                 <span>{settings?.pricing?.pricesIncludeTax === false && taxRate > 0 ? `+ ${taxRate}% GST at checkout` : 'Inclusive of all taxes'}</span>
               </p>
               {!outOfStock && ['thekua', 'gifts'].includes(product.category) && (
-                <p className="mt-2 text-sm text-ink-soft">
-                  <span className="font-medium text-ink">Made fresh in desi ghee after you order</span> · ships in 1–2 days ·{' '}
-                  <button type="button" onClick={() => toast.success('FIRST is applied automatically at checkout on your first order', { duration: 3000 })}
-                    className="font-medium text-leaf underline decoration-dotted underline-offset-4">first order: free delivery</button>
-                </p>
+                <>
+                  <p className="mt-3 rounded-md bg-leaf-tint px-3 py-2 text-sm text-ink">
+                    {product.price >= 399 ? (
+                      <><span className="font-semibold text-leaf">{formatINR(Math.round(product.price * 0.85))} on your first order</span>: 15% off + free delivery, applied automatically at checkout.</>
+                    ) : (
+                      <><span className="font-semibold text-leaf">First order: 15% off + free delivery</span> on ₹399 or more, applied automatically.</>
+                    )}
+                  </p>
+                  <ul className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-ink-soft" aria-label="Why VillageCrunch">
+                    <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Desi ghee</span>no oil, no dalda</li>
+                    <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Made after</span>you order</li>
+                    <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ships in</span>1–2 days</li>
+                  </ul>
+                  <p className="mt-2 text-xs text-ink-mute">Ordered from Assam, Telangana, Karnataka, Delhi and West Bengal in our first week.</p>
+                </>
               )}
             </div>
 

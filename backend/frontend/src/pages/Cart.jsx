@@ -28,6 +28,15 @@ const Cart = () => {
   const subtotal = getCartTotal();
 
   // Fetch settings and calculate order totals
+  // Warm up the payment script while the shopper reviews the cart
+  useEffect(() => {
+    if (window.Razorpay || document.querySelector('script[src*="checkout.razorpay.com"]')) return;
+    const sc = document.createElement('script');
+    sc.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    sc.async = true;
+    document.head.appendChild(sc);
+  }, []);
+
   useEffect(() => {
     const fetchSettingsAndCalculate = async () => {
       try {
