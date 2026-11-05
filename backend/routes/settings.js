@@ -42,6 +42,45 @@ router.put('/meta-capi', protect, admin, async (req, res) => {
   res.json({ configured: !!(s.metaCapi.token), backfill: result });
 });
 
+// @route GET /api/settings/shiprocket (admin) - is courier booking connected?
+router.get('/shiprocket', protect, admin, async (req, res) => {
+  const c = await require('../services/shiprocket').getConfig();
+  res.json({ configured: !!(c.email && c.password), email: c.email || '', pickupLocation: c.pickupLocation, pickupPincode: c.pickupPincode });
+});
+
+// @route PUT /api/settings/shiprocket (admin) - save the API user (password never returned).
+// The login is tested before saving, so a wrong password is caught here.
+router.put('/shiprocket', protect, admin, async (req, res) => {
+  const sr = require('../services/shiprocket');
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const password = String(req.body?.password || '');
+  const pickupLocation = String(req.body?.pickupLocation || '').trim().slice(0, 60);
+  const pickupPincode = String(req.body?.pickupPincode || '').trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ message: 'Enter the API user email' });
+  if (pickupPincode && !/^\d{6}$/.test(pickupPincode)) return res.status(400).json({ message: 'Pickup pincode must be 6 digits' });
+  const s = await Settings.getSettings();
+  const cur = s.toObject().shiprocket || {};
+  const next = {
+    ...cur,
+    ...(email ? { email } : {}),
+    ...(password ? { password } : {}),
+    ...(pickupLocation ? { pickupLocation } : {}),
+    ...(pickupPincode ? { pickupPincode } : {}),
+  };
+  if (email || password) {
+    if (!next.email || !next.password) return res.status(400).json({ message: 'Enter both the API user email and password' });
+    try {
+      next.token = await sr.login(next.email, next.password);
+      next.tokenAt = new Date();
+    } catch (e) {
+      return res.status(e.status || 400).json({ message: e.message });
+    }
+  }
+  s.shiprocket = next;
+  await s.save();
+  res.json({ configured: !!(next.email && next.password), email: next.email || '', pickupLocation: next.pickupLocation || 'Home', pickupPincode: next.pickupPincode || '811212' });
+});
+
 // @route POST /api/settings/meta-capi/backfill (admin) - send recent orders Meta has not seen
 router.post('/meta-capi/backfill', protect, admin, async (req, res) => {
   res.json(await require('../services/metaCapi').backfill({ days: 7 }));
@@ -73,6 +112,7 @@ router.get('/', async (req, res) => {
     // Return all settings for admin (secrets removed)
     const all = settings.toObject ? settings.toObject() : { ...settings };
     if (all.metaCapi) all.metaCapi = { pixelId: all.metaCapi.pixelId, configured: !!all.metaCapi.token };
+    if (all.shiprocket) all.shiprocket = { email: all.shiprocket.email, pickupLocation: all.shiprocket.pickupLocation, configured: !!all.shiprocket.password };
     if (all.payments) all.payments = { webhookConfigured: !!all.payments.webhookSecret };
     res.json(all);
   } catch (error) {

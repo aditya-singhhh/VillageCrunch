@@ -635,3 +635,10 @@ export const reconcilePayments = async () => (await api.post('/payment/admin/rec
 export const getMetaCapi = async () => (await api.get('/settings/meta-capi')).data;
 export const saveMetaCapi = async (token) => (await api.put('/settings/meta-capi', { token })).data;
 export const createOrderForPayment = async (id, shippingAddress) => (await api.post(`/payment/admin/stuck/${id}/create-order`, { shippingAddress })).data;
+
+// Shiprocket courier booking (admin)
+export const getShiprocket = async () => (await api.get('/settings/shiprocket')).data;
+export const saveShiprocket = async (body) => (await api.put('/settings/shiprocket', body)).data;
+export const getShiprocketCouriers = async (orderId, parcel = {}) => (await api.get(`/orders/${orderId}/shiprocket/couriers`, { params: parcel })).data;
+export const bookShiprocket = async (orderId, courierId, parcel) => (await api.post(`/orders/${orderId}/shiprocket/book`, { courierId, parcel })).data;
+export const getShiprocketLabel = async (orderId) => (await api.get(`/orders/${orderId}/shiprocket/label`)).data;

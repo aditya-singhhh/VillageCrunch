@@ -104,6 +104,15 @@ const settingsSchema = new mongoose.Schema({
   alerts: {
     ntfyTopic: String,
   },
+  // Shiprocket (courier booking). Password and token are write-only from admin.
+  shiprocket: {
+    email: String,
+    password: String,
+    pickupLocation: String, // nickname of the pickup address in Shiprocket, e.g. "Home"
+    pickupPincode: String,
+    token: String,
+    tokenAt: Date,
+  },
 
   notifications: {
     orderConfirmation: {

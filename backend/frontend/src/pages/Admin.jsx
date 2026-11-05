@@ -3,6 +3,8 @@ import LeadsPanel from '../components/LeadsPanel';
 import OrderAlertsCard from '../components/OrderAlertsCard';
 import PaymentRecoveryCard from '../components/PaymentRecoveryCard';
 import MetaCapiCard from '../components/MetaCapiCard';
+import ShiprocketCard from '../components/ShiprocketCard';
+import ShiprocketBooking from '../components/ShiprocketBooking';
 import {
   Package,
   Truck,
@@ -1101,6 +1103,7 @@ const saveSettings = async (e) => {
         <OrderAlertsCard />
         <PaymentRecoveryCard />
         <MetaCapiCard />
+        <ShiprocketCard />
 
         {/* Tab Navigation */}
         <div className="border-b border-line mb-6 md:mb-8 overflow-x-auto scrollbar-none snap-x">
@@ -1556,6 +1559,16 @@ const saveSettings = async (e) => {
                   )}
                 </div>
               </div>
+
+              {/* Courier booking */}
+              {selectedOrder.status !== 'cancelled' && (
+                <div className="border-t pt-4 mb-4">
+                  <ShiprocketBooking
+                    order={selectedOrder}
+                    onBooked={(r) => { setSelectedOrder({ ...selectedOrder, ...r }); fetchOrders(); }}
+                  />
+                </div>
+              )}
 
               {/* Remove test order (hidden, not deleted) */}
               <div className="border-t pt-4 mb-4 flex flex-wrap items-center justify-between gap-3">

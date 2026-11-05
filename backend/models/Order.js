@@ -84,6 +84,18 @@ const orderSchema = new mongoose.Schema({
   isDelivered: { type: Boolean, default: false },
   deliveredAt: Date,
   trackingNumber: String,
+  // Courier booking made through Shiprocket from the admin page
+  shiprocket: {
+    orderId: String,
+    shipmentId: String,
+    awb: String,
+    courier: String,
+    courierId: Number,
+    rate: Number,
+    labelUrl: String,
+    pickupRequested: Boolean,
+    bookedAt: Date,
+  },
 }, { timestamps: true });
 
 module.exports = defineModel('Order', orderSchema, { collection: 'orders' });
