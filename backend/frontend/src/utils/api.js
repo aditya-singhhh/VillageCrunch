@@ -26,6 +26,13 @@ export const getProducts = async (params = {}) => {
 };
 
 export const getProduct = async (id) => {
+  // Use the request index.html started before the app loaded (first view only)
+  const early = typeof window !== 'undefined' && window.__vcProduct;
+  if (early && early.id === id) {
+    window.__vcProduct = null;
+    const pre = await early.p;
+    if (pre && pre._id) return pre;
+  }
   const { data } = await axios.get(`${API_URL}/products/${id}`);
   return data;
 };
