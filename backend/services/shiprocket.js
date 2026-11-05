@@ -92,12 +92,20 @@ const parseKg = (w) => {
   return m[2] === 'kg' ? n : n / 1000;
 };
 
-/** Weight (kg, incl. ~150 g packing) and box size (cm) for an order. */
+/**
+ * Weight (kg, incl. ~100 g packing) and box size (cm) for an order.
+ * Couriers bill in 500 g slabs and also by volume (L x B x H / 5000).
+ * - Up to 0.5 kg (one 400 g pack): box cut down to 9.5 x 6.5 inch x 6 cm high
+ *   = 24.1 x 16.5 x 6 cm = 0.48 kg by volume, so it stays in the 0.5 kg slab.
+ * - Heavier (800 g, or 2+ packs): full box 9.5 x 6.5 x 4.5 inch = 24.1 x 16.5 x 11.4 cm (0.91 kg).
+ * Weigh the packed parcel and edit the weight in admin if it is heavier.
+ */
+const SMALL_BOX = { length: 24.1, breadth: 16.5, height: 6 };
+const BIG_BOX = { length: 24.1, breadth: 16.5, height: 11.4 };
 function parcelFor(order) {
   const contents = (order.items || []).reduce((s, i) => s + parseKg(i.weight) * (Number(i.quantity) || 1), 0);
-  const weight = Math.max(0.5, Math.round((contents + 0.15) * 100) / 100);
-  const big = weight > 0.7;
-  return { weight, length: big ? 25 : 20, breadth: big ? 20 : 15, height: big ? 12 : 10 };
+  const weight = Math.max(0.5, Math.round((contents + 0.1) * 100) / 100);
+  return { weight, ...(weight <= 0.5 ? SMALL_BOX : BIG_BOX) };
 }
 
 const isCod = (order) => order.paymentInfo?.method === 'cod';
@@ -122,7 +130,8 @@ function orderPayload(order, cfg, parcel, user = {}) {
     billing_pincode: a.pincode,
     billing_state: a.state,
     billing_country: 'India',
-    billing_email: user.email || 'orders@villagecrunch.in',
+    // phone-only accounts have a placeholder address; never send that to the courier
+    billing_email: (user.email && !/@phone\.villagecrunch\.in$/i.test(user.email)) ? user.email : (process.env.SHIPROCKET_FALLBACK_EMAIL || 'orders@villagecrunch.in'),
     billing_phone: phone,
     shipping_is_billing: true,
     order_items: (order.items || []).map((i) => ({
