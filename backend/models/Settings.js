@@ -104,6 +104,14 @@ const settingsSchema = new mongoose.Schema({
   alerts: {
     ntfyTopic: String,
   },
+  // WhatsApp Cloud API (automatic order updates). The token is write-only from admin.
+  whatsapp: {
+    phoneNumberId: String,
+    wabaId: String,
+    token: String,
+    supportPhone: String, // shown in messages: where customers can WhatsApp you
+    enabled: { type: Boolean, default: true },
+  },
   // Shiprocket (courier booking). Password and token are write-only from admin.
   shiprocket: {
     email: String,

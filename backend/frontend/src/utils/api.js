@@ -642,3 +642,9 @@ export const saveShiprocket = async (body) => (await api.put('/settings/shiprock
 export const getShiprocketCouriers = async (orderId, parcel = {}) => (await api.get(`/orders/${orderId}/shiprocket/couriers`, { params: parcel })).data;
 export const bookShiprocket = async (orderId, courierId, parcel) => (await api.post(`/orders/${orderId}/shiprocket/book`, { courierId, parcel })).data;
 export const getShiprocketLabel = async (orderId) => (await api.get(`/orders/${orderId}/shiprocket/label`)).data;
+
+// WhatsApp order updates (admin)
+export const getWhatsApp = async (params) => (await api.get('/settings/whatsapp', { params })).data;
+export const saveWhatsApp = async (body) => (await api.put('/settings/whatsapp', body)).data;
+export const createWhatsAppTemplates = async () => (await api.post('/settings/whatsapp/templates')).data;
+export const testWhatsApp = async (phone) => (await api.post('/settings/whatsapp/test', { phone })).data;

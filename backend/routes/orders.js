@@ -240,6 +240,7 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
 
     // 🔔 Instant phone alert to the shop owner (independent of email/SMS below)
     require('../services/alerts').newOrderAlert(order).catch(() => {});
+    require('../services/whatsapp').notify(order, 'placed').catch(() => {});
     // Tell Meta about the sale from the server (same event id as the browser pixel)
     require('../services/metaCapi').sendPurchase(order, { name: req.user.name, email: req.user.email, phone: req.user.phone }).catch(() => {});
 
@@ -418,6 +419,8 @@ router.put('/:id/status', protect, admin, async (req, res) => {
     }
 
     const updatedOrder = await order.save();
+    const waEvent = require('../services/whatsapp').eventForStatus(updatedOrder.status);
+    if (waEvent) require('../services/whatsapp').notify(updatedOrder, waEvent).catch(() => {});
     res.json(updatedOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -449,6 +452,7 @@ router.post('/:id/shiprocket/book', protect, admin, async (req, res) => {
     const user = await User.findById(order.user).catch(() => null);
     const courierId = numOr(req.body?.courierId);
     const booked = await shiprocket.book(order, { courierId, parcel: parcelFrom(req.body?.parcel) }, user || {});
+    if (booked.status === 'shipped') require('../services/whatsapp').notify(booked, 'shipped').catch(() => {});
     res.json({ _id: booked._id, status: booked.status, trackingNumber: booked.trackingNumber, shiprocket: booked.shiprocket, trackingUrl: shiprocket.trackingUrl(booked.shiprocket?.awb) });
   } catch (e) { srFail(res, e); }
 });

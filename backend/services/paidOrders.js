@@ -194,6 +194,7 @@ async function finalizeLiveOrder(liveOrderId, { shippingAddress, via = 'webhook'
   }
   try { require('../routes/leads').markConverted(address.phone || live.userInfo?.phone, order._id); } catch (_) { /* optional */ }
   require('./alerts').newOrderAlert(order).catch(() => {});
+  require('./whatsapp').notify(order, 'placed').catch(() => {});
   require('./metaCapi').sendPurchase(order, { name: live.userInfo?.name, email: live.userInfo?.email, phone: live.userInfo?.phone }).catch(() => {});
   notifyCustomer(order, live).catch(() => {});
 

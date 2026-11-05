@@ -4,6 +4,7 @@ import OrderAlertsCard from '../components/OrderAlertsCard';
 import PaymentRecoveryCard from '../components/PaymentRecoveryCard';
 import MetaCapiCard from '../components/MetaCapiCard';
 import ShiprocketCard from '../components/ShiprocketCard';
+import WhatsAppCard from '../components/WhatsAppCard';
 import ShiprocketBooking from '../components/ShiprocketBooking';
 import {
   Package,
@@ -174,6 +175,7 @@ const Admin = () => {
   const [contactsLoading, setContactsLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [manualTracking, setManualTracking] = useState('');
   const [selectedContact, setSelectedContact] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -1104,6 +1106,7 @@ const saveSettings = async (e) => {
         <PaymentRecoveryCard />
         <MetaCapiCard />
         <ShiprocketCard />
+        <WhatsAppCard />
 
         {/* Tab Navigation */}
         <div className="border-b border-line mb-6 md:mb-8 overflow-x-auto scrollbar-none snap-x">
@@ -1590,14 +1593,29 @@ const saveSettings = async (e) => {
 
               {/* Status Update */}
               <div className="border-t pt-4">
-                <h3 className="font-bold text-lg mb-4 text-desi-brown">Update Status</h3>
+                <h3 className="font-bold text-lg mb-2 text-desi-brown">Update Status</h3>
+                {!selectedOrder.shiprocket?.awb && (
+                  <label className="mb-4 block text-sm text-ink-soft">
+                    Shipped another way (e.g. Speed Post)? Enter the tracking number, then tap Shipped:
+                    <input
+                      value={manualTracking}
+                      onChange={(e) => setManualTracking(e.target.value.trim())}
+                      placeholder={selectedOrder.trackingNumber || 'e.g. EE123456789IN'}
+                      className="input-field mt-1 h-10 w-full text-sm font-mono"
+                    />
+                  </label>
+                )}
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {Object.entries(statusConfig).map(([key, cfg]) => {
                     const Icon = cfg.icon;
                     return (
                       <button
                         key={key}
-                        onClick={() => updateOrderStatus(selectedOrder._id, key)}
+                        onClick={() => {
+                          if (key === 'shipped' && !manualTracking && !selectedOrder.trackingNumber && !window.confirm('No tracking number. Mark shipped anyway? (The customer WhatsApp with tracking goes once you add the number.)')) return;
+                          updateOrderStatus(selectedOrder._id, key, key === 'shipped' ? manualTracking : '');
+                          setManualTracking('');
+                        }}
                         disabled={updatingStatus || selectedOrder.status === key}
                         className={`p-4 rounded-lg border-2 transition ${
                           selectedOrder.status === key
