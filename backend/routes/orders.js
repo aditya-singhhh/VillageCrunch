@@ -424,4 +424,42 @@ router.put('/:id/status', protect, admin, async (req, res) => {
   }
 });
 
+/* ---------- Shiprocket courier booking (admin) ---------- */
+const shiprocket = require('../services/shiprocket');
+const srFail = (res, e) => res.status(e instanceof shiprocket.ShiprocketError ? e.status : 500).json({ message: e.message });
+const numOr = (v) => (Number.isFinite(Number(v)) && Number(v) > 0 ? Number(v) : undefined);
+const parcelFrom = (b = {}) => Object.fromEntries(
+  ['weight', 'length', 'breadth', 'height'].map((k) => [k, numOr(b[k])]).filter(([, v]) => v !== undefined),
+);
+
+// @route GET /api/orders/:id/shiprocket/couriers  (admin) - couriers and prices for this order
+router.get('/:id/shiprocket/couriers', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(await shiprocket.couriersFor(order, parcelFrom(req.query)));
+  } catch (e) { srFail(res, e); }
+});
+
+// @route POST /api/orders/:id/shiprocket/book  (admin) - book the courier, mark shipped
+router.post('/:id/shiprocket/book', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    const user = await User.findById(order.user).catch(() => null);
+    const courierId = numOr(req.body?.courierId);
+    const booked = await shiprocket.book(order, { courierId, parcel: parcelFrom(req.body?.parcel) }, user || {});
+    res.json({ _id: booked._id, status: booked.status, trackingNumber: booked.trackingNumber, shiprocket: booked.shiprocket, trackingUrl: shiprocket.trackingUrl(booked.shiprocket?.awb) });
+  } catch (e) { srFail(res, e); }
+});
+
+// @route GET /api/orders/:id/shiprocket/label  (admin) - shipping label PDF link
+router.get('/:id/shiprocket/label', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json({ labelUrl: await shiprocket.label(order) });
+  } catch (e) { srFail(res, e); }
+});
+
 module.exports = router;
