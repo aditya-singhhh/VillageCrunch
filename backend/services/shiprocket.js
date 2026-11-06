@@ -115,6 +115,22 @@ function istStamp(d) {
   return t.toISOString().slice(0, 16).replace('T', ' ');
 }
 
+/**
+ * Shiprocket works out the order value (and the cash to collect on COD) as
+ *   sub_total (= sum of item prices) - total_discount + shipping_charges.
+ * Items carry the MRP, so the discount and any COD fee/shipping go in their own fields,
+ * making the value exactly what the customer pays.
+ */
+function amountsFor(order) {
+  const r2 = (n) => Math.round(n * 100) / 100;
+  const items = (order.items || []).reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
+  const total = Number(order.totalPrice) || 0;
+  let discount = Math.max(0, Number(order.promocodeDiscount) || 0);
+  let extra = total - (items - discount); // shipping, COD fee, rounding
+  if (extra < 0) { discount += -extra; extra = 0; }
+  return { sub_total: r2(items), total_discount: r2(discount), shipping_charges: r2(extra) };
+}
+
 function orderPayload(order, cfg, parcel, user = {}) {
   const a = order.shippingAddress || {};
   const [first, ...rest] = String(a.name || user.name || 'Customer').trim().split(/\s+/);
@@ -142,9 +158,7 @@ function orderPayload(order, cfg, parcel, user = {}) {
       selling_price: Number(i.price) || 0,
     })),
     payment_method: isCod(order) ? 'COD' : 'Prepaid',
-    shipping_charges: Number(order.shippingPrice) || 0,
-    total_discount: Number(order.promocodeDiscount) || 0,
-    sub_total: Number(order.totalPrice) || 0,
+    ...amountsFor(order),
     ...parcel,
   };
 }
@@ -258,4 +272,4 @@ async function cancel(order) {
 
 const trackingUrl = (awb) => (awb ? `https://shiprocket.co/tracking/${encodeURIComponent(awb)}` : '');
 
-module.exports = { cancel, getConfig, getToken, login, couriersFor, book, label, parcelFor, parseKg, orderPayload, trackingUrl, ShiprocketError, __setSender };
+module.exports = { amountsFor, cancel, getConfig, getToken, login, couriersFor, book, label, parcelFor, parseKg, orderPayload, trackingUrl, ShiprocketError, __setSender };
