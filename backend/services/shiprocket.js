@@ -120,7 +120,8 @@ function orderPayload(order, cfg, parcel, user = {}) {
   const [first, ...rest] = String(a.name || user.name || 'Customer').trim().split(/\s+/);
   const phone = String(a.phone || user.phone || '').replace(/\D/g, '').slice(-10);
   return {
-    order_id: order.orderNumber,
+    // a cancelled Shiprocket order keeps its id, so a re-booking gets a suffix (-2, -3 ...)
+    order_id: (order.shiprocket?.attempts || 0) > 0 ? `${order.orderNumber}-${order.shiprocket.attempts + 1}` : order.orderNumber,
     order_date: istStamp(order.createdAt),
     pickup_location: cfg.pickupLocation,
     billing_customer_name: first,
@@ -239,6 +240,22 @@ async function label(order) {
   return l.label_url;
 }
 
+/**
+ * Cancel the Shiprocket booking (before pickup) so the order can be booked again,
+ * e.g. from another pickup address. Freight goes back to the Shiprocket wallet.
+ */
+async function cancel(order) {
+  const sr = order.shiprocket?.toObject ? order.shiprocket.toObject() : (order.shiprocket || {});
+  if (!sr.orderId) throw new ShiprocketError('This order is not booked with Shiprocket', 400);
+  await authed('/orders/cancel', { method: 'POST', body: { ids: [Number(sr.orderId) || sr.orderId] } });
+  order.shiprocket = { attempts: (sr.attempts || 0) + 1 };
+  if (order.trackingNumber === sr.awb) order.trackingNumber = undefined;
+  if (order.status === 'shipped') order.status = 'processing';
+  if (order.notified?.shipped) order.notified = { ...(order.notified.toObject ? order.notified.toObject() : order.notified), shipped: undefined };
+  await order.save();
+  return order;
+}
+
 const trackingUrl = (awb) => (awb ? `https://shiprocket.co/tracking/${encodeURIComponent(awb)}` : '');
 
-module.exports = { getConfig, getToken, login, couriersFor, book, label, parcelFor, parseKg, orderPayload, trackingUrl, ShiprocketError, __setSender };
+module.exports = { cancel, getConfig, getToken, login, couriersFor, book, label, parcelFor, parseKg, orderPayload, trackingUrl, ShiprocketError, __setSender };

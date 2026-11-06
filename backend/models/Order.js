@@ -101,6 +101,7 @@ const orderSchema = new mongoose.Schema({
     labelUrl: String,
     pickupRequested: Boolean,
     bookedAt: Date,
+    attempts: Number, // how many Shiprocket orders were created (a cancelled one needs a new id)
   },
 }, { timestamps: true });
 

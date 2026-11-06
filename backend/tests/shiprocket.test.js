@@ -27,6 +27,7 @@ test.before(async () => {
         ? json(200, { awb_assign_status: 1, response: { data: { awb_code: 'AWB555', courier_name: 'Fast Air', courier_company_id: 2 } } })
         : json(400, { message: 'Insufficient balance in wallet' });
     }
+    if (url.endsWith('/orders/cancel')) return json(200, { message: 'Order cancelled' });
     if (url.endsWith('/courier/generate/pickup')) return json(200, { pickup_status: 1 });
     if (url.endsWith('/courier/generate/label')) return json(200, { label_created: 1, label_url: 'https://kr-shipmultichannel.s3.amazonaws.com/label.pdf' });
     return json(404, { message: 'unexpected ' + url });
@@ -101,6 +102,27 @@ test('couriers listed cheapest first; booking marks shipped, saves AWB, and is n
   const again = await app.api('POST', `/api/orders/${id}/shiprocket/book`, { courierId: 1 }, admin.token);
   assert.equal(again.body.trackingNumber, 'AWB555');
   assert.equal(calls.filter((x) => x.url.endsWith('/courier/assign/awb')).length, 2, 'already booked: no second AWB');
+});
+
+test('a booking can be cancelled and booked again with a new Shiprocket order id', async () => {
+  const admin = await h.makeAdmin();
+  const buyer = await h.makeUser();
+  const p = await h.makeProduct({ price: 399, stock: 5 });
+  const placed = await app.api('POST', '/api/orders', { items: [{ product: String(p._id), quantity: 1 }], shippingAddress: h.address, paymentInfo: { method: 'cod' } }, buyer.token);
+  const id = placed.body._id;
+  const b1 = await app.api('POST', `/api/orders/${id}/shiprocket/book`, { courierId: 2 }, admin.token);
+  assert.equal(b1.body.status, 'shipped');
+  assert.equal((await app.api('POST', `/api/orders/${id}/shiprocket/cancel`, {}, buyer.token)).status, 403);
+  const c = await app.api('POST', `/api/orders/${id}/shiprocket/cancel`, {}, admin.token);
+  assert.equal(c.status, 200, JSON.stringify(c.body));
+  assert.equal(c.body.status, 'processing');
+  assert.equal(c.body.trackingNumber, '');
+  assert.equal(c.body.shiprocket.awb, undefined);
+  assert.deepEqual(calls.filter((x) => x.url.endsWith('/orders/cancel')).pop().body, { ids: [9001] });
+  const b2 = await app.api('POST', `/api/orders/${id}/shiprocket/book`, { courierId: 2 }, admin.token);
+  assert.equal(b2.status, 200, JSON.stringify(b2.body));
+  assert.equal(b2.body.status, 'shipped');
+  assert.equal(calls.filter((x) => x.url.endsWith('/orders/create/adhoc')).pop().body.order_id, `${placed.body.orderNumber}-2`);
 });
 
 test('parcel weight comes from pack sizes plus packing', () => {

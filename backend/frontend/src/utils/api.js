@@ -655,3 +655,4 @@ export const getWhatsApp = async (params) => (await api.get('/settings/whatsapp'
 export const saveWhatsApp = async (body) => (await api.put('/settings/whatsapp', body)).data;
 export const createWhatsAppTemplates = async () => (await api.post('/settings/whatsapp/templates')).data;
 export const testWhatsApp = async (phone) => (await api.post('/settings/whatsapp/test', { phone })).data;
+export const cancelShiprocket = async (orderId) => (await api.post(`/orders/${orderId}/shiprocket/cancel`)).data;
