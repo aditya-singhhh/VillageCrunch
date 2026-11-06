@@ -141,8 +141,10 @@ function orderPayload(order, cfg, parcel, user = {}) {
       selling_price: Number(i.price) || 0,
     })),
     payment_method: isCod(order) ? 'COD' : 'Prepaid',
-    shipping_charges: Number(order.shippingPrice) || 0,
-    total_discount: Number(order.promocodeDiscount) || 0,
+    // Shiprocket takes the order value as sub_total minus total_discount, and for COD that is
+    // what the courier collects. Send the final amount the customer pays, with no extra discount.
+    shipping_charges: 0,
+    total_discount: 0,
     sub_total: Number(order.totalPrice) || 0,
     ...parcel,
   };
@@ -155,8 +157,12 @@ async function couriersFor(order, overrides = {}) {
   const parcel = { ...parcelFor(order), ...overrides };
   const pin = order.shippingAddress?.pincode;
   if (!/^\d{6}$/.test(String(pin || ''))) throw new ShiprocketError('The order has no valid 6-digit pincode', 400);
-  const q = `pickup_postcode=${cfg.pickupPincode}&delivery_postcode=${pin}&weight=${parcel.weight}&cod=${isCod(order) ? 1 : 0}`
-    + (isCod(order) ? `&declared_value=${Math.round(order.totalPrice || 0)}` : '');
+  // Once the order exists in Shiprocket, ask for that exact shipment (its pickup address and
+  // box), which is what booking checks; otherwise estimate from the pincodes.
+  const q = order.shiprocket?.orderId && !overrides.weight
+    ? `order_id=${encodeURIComponent(order.shiprocket.orderId)}`
+    : `pickup_postcode=${cfg.pickupPincode}&delivery_postcode=${pin}&weight=${parcel.weight}&cod=${isCod(order) ? 1 : 0}`
+      + (isCod(order) ? `&declared_value=${Math.round(order.totalPrice || 0)}` : '');
   const data = await authed(`/courier/serviceability/?${q}`);
   const list = data?.data?.available_courier_companies || [];
   const recommended = data?.data?.recommended_courier_company_id;

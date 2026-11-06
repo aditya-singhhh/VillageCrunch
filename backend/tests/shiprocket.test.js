@@ -97,6 +97,10 @@ test('couriers listed cheapest first; booking marks shipped, saves AWB, and is n
   assert.equal(created.billing_phone, '9876543210');
   assert.equal(created.order_id, placed.body.orderNumber);
   assert.equal(created.sub_total, placed.body.totalPrice);
+  assert.equal(created.total_discount, 0, 'value = what the customer pays (COD amount)');
+  const again2 = await app.api('GET', `/api/orders/${id}/shiprocket/couriers`, undefined, admin.token);
+  assert.equal(again2.status, 200);
+  assert.match(calls.filter((x) => x.url.includes('serviceability')).pop().url, /order_id=9001/);
 
   const again = await app.api('POST', `/api/orders/${id}/shiprocket/book`, { courierId: 1 }, admin.token);
   assert.equal(again.body.trackingNumber, 'AWB555');
