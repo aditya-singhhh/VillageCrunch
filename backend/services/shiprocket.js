@@ -172,8 +172,16 @@ async function couriersFor(order, overrides = {}) {
   if (!/^\d{6}$/.test(String(pin || ''))) throw new ShiprocketError('The order has no valid 6-digit pincode', 400);
   const q = `pickup_postcode=${cfg.pickupPincode}&delivery_postcode=${pin}&weight=${parcel.weight}&cod=${isCod(order) ? 1 : 0}`
     + (isCod(order) ? `&declared_value=${Math.round(order.totalPrice || 0)}` : '');
-  const data = await authed(`/courier/serviceability/?${q}`);
-  const list = data?.data?.available_courier_companies || [];
+  // Ask for all modes and for surface only, and merge: Shiprocket's default answer can leave out
+  // surface couriers (e.g. Ekart) while offering air ones the order can't use (DG-flagged items).
+  const [all, surface] = await Promise.all([
+    authed(`/courier/serviceability/?${q}`),
+    authed(`/courier/serviceability/?${q}&mode=Surface`).catch(() => null),
+  ]);
+  const seen = new Set();
+  const list = [...(all?.data?.available_courier_companies || []), ...(surface?.data?.available_courier_companies || [])]
+    .filter((c) => (seen.has(c.courier_company_id) ? false : seen.add(c.courier_company_id)));
+  const data = all;
   const recommended = data?.data?.recommended_courier_company_id;
   return {
     parcel,

@@ -15,6 +15,12 @@ test.before(async () => {
     if (url.endsWith('/auth/login')) {
       return body.password === 'right-pass' ? json(200, { token: 'tok123' }) : json(400, { message: 'Invalid email and password combination' });
     }
+    if (url.includes('/courier/serviceability/') && url.includes('mode=Surface')) {
+      return json(200, { data: { available_courier_companies: [
+        { courier_company_id: 1, courier_name: 'Slow Surface', rate: 62.4, estimated_delivery_days: '6', rating: 3.9, is_surface: true },
+        { courier_company_id: 3, courier_name: 'Extra Surface', rate: 80, estimated_delivery_days: '5', rating: 4.1, is_surface: true },
+      ] } });
+    }
     if (url.includes('/courier/serviceability/')) {
       return json(200, { data: { recommended_courier_company_id: 2, available_courier_companies: [
         { courier_company_id: 1, courier_name: 'Slow Surface', rate: 62.4, estimated_delivery_days: '6', rating: 3.9, is_surface: true },
@@ -68,9 +74,9 @@ test('couriers listed cheapest first; booking marks shipped, saves AWB, and is n
   assert.equal((await app.api('GET', `/api/orders/${id}/shiprocket/couriers`, undefined, buyer.token)).status, 403);
   const c = await app.api('GET', `/api/orders/${id}/shiprocket/couriers`, undefined, admin.token);
   assert.equal(c.status, 200, JSON.stringify(c.body));
-  assert.deepEqual(c.body.couriers.map((x) => x.name), ['Slow Surface', 'Fast Air']);
-  assert.equal(c.body.couriers[1].recommended, true);
-  const sv = calls.filter((x) => x.url.includes('serviceability')).pop();
+  assert.deepEqual(c.body.couriers.map((x) => x.name), ['Slow Surface', 'Extra Surface', 'Fast Air'], 'surface-only couriers merged in, no duplicates');
+  assert.equal(c.body.couriers.find((x) => x.name === "Fast Air").recommended, true);
+  const sv = calls.filter((x) => x.url.includes('serviceability') && !x.url.includes('mode=')).pop();
   assert.match(sv.url, /pickup_postcode=811212&delivery_postcode=800001&weight=0\.5&cod=1/);
   assert.equal(sv.auth, 'Bearer tok123');
 
