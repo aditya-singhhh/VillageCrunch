@@ -457,6 +457,16 @@ router.post('/:id/shiprocket/book', protect, admin, async (req, res) => {
   } catch (e) { srFail(res, e); }
 });
 
+// @route POST /api/orders/:id/shiprocket/cancel  (admin) - cancel booking before pickup, to re-book
+router.post('/:id/shiprocket/cancel', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    const o = await shiprocket.cancel(order);
+    res.json({ _id: o._id, status: o.status, trackingNumber: o.trackingNumber || '', shiprocket: o.shiprocket });
+  } catch (e) { srFail(res, e); }
+});
+
 // @route GET /api/orders/:id/shiprocket/label  (admin) - shipping label PDF link
 router.get('/:id/shiprocket/label', protect, admin, async (req, res) => {
   try {

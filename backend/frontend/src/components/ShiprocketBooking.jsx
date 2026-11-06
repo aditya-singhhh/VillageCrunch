@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Truck, ExternalLink, FileText } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getShiprocketCouriers, bookShiprocket, getShiprocketLabel } from '../utils/api';
+import { getShiprocketCouriers, bookShiprocket, getShiprocketLabel, cancelShiprocket } from '../utils/api';
 
 const trackUrl = (awb) => `https://shiprocket.co/tracking/${encodeURIComponent(awb)}`;
 
@@ -29,6 +29,17 @@ const ShiprocketBooking = ({ order, onBooked }) => {
           <button type="button" onClick={label} className="btn-secondary btn-sm inline-flex items-center gap-1"><FileText className="w-4 h-4" /> Label</button>
           <a href={trackUrl(sr.awb)} target="_blank" rel="noreferrer" className="btn-secondary btn-sm inline-flex items-center gap-1"><ExternalLink className="w-4 h-4" /> Tracking link</a>
           <button type="button" onClick={() => { navigator.clipboard?.writeText(trackUrl(sr.awb)); toast.success('Tracking link copied'); }} className="btn-secondary btn-sm">Copy link</button>
+          <button
+            type="button"
+            onClick={async () => {
+              if (!window.confirm('Cancel this courier booking? Only before pickup. The money goes back to your Shiprocket wallet and you can book again.')) return;
+              try { const r = await cancelShiprocket(order._id); toast.success('Booking cancelled. You can book again.'); onBooked?.(r); }
+              catch (e) { toast.error(e.response?.data?.message || 'Could not cancel'); }
+            }}
+            className="btn-secondary btn-sm text-berry"
+          >
+            Cancel booking
+          </button>
         </div>
       </div>
     );
