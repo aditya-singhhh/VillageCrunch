@@ -97,7 +97,7 @@ test('couriers listed cheapest first; booking marks shipped, saves AWB, and is n
   assert.equal(created.billing_pincode, '800001');
   assert.equal(created.billing_phone, '9876543210');
   assert.equal(created.order_id, placed.body.orderNumber);
-  assert.equal(created.sub_total, placed.body.totalPrice);
+  assert.equal(created.sub_total - created.total_discount + created.shipping_charges, placed.body.totalPrice, "value = what the customer pays (COD amount)");
 
   const again = await app.api('POST', `/api/orders/${id}/shiprocket/book`, { courierId: 1 }, admin.token);
   assert.equal(again.body.trackingNumber, 'AWB555');
@@ -123,6 +123,18 @@ test('a booking can be cancelled and booked again with a new Shiprocket order id
   assert.equal(b2.status, 200, JSON.stringify(b2.body));
   assert.equal(b2.body.status, 'shipped');
   assert.equal(calls.filter((x) => x.url.endsWith('/orders/create/adhoc')).pop().body.order_id, `${placed.body.orderNumber}-2`);
+});
+
+test('order value always equals what the customer pays', () => {
+  const v = (o) => { const a = sr.amountsFor(o); return Math.round((a.sub_total - a.total_discount + a.shipping_charges) * 100) / 100; };
+  // online 400 g with WELCOME15
+  assert.deepEqual(sr.amountsFor({ items: [{ price: 399, quantity: 1 }], promocodeDiscount: 60, totalPrice: 339 }), { sub_total: 399, total_discount: 60, shipping_charges: 0 });
+  // COD 400 g with WELCOME15 + ₹49 COD fee
+  assert.deepEqual(sr.amountsFor({ items: [{ price: 399, quantity: 1 }], promocodeDiscount: 60, totalPrice: 388 }), { sub_total: 399, total_discount: 60, shipping_charges: 49 });
+  // 800 g with 15% (112.35) rounded to 637
+  assert.equal(v({ items: [{ price: 749, quantity: 1 }], promocodeDiscount: 112.35, totalPrice: 637 }), 637);
+  // discount not recorded separately
+  assert.equal(v({ items: [{ price: 399, quantity: 1 }], totalPrice: 339 }), 339);
 });
 
 test('parcel weight comes from pack sizes plus packing', () => {
