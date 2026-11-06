@@ -17,7 +17,7 @@ const ShiprocketBooking = ({ order, onBooked }) => {
   if (sr.awb) {
     const label = async () => {
       try {
-        const { labelUrl } = sr.labelUrl ? { labelUrl: sr.labelUrl } : await getShiprocketLabel(order._id);
+        const { labelUrl } = await getShiprocketLabel(order._id);
         window.open(labelUrl, '_blank', 'noopener');
       } catch (e) { toast.error(e.response?.data?.message || 'Label not ready yet'); }
     };
