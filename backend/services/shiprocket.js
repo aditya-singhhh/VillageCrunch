@@ -226,12 +226,15 @@ async function book(order, { courierId, parcel: overrides = {} } = {}, user = {}
   return order;
 }
 
+/** Always asks Shiprocket for the label, so it follows the current label settings. */
 async function label(order) {
-  if (order.shiprocket?.labelUrl) return order.shiprocket.labelUrl;
   if (!order.shiprocket?.shipmentId) throw new ShiprocketError('Book a courier first', 400);
   const l = await authed('/courier/generate/label', { method: 'POST', body: { shipment_id: [order.shiprocket.shipmentId] } });
-  if (!l?.label_url) throw new ShiprocketError(firstError(l) || 'Label not ready yet, try again in a minute', 400);
-  order.shiprocket = { ...order.shiprocket, labelUrl: l.label_url };
+  if (!l?.label_url) {
+    if (order.shiprocket?.labelUrl) return order.shiprocket.labelUrl;
+    throw new ShiprocketError(firstError(l) || 'Label not ready yet, try again in a minute', 400);
+  }
+  order.shiprocket = { ...(order.shiprocket.toObject ? order.shiprocket.toObject() : order.shiprocket), labelUrl: l.label_url };
   await order.save();
   return l.label_url;
 }
