@@ -125,6 +125,11 @@ test('a booking can be cancelled and booked again with a new Shiprocket order id
   assert.equal(calls.filter((x) => x.url.endsWith('/orders/create/adhoc')).pop().body.order_id, `${placed.body.orderNumber}-2`);
 });
 
+test('courier item names avoid words that get flagged as dangerous goods', () => {
+  assert.equal(sr.shippingName({ name: 'Thekua · Jaggery & Desi Ghee (400 g)', weight: '400g' }), 'Thekua - Bihari sweet snack 400g');
+  assert.doesNotMatch(sr.shippingName({ name: 'Makhana roasted in Desi Ghee', weight: '100 g' }), /ghee/i);
+});
+
 test('order value always equals what the customer pays', () => {
   const v = (o) => { const a = sr.amountsFor(o); return Math.round((a.sub_total - a.total_discount + a.shipping_charges) * 100) / 100; };
   // online 400 g with WELCOME15
