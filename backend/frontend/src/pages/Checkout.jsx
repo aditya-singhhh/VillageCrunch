@@ -280,9 +280,20 @@ const Checkout = () => {
     return () => clearTimeout(t);
   }, [shippingInfo.phone]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Keep only the 10-digit mobile: drops spaces, dashes, +91 or a leading 0 (autofill and
+  // pasted numbers often come as "+91 98765 43210", which a 10-character box used to cut short).
+  const cleanPhone = (v) => {
+    let d = String(v || '').replace(/\D/g, '');
+    if (d.length > 10 && (d.startsWith('91') || d.startsWith('0'))) d = d.slice(-10);
+    return d.slice(0, 10);
+  };
+  const phoneOk = /^[6-9]\d{9}$/.test(String(shippingInfo.phone || '').replace(/\D/g, '').slice(-10));
+
   const handleChange = (e) => {
     const { name } = e.target;
-    const value = name === 'pincode' ? e.target.value.replace(/\D/g, '').slice(0, 6) : e.target.value;
+    const value = name === 'pincode' ? e.target.value.replace(/\D/g, '').slice(0, 6)
+      : name === 'phone' ? cleanPhone(e.target.value)
+      : e.target.value;
     setShippingInfo((prev) => ({ ...prev, [name]: value }));
     if (name === 'pincode' && value.length === 6) {
       lookupPincode(value).then((r) => {
@@ -424,6 +435,11 @@ const Checkout = () => {
     if (!shippingInfo.name || !shippingInfo.phone || !shippingInfo.street || 
         !shippingInfo.city || !shippingInfo.state || !shippingInfo.pincode) {
       toast.error('Please fill all shipping details');
+      return;
+    }
+    if (!user && !phoneOk) {
+      toast.error('Please enter your 10-digit mobile number (without +91 or 0)');
+      document.getElementById('co-phone')?.focus();
       return;
     }
 
@@ -810,7 +826,11 @@ const Checkout = () => {
                 <div>
                   <label htmlFor="co-phone" className="field-label">Mobile number <span className="text-ink-mute font-normal">(for delivery updates)</span></label>
                   <input id="co-phone" type="tel" inputMode="numeric" name="phone" value={shippingInfo.phone} onChange={handleChange} required
-                    autoComplete="tel-national" maxLength={10} className="input-field" readOnly={readOnlyAddress} />
+                    autoComplete="tel-national" maxLength={16} placeholder="98765 43210" className="input-field" readOnly={readOnlyAddress}
+                    aria-invalid={!!shippingInfo.phone && !phoneOk} aria-describedby="co-phone-hint" />
+                  {!!shippingInfo.phone && !phoneOk && !readOnlyAddress && (
+                    <p id="co-phone-hint" className="mt-1 text-xs text-berry">Enter the 10-digit mobile number ({String(shippingInfo.phone).replace(/\D/g, '').length}/10 digits)</p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="co-name" className="field-label">Full name <span className="text-ink-mute font-normal">(required)</span></label>
