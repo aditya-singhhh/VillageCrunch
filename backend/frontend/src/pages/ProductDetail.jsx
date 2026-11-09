@@ -584,9 +584,9 @@ const ProductDetail = () => {
                 <>
                   <p className="mt-3 rounded-md bg-leaf-tint px-3 py-2 text-sm text-ink">
                     {product.price >= 399 ? (
-                      <><span className="font-semibold text-leaf">{formatINR(Math.round(product.price * 0.85))} on your first order</span>: 15% off + free delivery, applied automatically at checkout.</>
+                      <><span className="font-semibold text-leaf">{formatINR(Math.round(product.price * 0.8))} on your first order</span>: 20% off + free delivery, applied automatically at checkout.</>
                     ) : (
-                      <><span className="font-semibold text-leaf">First order: 15% off + free delivery</span> on ₹399 or more, applied automatically.</>
+                      <><span className="font-semibold text-leaf">Free delivery on your first order</span>, applied automatically. 20% off from ₹399.</>
                     )}
                   </p>
                   <ul className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-ink-soft" aria-label="Why VillageCrunch">
