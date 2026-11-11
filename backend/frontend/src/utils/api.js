@@ -647,7 +647,7 @@ export const createOrderForPayment = async (id, shippingAddress) => (await api.p
 export const getDelhivery = async () => (await api.get('/settings/delhivery')).data;
 export const saveDelhivery = async (body) => (await api.put('/settings/delhivery', body)).data;
 export const getDelhiveryQuote = async (orderId, parcel = {}) => (await api.get(`/orders/${orderId}/delhivery/quote`, { params: parcel })).data;
-export const bookDelhivery = async (orderId, parcel) => (await api.post(`/orders/${orderId}/delhivery/book`, { parcel })).data;
+export const bookDelhivery = async (orderId, parcel, mode = 'Surface', pickup = {}) => (await api.post(`/orders/${orderId}/delhivery/book`, { parcel, mode, pickup })).data;
 export const getDelhiveryLabel = async (orderId) => (await api.get(`/orders/${orderId}/delhivery/label`)).data;
 export const cancelDelhivery = async (orderId) => (await api.post(`/orders/${orderId}/delhivery/cancel`)).data;
 export const getShiprocket = async () => (await api.get('/settings/shiprocket')).data;

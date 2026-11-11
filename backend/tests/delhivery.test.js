@@ -80,3 +80,22 @@ test('quote, book (AWB + pickup + label, marked shipped), cancel and re-book wit
   const sent2 = JSON.parse(new URLSearchParams(calls.filter((x) => x.url.endsWith('/api/cmu/create.json')).pop().body).get('data'));
   assert.equal(sent2.shipments[0].order, `${placed.body.orderNumber}-D2`);
 });
+
+test('Express mode and another pickup address are passed to Delhivery', async () => {
+  const admin = await h.makeAdmin();
+  const buyer = await h.makeUser();
+  const p = await h.makeProduct({ price: 499, stock: 5 });
+  const placed = await app.api('POST', '/api/orders', { items: [{ product: String(p._id), quantity: 1 }], shippingAddress: h.address, paymentInfo: { method: 'cod' } }, buyer.token);
+  const id = placed.body._id;
+  const q = await app.api('GET', `/api/orders/${id}/delhivery/quote?pickupLocation=Patna%20Home&pickupPincode=800001`, undefined, admin.token);
+  assert.deepEqual(q.body.options.map((o) => o.mode), ['Surface', 'Express']);
+  assert.equal(q.body.pickupLocation, 'Patna Home');
+  assert.match(calls.filter((c) => c.url.includes('charges') && c.url.includes('md=E')).pop().url, /o_pin=800001/);
+  const b = await app.api('POST', `/api/orders/${id}/delhivery/book`, { mode: 'Express', pickup: { location: 'Patna Home', pincode: '800001' } }, admin.token);
+  assert.equal(b.status, 200, JSON.stringify(b.body));
+  assert.equal(b.body.delhivery.mode, 'Express');
+  const sent = JSON.parse(new URLSearchParams(calls.filter((c) => c.url.endsWith('/api/cmu/create.json')).pop().body).get('data'));
+  assert.equal(sent.shipments[0].shipping_mode, 'Express');
+  assert.equal(sent.pickup_location.name, 'Patna Home');
+  assert.equal(JSON.parse(calls.filter((c) => c.url.endsWith('/fm/request/new/')).pop().body).pickup_location, 'Patna Home');
+});
