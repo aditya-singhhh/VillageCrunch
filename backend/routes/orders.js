@@ -486,7 +486,7 @@ router.get('/:id/delhivery/quote', protect, admin, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'Order not found' });
-    res.json(await delhivery.quote(order, parcelFrom(req.query)));
+    res.json(await delhivery.quote(order, parcelFrom(req.query), { location: req.query.pickupLocation, pincode: req.query.pickupPincode }));
   } catch (e) { dlFail(res, e); }
 });
 
@@ -496,7 +496,7 @@ router.post('/:id/delhivery/book', protect, admin, async (req, res) => {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ message: 'Order not found' });
     const user = await User.findById(order.user).catch(() => null);
-    const booked = await delhivery.book(order, { parcel: parcelFrom(req.body?.parcel) }, user || {});
+    const booked = await delhivery.book(order, { parcel: parcelFrom(req.body?.parcel), mode: req.body?.mode === 'Express' ? 'Express' : 'Surface', pickup: req.body?.pickup || {} }, user || {});
     if (booked.status === 'shipped') require('../services/whatsapp').notify(booked, 'shipped').catch(() => {});
     res.json(dlOut(booked));
   } catch (e) { dlFail(res, e); }

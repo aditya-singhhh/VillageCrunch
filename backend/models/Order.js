@@ -109,6 +109,8 @@ const orderSchema = new mongoose.Schema({
     labelUrl: String,
     pickupRequested: Boolean,
     weight: Number,
+    mode: String, // Surface or Express
+    pickupLocation: String,
     bookedAt: Date,
     attempts: Number, // cancelled bookings so far (a re-booking needs a new order id)
   },

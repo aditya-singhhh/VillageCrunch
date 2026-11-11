@@ -66,11 +66,11 @@ async function serviceability(cfg, pin) {
 }
 
 /** Freight for one parcel (surface). Chargeable weight = max(actual, L x B x H / 5000). */
-async function freight(cfg, order, parcel) {
+async function freight(cfg, order, parcel, mode = 'S') {
   const vol = (parcel.length * parcel.breadth * parcel.height) / 5000;
   const grams = Math.round(Math.max(parcel.weight, vol) * 1000);
   const q = new URLSearchParams({
-    md: 'S', ss: 'Delivered', d_pin: order.shippingAddress?.pincode, o_pin: cfg.pickupPincode,
+    md: mode, ss: 'Delivered', d_pin: order.shippingAddress?.pincode, o_pin: cfg.pickupPincode,
     cgm: String(grams), pt: isCod(order) ? 'COD' : 'Pre-paid',
     ...(isCod(order) ? { cod: String(Math.round(order.totalPrice || 0)) } : {}),
   });
@@ -79,17 +79,29 @@ async function freight(cfg, order, parcel) {
   return row?.total_amount != null ? Math.round(Number(row.total_amount)) : null;
 }
 
-async function quote(order, overrides = {}) {
-  const cfg = await getConfig();
+/** Optional per-booking pickup (another address saved in Delhivery One). */
+const withPickup = (cfg, pickup = {}) => ({
+  ...cfg,
+  ...(pickup.location ? { pickupLocation: String(pickup.location).trim().slice(0, 80) } : {}),
+  ...(/^\d{6}$/.test(String(pickup.pincode || '')) ? { pickupPincode: String(pickup.pincode) } : {}),
+});
+
+async function quote(order, overrides = {}, pickup = {}) {
+  const cfg = withPickup(await getConfig(), pickup);
   const pin = order.shippingAddress?.pincode;
   if (!/^\d{6}$/.test(String(pin || ''))) throw new DelhiveryError('The order has no valid 6-digit pincode', 400);
   const parcel = { ...parcelFor(order), ...overrides };
   const svc = await serviceability(cfg, pin);
-  let rate = null;
-  try { rate = await freight(cfg, order, parcel); } catch (e) { console.warn('Delhivery rate:', e.message); }
+  const rateFor = (m) => freight(cfg, order, parcel, m).catch((e) => { console.warn(`Delhivery rate ${m}:`, e.message); return null; });
+  const [surface, express] = await Promise.all([rateFor('S'), rateFor('E')]);
   const ok = svc.served && (isCod(order) ? svc.cod : svc.prepaid);
+  const options = [
+    { mode: 'Surface', rate: surface, days: '4-7' },
+    { mode: 'Express', rate: express, days: '2-4' },
+  ].filter((o) => o.rate != null);
   return {
-    parcel, rate, served: svc.served, cod: !!svc.cod, ok,
+    parcel, rate: surface, options, served: svc.served, cod: !!svc.cod, ok,
+    pickupLocation: cfg.pickupLocation, pickupPincode: cfg.pickupPincode,
     message: !svc.served ? 'Delhivery does not deliver to this pincode'
       : (isCod(order) && !svc.cod ? 'Delhivery does not collect cash at this pincode' : ''),
   };
@@ -97,7 +109,7 @@ async function quote(order, overrides = {}) {
 
 const istDate = (d = Date.now()) => new Date(new Date(d).getTime() + 330 * 60000).toISOString().slice(0, 10);
 
-function shipmentFor(order, cfg, parcel, user = {}) {
+function shipmentFor(order, cfg, parcel, user = {}, mode = 'Surface') {
   const a = order.shippingAddress || {};
   const attempts = order.delhivery?.attempts || 0;
   const amounts = amountsFor(order);
@@ -122,27 +134,27 @@ function shipmentFor(order, cfg, parcel, user = {}) {
     shipment_length: String(parcel.length),
     shipment_width: String(parcel.breadth),
     shipment_height: String(parcel.height),
-    shipping_mode: 'Surface',
+    shipping_mode: mode === 'Express' ? 'Express' : 'Surface',
     seller_name: 'VillageCrunch',
     hsn_code: '1905',
   };
 }
 
 /** Book: create the shipment (gets the AWB), then pickup + label as best effort. Safe to retry. */
-async function book(order, { parcel: overrides = {} } = {}, user = {}) {
+async function book(order, { parcel: overrides = {}, mode = 'Surface', pickup = {} } = {}, user = {}) {
   if (order.delhivery?.awb) return order;
   if (order.status === 'cancelled') throw new DelhiveryError('This order is cancelled', 400);
   if (order.shiprocket?.awb) throw new DelhiveryError('This order is booked with Shiprocket. Cancel that booking first.', 400);
-  const cfg = await getConfig();
+  const cfg = withPickup(await getConfig(), pickup);
   const parcel = { ...parcelFor(order), ...overrides };
-  const data = { shipments: [shipmentFor(order, cfg, parcel, user)], pickup_location: { name: cfg.pickupLocation } };
+  const data = { shipments: [shipmentFor(order, cfg, parcel, user, mode)], pickup_location: { name: cfg.pickupLocation } };
   const r = await call(cfg, '/api/cmu/create.json', { method: 'POST', form: { format: 'json', data: JSON.stringify(data) } });
   const pkg = r?.packages?.[0];
   if (!pkg?.waybill || (pkg.status && !/success/i.test(pkg.status))) {
     throw new DelhiveryError(msgOf(r) || 'Delhivery did not create the shipment', 400);
   }
   const prev = order.delhivery?.toObject ? order.delhivery.toObject() : (order.delhivery || {});
-  order.delhivery = { ...prev, awb: String(pkg.waybill), bookedAt: new Date(), weight: parcel.weight };
+  order.delhivery = { ...prev, awb: String(pkg.waybill), bookedAt: new Date(), weight: parcel.weight, mode: mode === 'Express' ? 'Express' : 'Surface', pickupLocation: cfg.pickupLocation };
   order.trackingNumber = String(pkg.waybill);
   if (['pending', 'confirmed', 'processing'].includes(order.status)) order.status = 'shipped';
   await order.save();
