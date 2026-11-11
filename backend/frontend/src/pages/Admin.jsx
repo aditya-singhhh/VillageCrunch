@@ -4,6 +4,8 @@ import OrderAlertsCard from '../components/OrderAlertsCard';
 import PaymentRecoveryCard from '../components/PaymentRecoveryCard';
 import MetaCapiCard from '../components/MetaCapiCard';
 import ShiprocketCard from '../components/ShiprocketCard';
+import DelhiveryCard from '../components/DelhiveryCard';
+import DelhiveryBooking from '../components/DelhiveryBooking';
 import WhatsAppCard from '../components/WhatsAppCard';
 import ShiprocketBooking from '../components/ShiprocketBooking';
 import {
@@ -1105,6 +1107,7 @@ const saveSettings = async (e) => {
         <OrderAlertsCard />
         <PaymentRecoveryCard />
         <MetaCapiCard />
+        <DelhiveryCard />
         <ShiprocketCard />
         <WhatsAppCard />
 
@@ -1565,11 +1568,15 @@ const saveSettings = async (e) => {
 
               {/* Courier booking */}
               {selectedOrder.status !== 'cancelled' && (
-                <div className="border-t pt-4 mb-4">
-                  <ShiprocketBooking
+                <div className="border-t pt-4 mb-4 space-y-3">
+                  <DelhiveryBooking
                     order={selectedOrder}
                     onBooked={(r) => { setSelectedOrder({ ...selectedOrder, ...r }); fetchOrders(); }}
                   />
+                  {!selectedOrder.delhivery?.awb && <ShiprocketBooking
+                    order={selectedOrder}
+                    onBooked={(r) => { setSelectedOrder({ ...selectedOrder, ...r }); fetchOrders(); }}
+                  />}
                 </div>
               )}
 
@@ -1594,7 +1601,7 @@ const saveSettings = async (e) => {
               {/* Status Update */}
               <div className="border-t pt-4">
                 <h3 className="font-bold text-lg mb-2 text-desi-brown">Update Status</h3>
-                {!selectedOrder.shiprocket?.awb && (
+                {!selectedOrder.shiprocket?.awb && !selectedOrder.delhivery?.awb && (
                   <label className="mb-4 block text-sm text-ink-soft">
                     Shipped another way (e.g. Speed Post)? Enter the tracking number, then tap Shipped:
                     <input
