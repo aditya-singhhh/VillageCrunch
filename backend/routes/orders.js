@@ -476,4 +476,48 @@ router.get('/:id/shiprocket/label', protect, admin, async (req, res) => {
   } catch (e) { srFail(res, e); }
 });
 
+/* ---------- Delhivery One courier booking (admin) ---------- */
+const delhivery = require('../services/delhivery');
+const dlFail = (res, e) => res.status(e instanceof delhivery.DelhiveryError ? e.status : 500).json({ message: e.message });
+const dlOut = (o) => ({ _id: o._id, status: o.status, trackingNumber: o.trackingNumber || '', delhivery: o.delhivery, trackingUrl: delhivery.trackingUrl(o.delhivery?.awb) });
+
+// @route GET /api/orders/:id/delhivery/quote  (admin) - can Delhivery deliver, and at what price
+router.get('/:id/delhivery/quote', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(await delhivery.quote(order, parcelFrom(req.query)));
+  } catch (e) { dlFail(res, e); }
+});
+
+// @route POST /api/orders/:id/delhivery/book  (admin) - create shipment, request pickup, mark shipped
+router.post('/:id/delhivery/book', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    const user = await User.findById(order.user).catch(() => null);
+    const booked = await delhivery.book(order, { parcel: parcelFrom(req.body?.parcel) }, user || {});
+    if (booked.status === 'shipped') require('../services/whatsapp').notify(booked, 'shipped').catch(() => {});
+    res.json(dlOut(booked));
+  } catch (e) { dlFail(res, e); }
+});
+
+// @route POST /api/orders/:id/delhivery/cancel  (admin) - cancel before pickup, to re-book
+router.post('/:id/delhivery/cancel', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json(dlOut(await delhivery.cancel(order)));
+  } catch (e) { dlFail(res, e); }
+});
+
+// @route GET /api/orders/:id/delhivery/label  (admin) - shipping label PDF link
+router.get('/:id/delhivery/label', protect, admin, async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Order not found' });
+    res.json({ labelUrl: await delhivery.label(order) });
+  } catch (e) { dlFail(res, e); }
+});
+
 module.exports = router;

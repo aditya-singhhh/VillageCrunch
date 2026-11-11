@@ -122,6 +122,14 @@ const settingsSchema = new mongoose.Schema({
     tokenAt: Date,
   },
 
+  // Delhivery One (direct courier booking). Token is write-only from admin.
+  delhivery: {
+    token: String,
+    pickupLocation: String, // pickup location name exactly as in Delhivery One
+    pickupPincode: String,
+    staging: Boolean,
+  },
+
   notifications: {
     orderConfirmation: {
       type: Boolean,

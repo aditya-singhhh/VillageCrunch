@@ -60,6 +60,9 @@ const prettyPhone = (p) => { const d = digits(p).slice(-10); return d.length ===
 const INDIA_POST = /^[A-Z]{2}\d{9}IN$/i;
 /** Courier name and tracking link (or number) for a shipped order, or null if none yet. */
 function trackingFor(order) {
+  if (order.delhivery?.awb) {
+    return { courier: 'Delhivery', link: `https://www.delhivery.com/track-v2/package/${encodeURIComponent(order.delhivery.awb)}` };
+  }
   if (order.shiprocket?.awb) {
     return { courier: order.shiprocket.courier || 'Courier', link: `https://shiprocket.co/tracking/${encodeURIComponent(order.shiprocket.awb)}` };
   }

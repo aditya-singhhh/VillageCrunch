@@ -103,6 +103,15 @@ const orderSchema = new mongoose.Schema({
     bookedAt: Date,
     attempts: Number, // how many Shiprocket orders were created (a cancelled one needs a new id)
   },
+  // Courier booking made directly with Delhivery One from the admin page
+  delhivery: {
+    awb: String,
+    labelUrl: String,
+    pickupRequested: Boolean,
+    weight: Number,
+    bookedAt: Date,
+    attempts: Number, // cancelled bookings so far (a re-booking needs a new order id)
+  },
 }, { timestamps: true });
 
 module.exports = defineModel('Order', orderSchema, { collection: 'orders' });

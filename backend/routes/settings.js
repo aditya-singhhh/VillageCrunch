@@ -81,6 +81,39 @@ router.put('/shiprocket', protect, admin, async (req, res) => {
   res.json({ configured: !!(next.email && next.password), email: next.email || '', pickupLocation: next.pickupLocation || 'Home', pickupPincode: next.pickupPincode || '811212' });
 });
 
+// @route GET /api/settings/delhivery (admin) - is Delhivery booking connected?
+router.get('/delhivery', protect, admin, async (req, res) => {
+  const c = await require('../services/delhivery').getConfig();
+  res.json({ configured: !!c.token, pickupLocation: c.pickupLocation, pickupPincode: c.pickupPincode, staging: c.staging });
+});
+
+// @route PUT /api/settings/delhivery (admin) - save token (never returned) and pickup details.
+// The token is tested before saving, so a wrong one is caught here.
+router.put('/delhivery', protect, admin, async (req, res) => {
+  const dl = require('../services/delhivery');
+  const token = String(req.body?.token || '').trim();
+  const pickupLocation = String(req.body?.pickupLocation || '').trim().slice(0, 80);
+  const pickupPincode = String(req.body?.pickupPincode || '').trim();
+  if (token && !/^[A-Za-z0-9]{20,80}$/.test(token)) return res.status(400).json({ message: 'That does not look like a Delhivery API token' });
+  if (pickupPincode && !/^\d{6}$/.test(pickupPincode)) return res.status(400).json({ message: 'Pickup pincode must be 6 digits' });
+  const s = await Settings.getSettings();
+  const cur = s.toObject().delhivery || {};
+  const next = {
+    ...cur,
+    ...(token ? { token } : {}),
+    ...(pickupLocation ? { pickupLocation } : {}),
+    ...(pickupPincode ? { pickupPincode } : {}),
+    ...(typeof req.body?.staging === 'boolean' ? { staging: req.body.staging } : {}),
+  };
+  if (token) {
+    try { await dl.testToken({ pickupLocation: next.pickupLocation, pickupPincode: next.pickupPincode, staging: !!next.staging, token }); }
+    catch (e) { return res.status(e.status || 400).json({ message: e.message }); }
+  }
+  s.delhivery = next;
+  await s.save();
+  res.json({ configured: !!next.token, pickupLocation: next.pickupLocation || 'VILLAGECRUNCH B2C', pickupPincode: next.pickupPincode || '811211', staging: !!next.staging });
+});
+
 // ---------- WhatsApp order updates (admin) ----------
 const waInfo = async () => {
   const wa = require('../services/whatsapp');
@@ -171,6 +204,7 @@ router.get('/', async (req, res) => {
     if (all.metaCapi) all.metaCapi = { pixelId: all.metaCapi.pixelId, configured: !!all.metaCapi.token };
     if (all.whatsapp) all.whatsapp = { phoneNumberId: all.whatsapp.phoneNumberId, configured: !!all.whatsapp.token };
     if (all.shiprocket) all.shiprocket = { email: all.shiprocket.email, pickupLocation: all.shiprocket.pickupLocation, configured: !!all.shiprocket.password };
+    if (all.delhivery) all.delhivery = { pickupLocation: all.delhivery.pickupLocation, configured: !!all.delhivery.token };
     if (all.payments) all.payments = { webhookConfigured: !!all.payments.webhookSecret };
     res.json(all);
   } catch (error) {
