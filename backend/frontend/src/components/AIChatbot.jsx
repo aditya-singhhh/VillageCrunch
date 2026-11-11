@@ -214,7 +214,7 @@ const AIChatbot = () => {
         '🧂 Classic Salted\n' +
         '🌿 Natural Plain\n\n' +
         '💰 ₹199-299 | 100gm\n' +
-        '🚚 Free delivery over ₹500';
+        '🚚 Free delivery from ₹499';
     }
 
     // Thekua - Quick info
@@ -281,11 +281,11 @@ const AIChatbot = () => {
       ]);
       return '💰 **Best Prices!**\n\n' +
         '🌰 Makhana: ₹199-299\n' +
-        '🍪 Thekua: ₹219 (200 g) · ₹399 (400 g) · ₹1,099 (pack of 3)\n' +
+        '🍪 Thekua: ₹299 (200 g) · ₹499 (400 g) · ₹949 (800 g) · ₹1,299 (pack of 3)\n' +
         '🎁 Diwali gift boxes: ₹899-999\n\n' +
         '🎉 **Offers:**\n' +
-        '✅ Free shipping over ₹500\n' +
-        '✅ First order: free delivery on ₹499+ (code FIRST)\n' +
+        '✅ Free shipping from ₹499\n' +
+        '✅ First order: 20% off + free delivery on ₹399+, so 400 g is just ₹399\n' +
         '✅ Corporate gifting rates for 25+ boxes';
     }
 
@@ -298,7 +298,7 @@ const AIChatbot = () => {
       return '🚚 **Fast Delivery!**\n\n' +
         '📍 Metro Cities: 2-3 days\n' +
         '📍 Other Cities: 3-5 days\n\n' +
-        '✅ FREE over ₹500\n' +
+        '✅ FREE from ₹499\n' +
         '✅ Real-time tracking\n' +
         '✅ Same-day dispatch';
     }

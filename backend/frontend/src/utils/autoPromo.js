@@ -6,7 +6,7 @@ const WELCOME_KEY = 'vc-welcome-code';
 /** Offers shown in the cart, best first. The server decides who is eligible. */
 export const OFFER_CODES = ['WELCOME15', AUTO_CODE];
 const OFFER_TEXT = {
-  WELCOME15: '15% off + free delivery on your first order',
+  WELCOME15: '20% off + free delivery on your first order',
   FIRST: 'Free delivery on your first order',
 };
 
