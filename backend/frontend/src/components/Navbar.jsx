@@ -17,7 +17,6 @@ const SHOP_LINKS = [
 
 const DESKTOP_LINKS = [
   ...SHOP_LINKS,
-  { to: '/diwali', label: 'Diwali gifts' },
   { to: '/ghar', label: 'Chhath 🌅' },
   { to: '/about', label: 'About', wide: true },
   { to: '/contact', label: 'Contact', wide: true },
@@ -225,7 +224,7 @@ const Navbar = () => {
         )}
       </div>
 
-      <MobileMenu open={drawerOpen} onClose={() => setDrawerOpen(false)} links={[...SHOP_LINKS, { to: '/diwali', label: 'Diwali gift boxes' }, { to: '/ghar', label: 'Chhath: ghar se door? 🌅' }]} user={user} onLogout={handleLogout} />
+      <MobileMenu open={drawerOpen} onClose={() => setDrawerOpen(false)} links={[...SHOP_LINKS, { to: '/ghar', label: 'Chhath: ghar se door? 🌅' }]} user={user} onLogout={handleLogout} />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <AddedToCartSheet />
     </header>

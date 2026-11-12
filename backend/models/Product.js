@@ -37,6 +37,11 @@ const productSchema = new mongoose.Schema({
   packNote: { type: String },    // e.g. "Save ₹49"
   packOrder: { type: Number, default: 0 },
   isBundle: { type: Boolean, default: false },
+  // Recipe variant inside a packGroup, e.g. "Shuddh Desi Ghee" or "Regular". Shown as a "Choose type" row.
+  variant: { type: String },
+  variantNote: { type: String }, // one line under the type buttons, e.g. "Fried in pure desi ghee"
+  variantOrder: { type: Number, default: 0 },
+  oilFried: { type: Boolean, default: false }, // true = fried in oil, so "no oil" claims are hidden
   stock: {
     type: Number,
     required: true,
