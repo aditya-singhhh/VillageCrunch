@@ -374,20 +374,29 @@ const ProductDetail = () => {
   const packOptions = product.packGroup
     ? allProducts.filter(p => p.packGroup === product.packGroup).sort((a, b) => (a.packOrder || 0) - (b.packOrder || 0))
     : [];
-  // Recipe variants (e.g. Shuddh Desi Ghee / Regular) share the packGroup; sizes are shown for the current variant only
-  const sameVariant = (p) => (p.variant || '') === (product.variant || '');
-  const variantOptions = [];
-  packOptions
-    .filter(p => !p.isBundle && p.variant)
-    .sort((a, b) => (a.variantOrder || 0) - (b.variantOrder || 0) || (a.packOrder || 0) - (b.packOrder || 0))
-    .forEach((p) => {
-      if (variantOptions.some((v) => v.variant === p.variant)) return;
-      // link to the same size in that variant when it exists, else its first size
-      const sameSize = packOptions.find((q) => !q.isBundle && q.variant === p.variant && q.weight === product.weight);
-      const pick = sameSize || p;
-      variantOptions.push({ variant: p.variant, note: pick.variantNote, to: pick._id, priceText: `${formatINR(pick.price)} · ${pick.packLabel || pick.weight}` });
-    });
-  const sizeOptions = packOptions.filter(p => !p.isBundle && (variantOptions.length > 1 ? sameVariant(p) : true));
+  // Recipe choices inside a packGroup: type (variant: Shuddh Desi Ghee / Regular) and sweetener (Gud / Cheeni).
+  // Sizes are shown for the current type + sweetener only.
+  const sizesInGroup = packOptions.filter(p => !p.isBundle);
+  const choiceRow = (field, noteField) => {
+    const opts = [];
+    sizesInGroup
+      .filter(p => p[field])
+      .sort((a, b) => (a.variantOrder || 0) - (b.variantOrder || 0) || (a.packOrder || 0) - (b.packOrder || 0))
+      .forEach((p) => {
+        if (opts.some((o) => o.value === p[field])) return;
+        // keep every other choice the same (type/sweetener/size) when it exists
+        const keep = (q) => ['variant', 'sweetener'].every((f) => f === field || (q[f] || '') === (product[f] || ''));
+        const match = sizesInGroup.filter((q) => q[field] === p[field]);
+        const pick = match.find((q) => keep(q) && q.weight === product.weight) || match.find(keep) || match.find((q) => q.weight === product.weight) || p;
+        opts.push({ value: p[field], note: noteField ? pick[noteField] : '', to: pick._id, priceText: `${formatINR(pick.price)} · ${pick.packLabel || pick.weight}` });
+      });
+    return opts.length > 1 ? opts : [];
+  };
+  const variantOptions = choiceRow('variant', 'variantNote');
+  const sweetenerOptions = choiceRow('sweetener');
+  const sizeOptions = sizesInGroup.filter(p =>
+    (!variantOptions.length || (p.variant || '') === (product.variant || '')) &&
+    (!sweetenerOptions.length || (p.sweetener || '') === (product.sweetener || '')));
   // Price per 100 g for each size, so the best-value pack can be shown clearly
   const gramsOf = (w) => { const m = String(w || '').trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|gm|gms|gram|grams)$/); return m ? parseFloat(m[1]) * (m[2] === 'kg' ? 1000 : 1) : 0; };
   const per100 = (o) => { const g = gramsOf(o.weight); return g && Number(o.price) ? (Number(o.price) / g) * 100 : null; };
@@ -616,29 +625,29 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Recipe type (Shuddh Desi Ghee / Regular) */}
-            {variantOptions.length > 1 && (
-              <div className="mt-4">
-                <p className="text-sm font-semibold text-ink mb-2">Choose type</p>
+            {/* Recipe choices: type (Shuddh Desi Ghee / Regular) and sweetener (Gud / Cheeni) */}
+            {[['Choose type', 'variant', variantOptions], ['Sweetener', 'sweetener', sweetenerOptions]].map(([title, field, opts]) => opts.length > 0 && (
+              <div className="mt-4" key={field}>
+                <p className="text-sm font-semibold text-ink mb-2">{title}</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {variantOptions.map((v) => {
-                    const active = v.variant === product.variant;
+                  {opts.map((v) => {
+                    const active = v.value === product[field];
                     return (
                       <Link
-                        key={v.variant}
+                        key={v.value}
                         to={`/product/${v.to}`}
                         aria-current={active ? 'true' : undefined}
                         className={`block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : 'border-line bg-white hover:border-brand/60'}`}
                       >
-                        <span className="block text-sm font-semibold text-ink">{v.variant}</span>
+                        <span className="block text-sm font-semibold text-ink">{v.value}</span>
                         {v.note && <span className="block text-xs text-ink-soft">{v.note}</span>}
-                        <span className="block text-xs text-ink-mute">{v.priceText}</span>
+                        {field === 'variant' && <span className="block text-xs text-ink-mute">{v.priceText}</span>}
                       </Link>
                     );
                   })}
                 </div>
               </div>
-            )}
+            ))}
 
             {/* Pack sizes and bundles */}
             {packOptions.length > 1 && (

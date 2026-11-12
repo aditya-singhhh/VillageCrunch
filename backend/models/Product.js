@@ -41,6 +41,7 @@ const productSchema = new mongoose.Schema({
   variant: { type: String },
   variantNote: { type: String }, // one line under the type buttons, e.g. "Fried in pure desi ghee"
   variantOrder: { type: Number, default: 0 },
+  sweetener: { type: String }, // e.g. "Gud (jaggery)" or "Cheeni (sugar)"; shown as a "Sweetener" row
   oilFried: { type: Boolean, default: false }, // true = fried in oil, so "no oil" claims are hidden
   stock: {
     type: Number,
