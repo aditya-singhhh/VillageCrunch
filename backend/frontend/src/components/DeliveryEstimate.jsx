@@ -17,11 +17,19 @@ const DEFAULT_DAYS = [4, 7];
 const daysFor = (state) => (ZONES.find((z) => z.states.some((s) => s.toLowerCase() === String(state || '').toLowerCase())) || {}).days || DEFAULT_DAYS;
 
 const fmt = (d) => d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d; };
+// Ranges assume dispatch tomorrow. When a version only ships from a later date, count from the day before it.
+export const shipDate = (shipsFrom) => {
+  if (!shipsFrom) return null;
+  const d = new Date(`${shipsFrom}T00:00:00`);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Number.isNaN(d.getTime()) || d <= today ? null : d;
+};
+const addDays = (n, from) => { const d = from ? new Date(from) : new Date(); if (from) d.setDate(d.getDate() - 1); d.setDate(d.getDate() + n); return d; };
 
 const KEY = 'vc-delivery-pin';
 
-const DeliveryEstimate = () => {
+const DeliveryEstimate = ({ shipsFrom }) => {
+  const later = shipDate(shipsFrom);
   const [pin, setPin] = useState(() => { try { return localStorage.getItem(KEY) || ''; } catch (_) { return ''; } });
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -37,7 +45,7 @@ const DeliveryEstimate = () => {
     if (!hit && !eta?.days) { setError('We could not find this PIN code. We still deliver across India.'); setResult(null); return; }
     try { localStorage.setItem(KEY, pin); } catch (_) { /* ignore */ }
     const [a, b] = eta?.days || daysFor(hit?.state);
-    setResult({ place: hit ? [hit.city, hit.state].filter(Boolean).join(', ') : `PIN ${pin}`, from: fmt(addDays(a)), to: fmt(addDays(b)), courier: !!eta?.days });
+    setResult({ place: hit ? [hit.city, hit.state].filter(Boolean).join(', ') : `PIN ${pin}`, from: fmt(addDays(a, later)), to: fmt(addDays(b, later)), courier: !!eta?.days });
   };
 
   return (
@@ -61,7 +69,7 @@ const DeliveryEstimate = () => {
       {result && (
         <p className="mt-2 text-sm text-ink-soft" aria-live="polite">
           Arrives by <b className="text-ink">{result.from} – {result.to}</b> in {result.place}.
-          <span className="block text-xs text-ink-mute mt-0.5">Made fresh after you order and shipped from Munger, Bihar in 1–2 days{result.courier ? ' · Delhivery estimate' : ''}.</span>
+          <span className="block text-xs text-ink-mute mt-0.5">{later ? `Made fresh in our first batch after Chhath and shipped from Munger, Bihar on ${fmt(later)}` : 'Made fresh after you order and shipped from Munger, Bihar in 1–2 days'}{result.courier ? ' · Delhivery estimate' : ''}.</span>
         </p>
       )}
       {error && <p className="mt-2 text-sm text-berry" aria-live="polite">{error}</p>}
