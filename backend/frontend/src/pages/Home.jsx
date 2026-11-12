@@ -78,11 +78,6 @@ const Home = () => {
     const combo = thekua.find((p) => p.isBundle && /makhana/i.test(p.name));
     return [...items, ...(combo ? [combo] : [])].slice(0, 4);
   }, [products, thekua]);
-  const giftBox = useMemo(() => thekua.find((p) => /gift/i.test(p.name)), [thekua]);
-  const giftRow = useMemo(
-    () => [...products.filter((p) => p.category === 'gifts').sort(byOrder), ...(giftBox ? [giftBox] : [])],
-    [products, giftBox]
-  );
 
   const trust = [
     { icon: Truck, text: freeShippingThreshold ? `Free delivery ${formatINR(freeShippingThreshold)}+` : 'Delivery across India' },
@@ -175,7 +170,6 @@ const Home = () => {
             </Link>
           </section>
 
-          <Row title="Diwali gift boxes" to="/diwali" products={giftRow} />
 
           <Row title="Makhana & Sattu" to="/products" products={pantryRow} />
 

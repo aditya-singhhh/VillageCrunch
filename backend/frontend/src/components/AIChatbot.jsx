@@ -282,7 +282,7 @@ const AIChatbot = () => {
       return '💰 **Best Prices!**\n\n' +
         '🌰 Makhana: ₹199-299\n' +
         '🍪 Thekua: ₹299 (200 g) · ₹499 (400 g) · ₹949 (800 g) · ₹1,299 (pack of 3)\n' +
-        '🎁 Diwali gift boxes: ₹899-999\n\n' +
+        '\n' +
         '🎉 **Offers:**\n' +
         '✅ Free shipping from ₹499\n' +
         '✅ First order: 20% off + free delivery on ₹399+, so 400 g is just ₹399\n' +

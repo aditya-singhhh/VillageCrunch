@@ -56,18 +56,6 @@ export const OFFER_SLIDES = [
     until: '2026-11-16',
   },
   {
-    id: 'gift-box',
-    badge: 'Diwali & Chhath',
-    headline: 'Kaju katli nahi, thekua dijiye',
-    sub: 'Festive Gift Box · 2 × 400 g',
-    cta: 'Send a gift',
-    to: '/diwali',
-    image: '/packaging/gift-box.jpg',
-    bg: 'linear-gradient(110deg,#FFF6E8 0%,#F7E3C2 70%,#EFCF9C 100%)',
-    dark: false,
-    until: '2026-11-12',
-  },
-  {
     id: 'makhana',
     headline: 'Chips nahi, makhana',
     sub: 'Chai ke saath · from ₹149 · Cash on delivery',

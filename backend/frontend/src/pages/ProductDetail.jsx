@@ -374,7 +374,29 @@ const ProductDetail = () => {
   const packOptions = product.packGroup
     ? allProducts.filter(p => p.packGroup === product.packGroup).sort((a, b) => (a.packOrder || 0) - (b.packOrder || 0))
     : [];
-  const sizeOptions = packOptions.filter(p => !p.isBundle);
+  // Recipe choices inside a packGroup: type (variant: Shuddh Desi Ghee / Regular) and sweetener (Gud / Cheeni).
+  // Sizes are shown for the current type + sweetener only.
+  const sizesInGroup = packOptions.filter(p => !p.isBundle);
+  const choiceRow = (field, noteField) => {
+    const opts = [];
+    sizesInGroup
+      .filter(p => p[field])
+      .sort((a, b) => (a.variantOrder || 0) - (b.variantOrder || 0) || (a.packOrder || 0) - (b.packOrder || 0))
+      .forEach((p) => {
+        if (opts.some((o) => o.value === p[field])) return;
+        // keep every other choice the same (type/sweetener/size) when it exists
+        const keep = (q) => ['variant', 'sweetener'].every((f) => f === field || (q[f] || '') === (product[f] || ''));
+        const match = sizesInGroup.filter((q) => q[field] === p[field]);
+        const pick = match.find((q) => keep(q) && q.weight === product.weight) || match.find(keep) || match.find((q) => q.weight === product.weight) || p;
+        opts.push({ value: p[field], note: noteField ? pick[noteField] : '', to: pick._id, priceText: `${formatINR(pick.price)} · ${pick.packLabel || pick.weight}` });
+      });
+    return opts.length > 1 ? opts : [];
+  };
+  const variantOptions = choiceRow('variant', 'variantNote');
+  const sweetenerOptions = choiceRow('sweetener');
+  const sizeOptions = sizesInGroup.filter(p =>
+    (!variantOptions.length || (p.variant || '') === (product.variant || '')) &&
+    (!sweetenerOptions.length || (p.sweetener || '') === (product.sweetener || '')));
   // Price per 100 g for each size, so the best-value pack can be shown clearly
   const gramsOf = (w) => { const m = String(w || '').trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|gm|gms|gram|grams)$/); return m ? parseFloat(m[1]) * (m[2] === 'kg' ? 1000 : 1) : 0; };
   const per100 = (o) => { const g = gramsOf(o.weight); return g && Number(o.price) ? (Number(o.price) / g) * 100 : null; };
@@ -590,7 +612,11 @@ const ProductDetail = () => {
                     )}
                   </p>
                   <ul className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-ink-soft" aria-label="Why VillageCrunch">
-                    <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Desi ghee</span>no oil, no dalda</li>
+                    {product.oilFried ? (
+                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Desi ghee</span>in the dough, fried in oil</li>
+                    ) : (
+                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Desi ghee</span>no oil, no dalda</li>
+                    )}
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Made after</span>you order</li>
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ships in</span>1–2 days</li>
                   </ul>
@@ -598,6 +624,30 @@ const ProductDetail = () => {
                 </>
               )}
             </div>
+
+            {/* Recipe choices: type (Shuddh Desi Ghee / Regular) and sweetener (Gud / Cheeni) */}
+            {[['Choose type', 'variant', variantOptions], ['Sweetener', 'sweetener', sweetenerOptions]].map(([title, field, opts]) => opts.length > 0 && (
+              <div className="mt-4" key={field}>
+                <p className="text-sm font-semibold text-ink mb-2">{title}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {opts.map((v) => {
+                    const active = v.value === product[field];
+                    return (
+                      <Link
+                        key={v.value}
+                        to={`/product/${v.to}`}
+                        aria-current={active ? 'true' : undefined}
+                        className={`block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : 'border-line bg-white hover:border-brand/60'}`}
+                      >
+                        <span className="block text-sm font-semibold text-ink">{v.value}</span>
+                        {v.note && <span className="block text-xs text-ink-soft">{v.note}</span>}
+                        {field === 'variant' && <span className="block text-xs text-ink-mute">{v.priceText}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
 
             {/* Pack sizes and bundles */}
             {packOptions.length > 1 && (
