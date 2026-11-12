@@ -16,7 +16,7 @@ import { imgSrc, imgProps } from '../utils/img';
 import { trackViewItem } from '../utils/analytics';
 import ImageLightbox from '../components/ImageLightbox';
 import ThekuaStory from '../components/ThekuaStory';
-import DeliveryEstimate from '../components/DeliveryEstimate';
+import DeliveryEstimate, { shipDate } from '../components/DeliveryEstimate';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -424,6 +424,7 @@ const ProductDetail = () => {
   const discount = discountPercent(product.price, product.originalPrice);
   const perUnit = unitPrice(product.price, product.weight);
   const outOfStock = product.stock === 0;
+  const laterShip = shipDate(product.shipsFrom);
   const maxQty = Math.max(1, Math.min(product.stock || 1, 10));
   const taxRate = settings?.pricing?.taxRate;
   const canBuy = !isMasalaProduct && !outOfStock;
@@ -698,7 +699,9 @@ const ProductDetail = () => {
                 <span className="inline-flex items-center h-10 px-4 rounded-md border-2 border-brand bg-action-tint text-brand text-sm font-semibold">{product.weight}</span>
               )}
               <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${outOfStock ? 'text-berry' : 'text-leaf'}`}>
-                {outOfStock ? 'Out of stock' : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
+                {outOfStock ? 'Out of stock' : laterShip
+                  ? (<><Check className="w-4 h-4" aria-hidden="true" /> Made fresh · ships {laterShip.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</>)
+                  : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
               </span>
             </div>
             {showBetterValue && (
@@ -710,7 +713,7 @@ const ProductDetail = () => {
               </Link>
             )}
 
-            {!isMasalaProduct && <DeliveryEstimate />}
+            {!isMasalaProduct && <DeliveryEstimate shipsFrom={product.shipsFrom} />}
 
             {/* Description */}
             {product.description && (
