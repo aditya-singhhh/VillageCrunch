@@ -1,7 +1,6 @@
 /**
  * Google Merchant Center product feed (RSS 2.0 with the g: namespace).
- * Lists every live product with its real selling price. Versions that only ship from a later
- * date are listed as "preorder" with that date, so Google shows the same thing as the product page.
+ * Lists every live product with its real selling price.
  */
 const esc = (s) => String(s ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -20,21 +19,13 @@ const abs = (base, url) => {
 // Food, Beverages & Tobacco > Food Items > Snack Foods
 const SNACK_CATEGORY = '423';
 
-const availability = (p, today) => {
-  if (!(Number(p.stock) > 0)) return { status: 'out_of_stock' };
-  if (p.shipsFrom && /^\d{4}-\d{2}-\d{2}$/.test(p.shipsFrom) && p.shipsFrom > today) {
-    return { status: 'preorder', date: `${p.shipsFrom}T09:00+05:30` };
-  }
-  return { status: 'in_stock' };
-};
+const availability = (p) => (Number(p.stock) > 0 ? 'in_stock' : 'out_of_stock');
 
-function buildGoogleFeed(products, baseUrl, now = new Date()) {
-  const today = new Date(now.getTime() + 5.5 * 3600e3).toISOString().slice(0, 10); // IST date
+function buildGoogleFeed(products, baseUrl) {
   const items = (products || [])
     .filter((p) => p && p.isActive !== false && !p.isBundle && Number(p.price) > 0 && p.image)
     .map((p) => {
       const id = String(p._id || p.id);
-      const av = availability(p, today);
       const extra = (p.images || []).filter((u) => u && u !== p.image).slice(0, 10);
       const desc = plain(p.description).slice(0, 4900) || plain(p.name);
       const lines = [
@@ -44,8 +35,7 @@ function buildGoogleFeed(products, baseUrl, now = new Date()) {
         `<g:link>${esc(`${baseUrl}/product/${id}`)}</g:link>`,
         `<g:image_link>${esc(abs(baseUrl, p.image))}</g:image_link>`,
         ...extra.map((u) => `<g:additional_image_link>${esc(abs(baseUrl, u))}</g:additional_image_link>`),
-        `<g:availability>${av.status}</g:availability>`,
-        av.date ? `<g:availability_date>${av.date}</g:availability_date>` : '',
+        `<g:availability>${availability(p)}</g:availability>`,
         `<g:price>${Number(p.price).toFixed(2)} INR</g:price>`,
         '<g:brand>VillageCrunch</g:brand>',
         '<g:condition>new</g:condition>',
