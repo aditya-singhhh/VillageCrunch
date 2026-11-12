@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import collapseVariants from '../utils/collapseVariants';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Truck, Banknote, Leaf, RefreshCw, Gift, BadgePercent, LayoutGrid } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -68,7 +69,10 @@ const Home = () => {
   const thekua = useMemo(() => products.filter((p) => p.category === 'thekua').sort(byOrder), [products]);
   // Row 1: the three thekua sizes + the best-value pack
   const thekuaRow = useMemo(() => {
-    const sizes = thekua.filter((p) => !p.isBundle);
+    const allSizes = thekua.filter((p) => !p.isBundle);
+    // one card per type (Shuddh / Regular), then the other Shuddh gud sizes
+    const reps = collapseVariants(allSizes);
+    const sizes = [...reps, ...allSizes.filter((p) => !reps.includes(p) && (!p.variant || (/gud|jaggery/i.test(p.sweetener || '') && p.variant === reps[0]?.variant)))];
     const packs = thekua.filter((p) => p.isBundle && !/makhana/i.test(p.name) && !/gift/i.test(p.name));
     return [...sizes, ...packs, ...thekua.filter((p) => p.isBundle)].filter((p, i, a) => a.indexOf(p) === i).slice(0, 4);
   }, [thekua]);

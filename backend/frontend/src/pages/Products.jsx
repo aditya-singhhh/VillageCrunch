@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import collapseVariants from '../utils/collapseVariants';
 import { useSearchParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -63,7 +64,7 @@ const Products = () => {
   }, [urlSearch]);
 
   const categories = useMemo(() => [...new Set(all.map((p) => p.category).filter(Boolean))].sort(), [all]);
-  const counts = useMemo(() => all.reduce((m, p) => ({ ...m, [p.category]: (m[p.category] || 0) + 1 }), {}), [all]);
+  const counts = useMemo(() => collapseVariants(all).reduce((m, p) => ({ ...m, [p.category]: (m[p.category] || 0) + 1 }), {}), [all]);
 
   const visible = useMemo(() => {
     const term = urlSearch.trim().toLowerCase();
@@ -77,7 +78,7 @@ const Products = () => {
       if (filters.stock && !(p.stock > 0)) return false;
       return true;
     });
-    list = [...list];
+    list = term ? [...list] : collapseVariants(list);
     if (filters.sort === 'price-asc') list.sort((a, b) => a.price - b.price);
     else if (filters.sort === 'price-desc') list.sort((a, b) => b.price - a.price);
     else if (filters.sort === 'discount') list.sort((a, b) => discountPercent(b.price, b.originalPrice) - discountPercent(a.price, a.originalPrice));

@@ -52,9 +52,17 @@ const ProductDetail = () => {
   const { settings } = useStoreSettings();
 
   useEffect(() => {
-    fetchProduct();
-    fetchAllProducts();
+    // Switching size/type/sweetener: show the product we already have straight away, then refresh quietly
+    const cached = allProducts.find((p) => p._id === id);
+    if (cached) {
+      setProduct((prev) => ({ ...cached, reviews: prev && prev._id === id ? prev.reviews : cached.reviews }));
+      getProduct(id).then((fresh) => setProduct((cur) => (cur && cur._id === id ? fresh : cur))).catch(() => {});
+    } else {
+      fetchProduct();
+    }
+    if (!allProducts.length) fetchAllProducts();
     setSelectedImage(0); // Reset image selection when product changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -613,14 +621,14 @@ const ProductDetail = () => {
                   </p>
                   <ul className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-ink-soft" aria-label="Why VillageCrunch">
                     {product.oilFried ? (
-                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Desi ghee</span>in the dough, fried in oil</li>
+                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ghee + oil</span>ghee in dough, oil-fried</li>
                     ) : (
-                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Desi ghee</span>no oil, no dalda</li>
+                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Pure desi ghee</span>fried in ghee, no oil</li>
                     )}
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Made after</span>you order</li>
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ships in</span>1–2 days</li>
                   </ul>
-                  <p className="mt-2 text-xs text-ink-mute">Ordered from Assam, Telangana, Karnataka, Delhi and West Bengal in our first week.</p>
+                  <p className="mt-2 text-xs text-ink-mute">Ordered by families in Assam, Telangana, Karnataka, Delhi, West Bengal and Maharashtra.</p>
                 </>
               )}
             </div>
@@ -636,6 +644,8 @@ const ProductDetail = () => {
                       <Link
                         key={v.value}
                         to={`/product/${v.to}`}
+                        replace
+                        state={{ keepScroll: true }}
                         aria-current={active ? 'true' : undefined}
                         className={`block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : 'border-line bg-white hover:border-brand/60'}`}
                       >
@@ -664,6 +674,8 @@ const ProductDetail = () => {
                           <Link
                             key={o._id}
                             to={`/product/${o._id}`}
+                            replace
+                            state={{ keepScroll: true }}
                             aria-current={active ? 'true' : undefined}
                             className={`relative block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : isBest ? 'border-leaf bg-leaf-tint/40 hover:border-leaf' : 'border-line bg-white hover:border-brand/60'}`}
                           >
@@ -690,7 +702,7 @@ const ProductDetail = () => {
               </span>
             </div>
             {showBetterValue && (
-              <Link to={`/product/${bestValue._id}`} className="mt-3 flex items-center justify-between gap-3 rounded-md border border-leaf/40 bg-leaf-tint/50 px-3 py-2 text-sm">
+              <Link to={`/product/${bestValue._id}`} replace state={{ keepScroll: true }} className="mt-3 flex items-center justify-between gap-3 rounded-md border border-leaf/40 bg-leaf-tint/50 px-3 py-2 text-sm">
                 <span className="text-ink-soft">
                   <b className="text-ink">{bestValue.packLabel || bestValue.weight}</b> for {formatINR(bestValue.price)}: just {formatINR(per100(bestValue))}/100 g{bestValue.packNote ? ` · ${bestValue.packNote}` : ''}
                 </span>
