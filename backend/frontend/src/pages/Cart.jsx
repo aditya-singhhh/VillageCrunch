@@ -14,7 +14,7 @@ import { imgSrc, imgProps } from '../utils/img';
 // Shown next to the total, where first-time buyers hesitate. Keep these true to the product page.
 const TRUST_POINTS = [
   'Made fresh after you order, in Bihar',
-  'Desi ghee and jaggery. No oil, no dalda',
+  'Whole-wheat atta, gud and desi ghee',
   'Ships in 1–2 days, delivered across India',
   'Ordered from Assam, Telangana, Karnataka, Delhi, West Bengal and Maharashtra',
 ];
