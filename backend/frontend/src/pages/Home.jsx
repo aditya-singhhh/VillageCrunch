@@ -93,13 +93,13 @@ const Home = () => {
   return (
     <div>
       <SEOHead
-        title="Thekua, Makhana & Sattu from Bihar"
-        description="Traditional Bihari thekua made with jaggery and desi ghee, phool makhana and sattu. Natural, no preservatives, delivered direct to your home across India."
+        title="Buy Bihari Thekua Online – Desi Ghee & Gud, from Munger"
+        description="Authentic Bihari thekua made in Munger with whole-wheat atta, gud and desi ghee. No maida, no preservatives. Order thekua online, delivered across India. Also makhana and sattu."
         keywords="thekua online, Bihari thekua, makhana online, phool makhana, roasted makhana, sattu online, Chhath prasad, natural snacks, no preservatives"
         url="/"
         type="website"
       />
-      <h1 className="sr-only">VillageCrunch: thekua, makhana and sattu</h1>
+      <h1 className="sr-only">VillageCrunch: buy Bihari thekua online, made in Munger</h1>
 
       <HeroCarousel products={products} freeShippingThreshold={freeShippingThreshold} ready={loaded && (!!settings || !settingsWait)} />
 

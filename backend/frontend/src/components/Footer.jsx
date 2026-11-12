@@ -7,6 +7,7 @@ const SHOP = [
   { to: '/products', label: 'All products' },
   { to: '/products?category=makhana', label: 'Makhana' },
   { to: '/products?category=thekua', label: 'Thekua' },
+  { to: '/thekua', label: 'About Bihari thekua' },
   { to: '/products?category=sattu', label: 'Sattu' },
   { to: '/ghar', label: 'Chhath: ghar se door?' },
 ];
