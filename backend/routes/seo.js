@@ -28,6 +28,20 @@ const getPublicSiteUrl = () => {
   }
 };
 
+// Google Merchant Center product feed: https://villagecrunch.in/api/seo/google-feed.xml
+router.get('/google-feed.xml', async (req, res) => {
+  try {
+    const { buildGoogleFeed } = require('../services/googleFeed');
+    const products = await Product.find({ isActive: { $ne: false } }).lean();
+    res.set('Content-Type', 'application/xml; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.send(buildGoogleFeed(products, getPublicSiteUrl()));
+  } catch (error) {
+    console.error('Google feed error:', error.message);
+    res.status(500).send('Feed unavailable');
+  }
+});
+
 // Generate sitemap.xml
 router.get('/sitemap.xml', async (req, res) => {
   try {
