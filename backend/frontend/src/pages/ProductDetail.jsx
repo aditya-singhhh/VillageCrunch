@@ -594,7 +594,7 @@ const ProductDetail = () => {
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Made after</span>you order</li>
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ships in</span>1–2 days</li>
                   </ul>
-                  <p className="mt-2 text-xs text-ink-mute">Ordered from Assam, Telangana, Karnataka, Delhi and West Bengal in our first week.</p>
+                  <p className="mt-2 text-xs text-ink-mute">Ordered from Assam, Telangana, Karnataka, Delhi, West Bengal and Maharashtra.</p>
                 </>
               )}
             </div>

@@ -11,6 +11,14 @@ import { validatePromocode, calculateOrderTotal, getSettings } from '../utils/ap
 import toast from 'react-hot-toast';
 import { imgSrc, imgProps } from '../utils/img';
 
+// Shown next to the total, where first-time buyers hesitate. Keep these true to the product page.
+const TRUST_POINTS = [
+  'Made fresh after you order, in Bihar',
+  'Desi ghee and jaggery. No oil, no dalda',
+  'Ships in 1–2 days, delivered across India',
+  'Ordered from Assam, Telangana, Karnataka, Delhi, West Bengal and Maharashtra',
+];
+
 const Cart = () => {
   const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
   const { user } = useAuth();
@@ -434,6 +442,14 @@ const Cart = () => {
               {appliedPromocode && promocodeDiscount > 0 && (
                 <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount)} with {appliedPromocode.code}</p>
               )}
+              <ul className="mt-4 space-y-1.5 rounded-md bg-cream px-3 py-3 text-sm text-ink-soft" aria-label="Why VillageCrunch">
+                {TRUST_POINTS.map((t) => (
+                  <li key={t} className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-leaf" aria-hidden="true" />
+                    <span>{t}</span>
+                  </li>
+                ))}
+              </ul>
               <button onClick={handleCheckout} className="btn-primary w-full mt-5 hidden lg:inline-flex">Proceed to checkout</button>
               <p className="hidden lg:flex items-center justify-center gap-1.5 text-sm text-ink-soft mt-3">
                 <Lock className="w-4 h-4" aria-hidden="true" /> Secure checkout
@@ -448,7 +464,19 @@ const Cart = () => {
         <div className="flex items-center gap-3 max-w-xl mx-auto">
           <div className="leading-tight">
             <p className="text-xs text-ink-mute">Total</p>
-            <p className="text-lg font-semibold tabular-nums">{formatINR(total)}</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {promocodeDiscount > 0 && (
+                <s className="mr-1.5 text-sm font-normal text-ink-mute">{formatINR(subtotal)}</s>
+              )}
+              {formatINR(total)}
+            </p>
+            {(promocodeDiscount > 0 || shipping === 0) && (
+              <p className="text-xs font-medium text-leaf">
+                {promocodeDiscount > 0 ? `You save ${formatINR(promocodeDiscount)}` : ''}
+                {promocodeDiscount > 0 && shipping === 0 ? ' + ' : ''}
+                {shipping === 0 ? 'free delivery' : ''}
+              </p>
+            )}
           </div>
           <button onClick={handleCheckout} className="btn-primary flex-1">Checkout</button>
         </div>
