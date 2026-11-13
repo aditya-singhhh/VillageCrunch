@@ -42,9 +42,9 @@ const productSchema = new mongoose.Schema({
   variantNote: { type: String }, // one line under the type buttons, e.g. "Fried in pure desi ghee"
   variantOrder: { type: Number, default: 0 },
   sweetener: { type: String }, // e.g. "Gud (jaggery)" or "Cheeni (sugar)"; shown as a "Sweetener" row
-  oilFried: { type: Boolean, default: false },
+  oilFried: { type: Boolean, default: false }, // true = fried in oil, so "no oil" claims are hidden
   // First dispatch date (YYYY-MM-DD) when a version is made to order later, e.g. after a festival break
-  shipsFrom: { type: String }, // true = fried in oil, so "no oil" claims are hidden
+  shipsFrom: { type: String },
   stock: {
     type: Number,
     required: true,
