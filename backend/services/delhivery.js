@@ -210,6 +210,25 @@ async function testToken(cfg) {
   return true;
 }
 
+/**
+ * Delivery estimate for the product page: is the PIN served, and Delhivery's expected transit days
+ * (surface) from our pickup PIN. Returns null when Delhivery isn't connected or doesn't answer.
+ */
+async function eta(destPin, mode = 'S') {
+  const cfg = await getConfig();
+  if (!cfg.token) return null;
+  const svc = await serviceability(cfg, destPin);
+  if (!svc.served) return { served: false };
+  let tat = null;
+  try {
+    const q = new URLSearchParams({ origin_pin: cfg.pickupPincode, destination_pin: String(destPin), mot: mode, pdt: 'B2C' });
+    const d = await call(cfg, `/api/dc/expected_tat?${q}`);
+    const v = d?.data?.tat ?? d?.tat ?? d?.data?.expected_tat ?? d?.expected_tat;
+    if (Number.isFinite(Number(v)) && Number(v) > 0 && Number(v) < 20) tat = Math.round(Number(v));
+  } catch (e) { console.warn('Delhivery TAT:', e.message); }
+  return { served: true, cod: !!svc.cod, tat, city: svc.city, state: svc.state };
+}
+
 const trackingUrl = (awb) => (awb ? `https://www.delhivery.com/track-v2/package/${encodeURIComponent(awb)}` : '');
 
-module.exports = { getConfig, quote, book, label, cancel, testToken, trackingUrl, shipmentFor, DelhiveryError, __setSender };
+module.exports = { getConfig, eta, quote, book, label, cancel, testToken, trackingUrl, shipmentFor, DelhiveryError, __setSender };

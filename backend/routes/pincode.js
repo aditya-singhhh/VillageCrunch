@@ -41,4 +41,30 @@ router.get('/:pin', async (req, res) => {
   }
 });
 
+// Delivery estimate for a PIN: Delhivery serviceability + expected transit days (surface).
+// days = [earliest, latest] from today, counting 1-2 days to make and hand over the order.
+const etaCache = new Map();
+const ETA_TTL = 12 * 3600 * 1000;
+let etaFor = (pin) => require('../services/delhivery').eta(pin);
+router.__setEta = (fn) => { etaFor = fn; etaCache.clear(); }; // tests only
+
+router.get('/:pin/eta', async (req, res) => {
+  const pin = String(req.params.pin || '');
+  if (!/^[1-9]\d{5}$/.test(pin)) return res.status(400).json({ message: 'Enter a valid 6-digit PIN code' });
+  const hit = etaCache.get(pin);
+  if (hit && Date.now() - hit.at < ETA_TTL) return res.json(hit.body);
+  try {
+    const r = await etaFor(pin);
+    const body = !r ? { source: 'estimate' }
+      : !r.served ? { source: 'delhivery', served: false }
+      : r.tat ? { source: 'delhivery', served: true, cod: r.cod, tat: r.tat, days: [r.tat + 1, r.tat + 3] }
+      : { source: 'estimate', served: true, cod: r.cod };
+    etaCache.set(pin, { at: Date.now(), body });
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.json(body);
+  } catch (e) {
+    res.json({ source: 'estimate' });
+  }
+});
+
 module.exports = router;

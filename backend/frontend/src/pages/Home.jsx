@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import collapseVariants from '../utils/collapseVariants';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Truck, Banknote, Leaf, RefreshCw, Gift, BadgePercent, LayoutGrid } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
@@ -68,7 +69,10 @@ const Home = () => {
   const thekua = useMemo(() => products.filter((p) => p.category === 'thekua').sort(byOrder), [products]);
   // Row 1: the three thekua sizes + the best-value pack
   const thekuaRow = useMemo(() => {
-    const sizes = thekua.filter((p) => !p.isBundle);
+    const allSizes = thekua.filter((p) => !p.isBundle);
+    // one card per type (Shuddh / Regular), then the other Shuddh gud sizes
+    const reps = collapseVariants(allSizes);
+    const sizes = [...reps, ...allSizes.filter((p) => !reps.includes(p) && (!p.variant || (/gud|jaggery/i.test(p.sweetener || '') && p.variant === reps[0]?.variant)))];
     const packs = thekua.filter((p) => p.isBundle && !/makhana/i.test(p.name) && !/gift/i.test(p.name));
     return [...sizes, ...packs, ...thekua.filter((p) => p.isBundle)].filter((p, i, a) => a.indexOf(p) === i).slice(0, 4);
   }, [thekua]);
@@ -78,11 +82,6 @@ const Home = () => {
     const combo = thekua.find((p) => p.isBundle && /makhana/i.test(p.name));
     return [...items, ...(combo ? [combo] : [])].slice(0, 4);
   }, [products, thekua]);
-  const giftBox = useMemo(() => thekua.find((p) => /gift/i.test(p.name)), [thekua]);
-  const giftRow = useMemo(
-    () => [...products.filter((p) => p.category === 'gifts').sort(byOrder), ...(giftBox ? [giftBox] : [])],
-    [products, giftBox]
-  );
 
   const trust = [
     { icon: Truck, text: freeShippingThreshold ? `Free delivery ${formatINR(freeShippingThreshold)}+` : 'Delivery across India' },
@@ -94,13 +93,13 @@ const Home = () => {
   return (
     <div>
       <SEOHead
-        title="Thekua, Makhana & Sattu from Bihar"
-        description="Traditional Bihari thekua made with jaggery and desi ghee, phool makhana and sattu. Natural, no preservatives, delivered direct to your home across India."
+        title="Buy Bihari Thekua Online – Desi Ghee & Gud, from Munger"
+        description="Authentic Bihari thekua made in Munger with whole-wheat atta, gud and desi ghee. No maida, no preservatives. Order thekua online, delivered across India. Also makhana and sattu."
         keywords="thekua online, Bihari thekua, makhana online, phool makhana, roasted makhana, sattu online, Chhath prasad, natural snacks, no preservatives"
         url="/"
         type="website"
       />
-      <h1 className="sr-only">VillageCrunch: thekua, makhana and sattu</h1>
+      <h1 className="sr-only">VillageCrunch: buy Bihari thekua online, made in Munger</h1>
 
       <HeroCarousel products={products} freeShippingThreshold={freeShippingThreshold} ready={loaded && (!!settings || !settingsWait)} />
 
@@ -175,7 +174,6 @@ const Home = () => {
             </Link>
           </section>
 
-          <Row title="Diwali gift boxes" to="/diwali" products={giftRow} />
 
           <Row title="Makhana & Sattu" to="/products" products={pantryRow} />
 

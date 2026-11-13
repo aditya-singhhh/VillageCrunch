@@ -16,7 +16,7 @@ import { imgSrc, imgProps } from '../utils/img';
 import { trackViewItem } from '../utils/analytics';
 import ImageLightbox from '../components/ImageLightbox';
 import ThekuaStory from '../components/ThekuaStory';
-import DeliveryEstimate from '../components/DeliveryEstimate';
+import DeliveryEstimate, { shipDate } from '../components/DeliveryEstimate';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -52,9 +52,17 @@ const ProductDetail = () => {
   const { settings } = useStoreSettings();
 
   useEffect(() => {
-    fetchProduct();
-    fetchAllProducts();
+    // Switching size/type/sweetener: show the product we already have straight away, then refresh quietly
+    const cached = allProducts.find((p) => p._id === id);
+    if (cached) {
+      setProduct((prev) => ({ ...cached, reviews: prev && prev._id === id ? prev.reviews : cached.reviews }));
+      getProduct(id).then((fresh) => setProduct((cur) => (cur && cur._id === id ? fresh : cur))).catch(() => {});
+    } else {
+      fetchProduct();
+    }
+    if (!allProducts.length) fetchAllProducts();
     setSelectedImage(0); // Reset image selection when product changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -374,7 +382,29 @@ const ProductDetail = () => {
   const packOptions = product.packGroup
     ? allProducts.filter(p => p.packGroup === product.packGroup).sort((a, b) => (a.packOrder || 0) - (b.packOrder || 0))
     : [];
-  const sizeOptions = packOptions.filter(p => !p.isBundle);
+  // Recipe choices inside a packGroup: type (variant: Shuddh Desi Ghee / Regular) and sweetener (Gud / Cheeni).
+  // Sizes are shown for the current type + sweetener only.
+  const sizesInGroup = packOptions.filter(p => !p.isBundle);
+  const choiceRow = (field, noteField) => {
+    const opts = [];
+    sizesInGroup
+      .filter(p => p[field])
+      .sort((a, b) => (a.variantOrder || 0) - (b.variantOrder || 0) || (a.packOrder || 0) - (b.packOrder || 0))
+      .forEach((p) => {
+        if (opts.some((o) => o.value === p[field])) return;
+        // keep every other choice the same (type/sweetener/size) when it exists
+        const keep = (q) => ['variant', 'sweetener'].every((f) => f === field || (q[f] || '') === (product[f] || ''));
+        const match = sizesInGroup.filter((q) => q[field] === p[field]);
+        const pick = match.find((q) => keep(q) && q.weight === product.weight) || match.find(keep) || match.find((q) => q.weight === product.weight) || p;
+        opts.push({ value: p[field], note: noteField ? pick[noteField] : '', to: pick._id, priceText: `${formatINR(pick.price)} · ${pick.packLabel || pick.weight}` });
+      });
+    return opts.length > 1 ? opts : [];
+  };
+  const variantOptions = choiceRow('variant', 'variantNote');
+  const sweetenerOptions = choiceRow('sweetener');
+  const sizeOptions = sizesInGroup.filter(p =>
+    (!variantOptions.length || (p.variant || '') === (product.variant || '')) &&
+    (!sweetenerOptions.length || (p.sweetener || '') === (product.sweetener || '')));
   // Price per 100 g for each size, so the best-value pack can be shown clearly
   const gramsOf = (w) => { const m = String(w || '').trim().toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(kg|g|gm|gms|gram|grams)$/); return m ? parseFloat(m[1]) * (m[2] === 'kg' ? 1000 : 1) : 0; };
   const per100 = (o) => { const g = gramsOf(o.weight); return g && Number(o.price) ? (Number(o.price) / g) * 100 : null; };
@@ -394,6 +424,7 @@ const ProductDetail = () => {
   const discount = discountPercent(product.price, product.originalPrice);
   const perUnit = unitPrice(product.price, product.weight);
   const outOfStock = product.stock === 0;
+  const laterShip = shipDate(product.shipsFrom);
   const maxQty = Math.max(1, Math.min(product.stock || 1, 10));
   const taxRate = settings?.pricing?.taxRate;
   const canBuy = !isMasalaProduct && !outOfStock;
@@ -424,8 +455,8 @@ const ProductDetail = () => {
   return (
     <div className="pb-6 md:pb-12">
       <SEOHead 
-        title={`${product.name} - Buy Online at VillageCrunch`}
-        description={`${product.description || `Buy premium ${product.name} online at VillageCrunch`}. Fresh, natural, and authentic quality. Price: ₹${product.price}. Fast delivery across India.`}
+        title={`${product.category === 'thekua' ? product.name.replace(/^Thekua/, 'Bihari Thekua') : product.name} – Buy Online`}
+        description={`${String(product.description || `Buy ${product.name} online`).replace(/\s+/g, ' ').slice(0, 120).trim()}. ₹${product.price}. Made in Munger, Bihar and delivered across India.`}
         keywords={`${product.name}, buy ${product.name} online, ${product.category}, natural ${product.category}, no preservatives, Bihar`}
         url={`/product/${product._id}`}
         image={product.image}
@@ -590,14 +621,44 @@ const ProductDetail = () => {
                     )}
                   </p>
                   <ul className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-ink-soft" aria-label="Why VillageCrunch">
-                    <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Desi ghee</span>no oil, no dalda</li>
+                    {product.oilFried ? (
+                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ghee + oil</span>ghee in dough, oil-fried</li>
+                    ) : (
+                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Pure desi ghee</span>fried in ghee, no oil</li>
+                    )}
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Made after</span>you order</li>
                     <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ships in</span>1–2 days</li>
                   </ul>
-                  <p className="mt-2 text-xs text-ink-mute">Ordered from Assam, Telangana, Karnataka, Delhi, West Bengal and Maharashtra.</p>
+                  <p className="mt-2 text-xs text-ink-mute">Ordered by families in Assam, Telangana, Karnataka, Delhi, West Bengal and Maharashtra.</p>
                 </>
               )}
             </div>
+
+            {/* Recipe choices: type (Shuddh Desi Ghee / Regular) and sweetener (Gud / Cheeni) */}
+            {[['Choose type', 'variant', variantOptions], ['Sweetener', 'sweetener', sweetenerOptions]].map(([title, field, opts]) => opts.length > 0 && (
+              <div className="mt-4" key={field}>
+                <p className="text-sm font-semibold text-ink mb-2">{title}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {opts.map((v) => {
+                    const active = v.value === product[field];
+                    return (
+                      <Link
+                        key={v.value}
+                        to={`/product/${v.to}`}
+                        replace
+                        state={{ keepScroll: true }}
+                        aria-current={active ? 'true' : undefined}
+                        className={`block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : 'border-line bg-white hover:border-brand/60'}`}
+                      >
+                        <span className="block text-sm font-semibold text-ink">{v.value}</span>
+                        {v.note && <span className="block text-xs text-ink-soft">{v.note}</span>}
+                        {field === 'variant' && <span className="block text-xs text-ink-mute">{v.priceText}</span>}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
 
             {/* Pack sizes and bundles */}
             {packOptions.length > 1 && (
@@ -614,6 +675,8 @@ const ProductDetail = () => {
                           <Link
                             key={o._id}
                             to={`/product/${o._id}`}
+                            replace
+                            state={{ keepScroll: true }}
                             aria-current={active ? 'true' : undefined}
                             className={`relative block rounded-md border-2 px-3 py-2 min-h-[44px] transition-colors ${active ? 'border-brand bg-action-tint' : isBest ? 'border-leaf bg-leaf-tint/40 hover:border-leaf' : 'border-line bg-white hover:border-brand/60'}`}
                           >
@@ -636,11 +699,13 @@ const ProductDetail = () => {
                 <span className="inline-flex items-center h-10 px-4 rounded-md border-2 border-brand bg-action-tint text-brand text-sm font-semibold">{product.weight}</span>
               )}
               <span className={`inline-flex items-center gap-1.5 text-sm font-medium ${outOfStock ? 'text-berry' : 'text-leaf'}`}>
-                {outOfStock ? 'Out of stock' : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
+                {outOfStock ? 'Out of stock' : laterShip
+                  ? (<><Check className="w-4 h-4" aria-hidden="true" /> Made fresh · ships {laterShip.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</>)
+                  : (<><Check className="w-4 h-4" aria-hidden="true" /> In stock</>)}
               </span>
             </div>
             {showBetterValue && (
-              <Link to={`/product/${bestValue._id}`} className="mt-3 flex items-center justify-between gap-3 rounded-md border border-leaf/40 bg-leaf-tint/50 px-3 py-2 text-sm">
+              <Link to={`/product/${bestValue._id}`} replace state={{ keepScroll: true }} className="mt-3 flex items-center justify-between gap-3 rounded-md border border-leaf/40 bg-leaf-tint/50 px-3 py-2 text-sm">
                 <span className="text-ink-soft">
                   <b className="text-ink">{bestValue.packLabel || bestValue.weight}</b> for {formatINR(bestValue.price)}: just {formatINR(per100(bestValue))}/100 g{bestValue.packNote ? ` · ${bestValue.packNote}` : ''}
                 </span>
@@ -648,7 +713,7 @@ const ProductDetail = () => {
               </Link>
             )}
 
-            {!isMasalaProduct && <DeliveryEstimate />}
+            {!isMasalaProduct && <DeliveryEstimate shipsFrom={product.shipsFrom} />}
 
             {/* Description */}
             {product.description && (

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
@@ -36,7 +36,7 @@ const CustomerSupport = lazy(() => import('./pages/CustomerSupport'));
 import ProtectedRoute from './components/ProtectedRoute';
 const OrdersDetail = lazy(() => import('./pages/OrderDetail'));
 const Ghar = lazy(() => import('./pages/Ghar'));
-const Diwali = lazy(() => import('./pages/Diwali'));
+const Thekua = lazy(() => import('./pages/Thekua'));
 const AdminGhar = lazy(() => import('./pages/AdminGhar'));
 
 // The chat assistant loads only after the page is idle, so it never slows the first screen.
@@ -80,7 +80,8 @@ const Shell = () => {
                 </ProtectedRoute>} />
                 <Route path="/admin/ghar" element={<ProtectedRoute adminOnly={true}><AdminGhar /></ProtectedRoute>} />
                 <Route path="/ghar" element={<Ghar />} />
-                <Route path="/diwali" element={<Diwali />} />
+                <Route path="/thekua" element={<Thekua />} />
+                <Route path="/diwali" element={<Navigate to="/products?category=thekua" replace />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/product/:id" element={<ProductDetail />} />
