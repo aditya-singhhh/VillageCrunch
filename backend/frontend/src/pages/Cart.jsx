@@ -1,11 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
-import SattuAddon from '../components/SattuAddon';
+import AddOnStrip from '../components/AddOnStrip';
 import { Plus, Minus, ShoppingBag, Tag, CheckCircle, XCircle, Lock, X } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
-import { tryAutoFirst, markAutoPromoRemoved, OFFER_CODES } from '../utils/autoPromo';
+import { tryAutoFirst, markAutoPromoRemoved, OFFER_CODES, promoLabel } from '../utils/autoPromo';
 import AvailableOffers from '../components/AvailableOffers';
 import FreeDeliveryNudge from '../components/FreeDeliveryNudge';
 import { validatePromocode, calculateOrderTotal, getSettings } from '../utils/api';
@@ -354,7 +354,7 @@ const Cart = () => {
               ))}
             </ul>
 
-            <SattuAddon />
+            <AddOnStrip title="Add to your box" className="mt-2" />
 
             {/* Promocode */}
             <div className="panel">
@@ -430,8 +430,11 @@ const Cart = () => {
               <h2 className="font-display text-xl font-semibold mb-4">Order summary</h2>
               <dl className="space-y-2.5 text-[15px]">
                 <div className="flex justify-between"><dt className="text-ink-soft">Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</dt><dd className="tabular-nums">{formatINR(subtotal)}</dd></div>
+                {orderTotals?.combo?.amount > 0 && (
+                  <div className="flex justify-between text-leaf"><dt className="min-w-0 truncate">{orderTotals.combo.label} ✓</dt><dd className="tabular-nums">-{formatINR(orderTotals.combo.amount)}</dd></div>
+                )}
                 {appliedPromocode && promocodeDiscount > 0 && (
-                  <div className="flex justify-between text-leaf"><dt className="flex items-center gap-1 min-w-0"><Tag className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" /><span className="truncate">Promo ({appliedPromocode.code})</span></dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
+                  <div className="flex justify-between text-leaf"><dt className="flex items-center gap-1 min-w-0"><Tag className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" /><span className="truncate">{promoLabel(appliedPromocode.code)}</span></dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
                 )}
                 <div className="flex justify-between"><dt className="text-ink-soft">Shipping</dt><dd className={`tabular-nums ${shipping === 0 ? 'text-leaf font-medium' : ''}`}>{shipping === 0 ? 'Free' : formatINR(shipping)}</dd></div>
                 {settings?.pricing?.taxRate > 0 && (
@@ -442,8 +445,14 @@ const Cart = () => {
                 <span className="text-lg font-semibold">Total</span>
                 <span className="text-xl font-semibold tabular-nums">{formatINR(total)}</span>
               </div>
-              {appliedPromocode && promocodeDiscount > 0 && (
-                <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount)} with {appliedPromocode.code}</p>
+              {(promocodeDiscount + (orderTotals?.combo?.amount || 0)) > 0 && (
+                <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount + (orderTotals?.combo?.amount || 0))}</p>
+              )}
+              {appliedPromocode && OFFER_CODES.includes(appliedPromocode.code) && promocodeDiscount > 0 && (
+                <p className="mt-3 flex items-start gap-2 rounded-md bg-leaf-tint px-3 py-2 text-sm text-leaf">
+                  <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                  <span><b>First-order discount applied automatically.</b> No code needed.</span>
+                </p>
               )}
               <ul className="mt-4 space-y-1.5 rounded-md bg-cream px-3 py-3 text-sm text-ink-soft" aria-label="Why VillageCrunch">
                 {TRUST_POINTS.map((t) => (

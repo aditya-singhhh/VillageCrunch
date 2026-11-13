@@ -571,15 +571,23 @@ export const getUserStats = async () => {
 };
 
 // ✅ Wishlist Management
+// Every product card asks for the wishlist; share one request between them (15 s) instead of
+// sending one per card. Any wishlist change clears it.
+let wishlistCache = null; // { token, at, promise }
+const clearWishlistCache = () => { wishlistCache = null; };
 export const getWishlist = async () => {
   const token = localStorage.getItem('token');
-  const { data } = await axios.get(`${API_URL}/wishlist`, {
+  if (wishlistCache && wishlistCache.token === token && Date.now() - wishlistCache.at < 15000) return wishlistCache.promise;
+  const promise = axios.get(`${API_URL}/wishlist`, {
     headers: { Authorization: `Bearer ${token}` },
-  });
-  return data;
+  }).then(({ data }) => data);
+  wishlistCache = { token, at: Date.now(), promise };
+  promise.catch(clearWishlistCache);
+  return promise;
 };
 
 export const addToWishlist = async (productId) => {
+  clearWishlistCache();
   const token = localStorage.getItem('token');
   const { data } = await axios.post(`${API_URL}/wishlist/add/${productId}`, {}, {
     headers: { Authorization: `Bearer ${token}` },
@@ -588,6 +596,7 @@ export const addToWishlist = async (productId) => {
 };
 
 export const removeFromWishlist = async (productId) => {
+  clearWishlistCache();
   const token = localStorage.getItem('token');
   const { data } = await axios.delete(`${API_URL}/wishlist/remove/${productId}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -596,6 +605,7 @@ export const removeFromWishlist = async (productId) => {
 };
 
 export const toggleWishlist = async (productId) => {
+  clearWishlistCache();
   const token = localStorage.getItem('token');
   const { data } = await axios.post(`${API_URL}/wishlist/toggle/${productId}`, {}, {
     headers: { Authorization: `Bearer ${token}` },

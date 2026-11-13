@@ -94,6 +94,7 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (
           taxPrice: pricing.tax,
           totalPrice: pricing.total,
           promocodeDiscount: pricing.discount,
+          comboDiscount: pricing.comboDiscount || 0,
         },
         shippingAddress,
         giftMessage: giftMessage || undefined,
@@ -220,6 +221,10 @@ router.post('/webhook', async (req, res) => {
       throw e;
     }
   } catch (error) {
+    // Razorpay sends several events for one payment at once; when another delivery (or the
+    // checkout page) is already turning it into an order, that's fine: answer 200 so Razorpay
+    // doesn't count it as a failure (repeated failures make Razorpay switch the webhook off).
+    if (error.code === 'BUSY') return res.json({ ok: true, busy: true });
     console.error('Razorpay webhook error:', error.message);
     // 500 makes Razorpay retry later
     res.status(500).json({ ok: false });

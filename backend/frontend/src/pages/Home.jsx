@@ -52,9 +52,6 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const { settings, freeShippingThreshold } = useStoreSettings();
-  // Wait for settings (or give up after 2s) so slides are not inserted after first paint
-  const [settingsWait, setSettingsWait] = useState(true);
-  useEffect(() => { const t = setTimeout(() => setSettingsWait(false), 2000); return () => clearTimeout(t); }, []);
 
   useEffect(() => {
     let alive = true;
@@ -87,7 +84,7 @@ const Home = () => {
     { icon: Truck, text: freeShippingThreshold ? `Free delivery ${formatINR(freeShippingThreshold)}+` : 'Delivery across India' },
     { icon: Leaf, text: 'Natural · no preservatives' },
     { icon: Banknote, text: 'Secure UPI payment' },
-    { icon: RefreshCw, text: 'Easy returns' },
+    { icon: RefreshCw, text: '7-day replacement guarantee' },
   ];
 
   return (
@@ -101,7 +98,7 @@ const Home = () => {
       />
       <h1 className="sr-only">VillageCrunch: buy Bihari thekua online, made in Munger</h1>
 
-      <HeroCarousel products={products} freeShippingThreshold={freeShippingThreshold} ready={loaded && (!!settings || !settingsWait)} />
+      <HeroCarousel products={products} freeShippingThreshold={freeShippingThreshold} ready />
 
       {/* Category circles */}
       <nav aria-label="Shop by category" className="bg-white border-b border-line">
@@ -158,22 +155,6 @@ const Home = () => {
           </section>
 
           <Row title="Thekua" to="/products?category=thekua" products={thekuaRow} />
-
-          {/* Chhath campaign strip */}
-          <section className="container-page py-3">
-            <Link
-              to="/ghar"
-              className="flex items-center gap-3 rounded-lg bg-[#2B1B33] text-white px-4 py-3 md:px-6 md:py-4 hover:bg-[#3A2545] transition-colors"
-            >
-              <span className="w-11 h-11 rounded-full bg-[#FFD27A] inline-flex items-center justify-center flex-shrink-0 text-xl" aria-hidden="true">🌅</span>
-              <span className="flex-1">
-                <span className="block font-display font-semibold text-lg md:text-xl">Ghat door hai, suraj wahi hai.</span>
-                <span className="block text-sm text-white/75">Is Chhath ghar nahi ja paa rahe? Bihar se aapke liye ek dabba — hamari taraf se.</span>
-              </span>
-              <span className="inline-flex items-center gap-1 text-sm font-semibold text-[#FFD27A]">Dekhiye <ArrowRight className="w-4 h-4" aria-hidden="true" /></span>
-            </Link>
-          </section>
-
 
           <Row title="Makhana & Sattu" to="/products" products={pantryRow} />
 

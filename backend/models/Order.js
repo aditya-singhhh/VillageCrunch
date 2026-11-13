@@ -66,6 +66,8 @@ const orderSchema = new mongoose.Schema({
     description: String,
   },
   promocodeDiscount: { type: Number, default: 0 },
+  // Saving from thekua + nimki (+ sattu) combos, applied before any promo code
+  comboDiscount: { type: Number, default: 0 },
   status: {
     type: String,
     enum: [

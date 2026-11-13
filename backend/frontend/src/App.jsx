@@ -35,7 +35,6 @@ const Wishlist = lazy(() => import('./pages/Wishlist'));
 const CustomerSupport = lazy(() => import('./pages/CustomerSupport'));
 import ProtectedRoute from './components/ProtectedRoute';
 const OrdersDetail = lazy(() => import('./pages/OrderDetail'));
-const Ghar = lazy(() => import('./pages/Ghar'));
 const Thekua = lazy(() => import('./pages/Thekua'));
 const AdminGhar = lazy(() => import('./pages/AdminGhar'));
 
@@ -69,8 +68,8 @@ const Shell = () => {
       {!isAdmin && <AnnouncementBar />}
       {!isAdmin && <WelcomePopup />}
       <Navbar />
-      <main id="main" className="flex-grow bg-paper min-h-[60vh]">
-        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+      <main id="main" className="flex-grow bg-paper min-h-[100svh]">
+        <Suspense fallback={<div className="min-h-[100svh]" aria-busy="true" />}>
         <Routes>
                 <Route path="/admin" element={<ProtectedRoute adminOnly={true}>
                   <Admin />
@@ -79,7 +78,7 @@ const Shell = () => {
                   <CustomerSupport />
                 </ProtectedRoute>} />
                 <Route path="/admin/ghar" element={<ProtectedRoute adminOnly={true}><AdminGhar /></ProtectedRoute>} />
-                <Route path="/ghar" element={<Ghar />} />
+                <Route path="/ghar" element={<Navigate to="/thekua" replace />} />
                 <Route path="/thekua" element={<Thekua />} />
                 <Route path="/diwali" element={<Navigate to="/products?category=thekua" replace />} />
                 <Route path="/" element={<Home />} />

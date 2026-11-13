@@ -26,7 +26,7 @@ deploy_backend() {
     --service-account "$RUNTIME_SA" \
     --allow-unauthenticated \
     --port 8080 \
-    --min-instances 0 --max-instances 5 \
+    --min-instances 1 --max-instances 5 --cpu-boost \
     --cpu 1 --memory 512Mi --timeout 60 \
     --add-volume "name=uploads,type=cloud-storage,bucket=${BUCKET}" \
     --add-volume-mount "volume=uploads,mount-path=/data/uploads" \

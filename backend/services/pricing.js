@@ -6,6 +6,7 @@
  * promocode. Nothing price-related from the request body is ever trusted.
  */
 const Product = require('../models/Product');
+const { comboSaving } = require('./combos');
 const Settings = require('../models/Settings');
 const Promocode = require('../models/Promocode');
 
@@ -104,6 +105,11 @@ async function priceCart({
   }
   subtotal = round2(subtotal);
 
+  // Combo savings (thekua + nimki [+ sattu]). They don't stack with a promo code's money-off:
+  // the buyer gets whichever saving is bigger (promo free delivery still applies).
+  const combo = comboSaving(lines.map(({ productId, quantity }) => ({ product: byId.get(productId), quantity })));
+  let comboDiscount = round2(Math.min(combo.amount, subtotal));
+
   // Shipping
   const shippingConfig =
     settings.pricing.shippingCharges[shippingMethod] || settings.pricing.shippingCharges.standard;
@@ -127,6 +133,7 @@ async function priceCart({
     if (!result.valid) throw new PricingError(result.message || 'Promocode cannot be applied', 'PROMO_REJECTED');
     discount = Number(result.discount) || 0;
     if (promo.type === 'freeShipping' || promo.includesFreeShipping) shipping = 0;
+    if (discount >= comboDiscount) comboDiscount = 0; else discount = 0;
   }
 
   // Prices on the site are MRP, inclusive of GST (Legal Metrology rules). By default the
@@ -134,11 +141,12 @@ async function priceCart({
   // Set pricing.pricesIncludeTax = false to go back to adding tax at checkout.
   const rate = Number(settings.pricing.taxRate) || 0;
   const inclusive = settings.pricing.pricesIncludeTax !== false;
-  const taxable = subtotal + shipping;
+  const afterCombo = round2(subtotal - comboDiscount);
+  const taxable = afterCombo + shipping;
   const tax = inclusive ? round2((taxable * rate) / (100 + rate)) : round2((taxable * rate) / 100);
   const codCharge = paymentMethod === 'cod' ? Number(settings.pricing.codCharges) || 0 : 0;
 
-  const gross = subtotal + shipping + (inclusive ? 0 : tax) + codCharge;
+  const gross = afterCombo + shipping + (inclusive ? 0 : tax) + codCharge;
   discount = Math.min(round2(discount), round2(gross));
   const total = round2(Math.max(0, gross - discount));
 
@@ -153,6 +161,8 @@ async function priceCart({
     codCharge,
     discount,
     promo,
+    comboDiscount,
+    comboLabel: comboDiscount > 0 ? combo.label : null,
     total,
     currency: settings.pricing.currency,
   };

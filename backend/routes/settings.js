@@ -319,6 +319,7 @@ router.post('/calculate-order-total', async (req, res) => {
         inclusive: pricing.taxInclusive,
       },
       codCharge: pricing.codCharge,
+      combo: { amount: pricing.comboDiscount || 0, label: pricing.comboLabel || null },
       discount: {
         applied: pricing.discount > 0 || !!pricing.promo,
         amount: pricing.discount,
