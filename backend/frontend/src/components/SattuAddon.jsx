@@ -6,7 +6,7 @@ import { imgSrc } from '../utils/img';
 import { formatINR } from '../utils/format';
 
 /*
- * "Add sattu for litti" suggestion. Shown only when thekua is in the cart and sattu is not:
+ * "Add Bihari Sattu" suggestion. Shown only when thekua is in the cart and sattu is not:
  * it goes in the same parcel, so it adds to the order without extra ad cost.
  */
 let cached = null; // one lookup per page load
