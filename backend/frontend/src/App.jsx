@@ -35,7 +35,6 @@ const Wishlist = lazy(() => import('./pages/Wishlist'));
 const CustomerSupport = lazy(() => import('./pages/CustomerSupport'));
 import ProtectedRoute from './components/ProtectedRoute';
 const OrdersDetail = lazy(() => import('./pages/OrderDetail'));
-const Ghar = lazy(() => import('./pages/Ghar'));
 const Thekua = lazy(() => import('./pages/Thekua'));
 const AdminGhar = lazy(() => import('./pages/AdminGhar'));
 
@@ -79,7 +78,7 @@ const Shell = () => {
                   <CustomerSupport />
                 </ProtectedRoute>} />
                 <Route path="/admin/ghar" element={<ProtectedRoute adminOnly={true}><AdminGhar /></ProtectedRoute>} />
-                <Route path="/ghar" element={<Ghar />} />
+                <Route path="/ghar" element={<Navigate to="/thekua" replace />} />
                 <Route path="/thekua" element={<Thekua />} />
                 <Route path="/diwali" element={<Navigate to="/products?category=thekua" replace />} />
                 <Route path="/" element={<Home />} />

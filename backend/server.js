@@ -204,7 +204,6 @@ app.get('/sitemap.xml', async (req, res) => {
       { url: '/contact', priority: '0.7', changefreq: 'monthly' },
       { url: '/products', priority: '0.9', changefreq: 'daily' },
       { url: '/thekua', priority: '0.9', changefreq: 'weekly' },
-      { url: '/ghar', priority: '0.8', changefreq: 'weekly' },
       { url: '/products?category=thekua', priority: '0.8', changefreq: 'weekly' },
       { url: '/shipping-policy', priority: '0.5', changefreq: 'yearly' },
       { url: '/returns-policy', priority: '0.5', changefreq: 'yearly' },
