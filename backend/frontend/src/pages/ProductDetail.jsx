@@ -396,7 +396,7 @@ const ProductDetail = () => {
         const keep = (q) => ['variant', 'sweetener'].every((f) => f === field || (q[f] || '') === (product[f] || ''));
         const match = sizesInGroup.filter((q) => q[field] === p[field]);
         const pick = match.find((q) => keep(q) && q.weight === product.weight) || match.find(keep) || match.find((q) => q.weight === product.weight) || p;
-        opts.push({ value: p[field], note: noteField ? pick[noteField] : '', to: pick._id, priceText: `${formatINR(pick.price)} · ${pick.packLabel || pick.weight}` });
+        opts.push({ value: p[field], note: noteField ? pick[noteField] : '', to: pick._id, price: Number(pick.price) || 0, priceText: `${formatINR(pick.price)} · ${pick.packLabel || pick.weight}` });
       });
     return opts.length > 1 ? opts : [];
   };
@@ -413,6 +413,13 @@ const ProductDetail = () => {
     : null;
   const showBetterValue = bestValue && bestValue._id !== product._id && !product.isBundle && sizeOptions.some((o) => o._id === product._id);
   const bundleOptions = packOptions.filter(p => p.isBundle);
+  // Show the price a first-time buyer actually pays (20% off from ₹399, applied at checkout) as the main price,
+  // and point to a cheaper recipe when there is one, so ad visitors see a price they're comfortable with up front.
+  const firstOrderPrice = product.stock !== 0 && ['thekua', 'gifts'].includes(product.category) && Number(product.price) >= 399
+    ? Math.round(product.price * 0.8) : 0;
+  const cheaperChoice = variantOptions
+    .filter((v) => v.value !== product.variant && v.price && v.price < Number(product.price))
+    .sort((a, b) => a.price - b.price)[0];
 
   const relatedProducts = allProducts
     .filter(p => p.category === product.category && (p._id || p.name) !== (product._id || product.name) && (!product.packGroup || p.packGroup !== product.packGroup))
@@ -597,6 +604,13 @@ const ProductDetail = () => {
 
             {/* Price */}
             <div className="mt-4">
+              {firstOrderPrice ? (
+                <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1">
+                  <span className="text-[30px] md:text-[34px] leading-9 font-semibold text-leaf tabular-nums">{formatINR(firstOrderPrice)}</span>
+                  <span className="text-base font-semibold text-leaf">on your first order</span>
+                  <span className="w-full text-sm text-ink-soft">Usual price <span className="tabular-nums">{formatINR(product.price)}</span></span>
+                </div>
+              ) : (
               <div className="flex items-baseline flex-wrap gap-x-3 gap-y-1">
                 <span className="text-[28px] md:text-[32px] leading-9 font-semibold text-ink tabular-nums">{formatINR(product.price)}</span>
                 {product.originalPrice > product.price && (
@@ -606,6 +620,17 @@ const ProductDetail = () => {
                   </>
                 )}
               </div>
+              )}
+              {cheaperChoice && (
+                <Link
+                  to={`/product/${cheaperChoice.to}`}
+                  replace
+                  state={{ keepScroll: true }}
+                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-action hover:underline"
+                >
+                  Or try {cheaperChoice.value} at {formatINR(cheaperChoice.price)} →
+                </Link>
+              )}
               <p className="text-sm text-ink-mute mt-1">
                 {perUnit && <span>{perUnit}</span>}
                 {perUnit && <span> &middot; </span>}
@@ -615,7 +640,7 @@ const ProductDetail = () => {
                 <>
                   <p className="mt-3 rounded-md bg-leaf-tint px-3 py-2 text-sm text-ink">
                     {product.price >= 399 ? (
-                      <><span className="font-semibold text-leaf">{formatINR(Math.round(product.price * 0.8))} on your first order</span>: 20% off + free delivery, applied automatically at checkout.</>
+                      <><span className="font-semibold text-leaf">20% off + free delivery</span> on your first order, applied automatically at checkout.</>
                     ) : (
                       <><span className="font-semibold text-leaf">Free delivery on your first order</span>, applied automatically. 20% off from ₹399.</>
                     )}
