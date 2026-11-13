@@ -455,8 +455,8 @@ const ProductDetail = () => {
   return (
     <div className="pb-6 md:pb-12">
       <SEOHead 
-        title={`${product.name} - Buy Online at VillageCrunch`}
-        description={`${product.description || `Buy premium ${product.name} online at VillageCrunch`}. Fresh, natural, and authentic quality. Price: ₹${product.price}. Fast delivery across India.`}
+        title={`${product.category === 'thekua' ? product.name.replace(/^Thekua/, 'Bihari Thekua') : product.name} – Buy Online`}
+        description={`${String(product.description || `Buy ${product.name} online`).replace(/\s+/g, ' ').slice(0, 120).trim()}. ₹${product.price}. Made in Munger, Bihar and delivered across India.`}
         keywords={`${product.name}, buy ${product.name} online, ${product.category}, natural ${product.category}, no preservatives, Bihar`}
         url={`/product/${product._id}`}
         image={product.image}
