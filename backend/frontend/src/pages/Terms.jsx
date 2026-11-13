@@ -5,7 +5,7 @@ const Terms = () => (
   <LegalPage
     title="Terms & Conditions"
     path="/terms"
-    updated="23 October 2026"
+    updated="13 November 2026"
     intro={`These terms apply when you use villagecrunch.in or buy from ${BUSINESS.name}. By placing an order you agree to them.`}
     sections={[
       ['Who we are', <p key="a">{BUSINESS.name} makes and sells traditional Bihari food products such as thekua, makhana and sattu, from {BUSINESS.address}.</p>],
@@ -18,7 +18,7 @@ const Terms = () => (
         <p>We may cancel an order if a product is unavailable, the address is outside our delivery area, or we suspect misuse. If you have already paid, we refund the full amount to the original payment method.</p>
       </>],
       ['Payment', <p key="p">Online payments are processed securely by Razorpay (UPI, cards, net banking, wallets). We never see or store your card or UPI PIN. Cash on delivery may be offered on some orders.</p>],
-      ['Made fresh and delivery', <p key="d">Thekua and gift boxes are made fresh after you order and are usually dispatched within 1–2 days. Delivery times depend on your location. See our <Link className="text-action underline" to="/shipping-policy">Shipping policy</Link>.</p>],
+      ['Made fresh and delivery', <p key="d">Thekua and gift boxes are made fresh after you order and are usually dispatched within 1–3 working days. Delivery times depend on your location. See our <Link className="text-action underline" to="/shipping-policy">Shipping policy</Link>.</p>],
       ['Cancellations, returns and refunds', <p key="r">Please see our <Link className="text-action underline" to="/returns-policy">Cancellation & refunds policy</Link> for when you can cancel, return or get a refund, and how long refunds take.</p>],
       ['Offers and promo codes', <p key="o">Promo codes such as FIRST have their own conditions (minimum order, one use per customer, end date) shown with the offer. We may change or end an offer at any time; orders already placed keep the price shown at checkout.</p>],
       ['Food safety and allergens', <p key="f">Our thekua contains wheat and milk (desi ghee). Please read the ingredients and allergen information on the product page and pack before eating. Store in a cool, dry place and eat before the best-before date.</p>],

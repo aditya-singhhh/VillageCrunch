@@ -979,7 +979,7 @@ const Checkout = () => {
             {/* Trust row */}
             <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-ink-soft px-1">
               {onlineEnabled && <span className="inline-flex items-center gap-1.5 min-h-[32px]"><Lock className="w-4 h-4 text-leaf" aria-hidden="true" /> Payments secured by Razorpay</span>}
-              <Link to="/returns-policy" className="inline-flex items-center min-h-[32px] hover:text-action underline underline-offset-2">7-day returns</Link>
+              <Link to="/returns-policy" className="inline-flex items-center min-h-[32px] hover:text-action underline underline-offset-2">7-day replacement guarantee</Link>
               <a href="tel:+916203009518" className="inline-flex items-center gap-1.5 min-h-[32px] hover:text-action"><Phone className="w-4 h-4" aria-hidden="true" /> Need help? Call us</a>
             </div>
           </form>

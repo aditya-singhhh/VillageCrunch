@@ -818,7 +818,7 @@ const ProductDetail = () => {
               <li>
                 <Link to="/returns-policy" className="flex flex-col items-center gap-1.5 text-[13px] leading-4 text-ink-soft hover:text-action">
                   <RefreshCw className="w-6 h-6 text-leaf" strokeWidth={1.75} aria-hidden="true" />
-                  Easy returns
+                  7-day guarantee
                 </Link>
               </li>
               <li className="flex flex-col items-center gap-1.5 text-[13px] leading-4 text-ink-soft">

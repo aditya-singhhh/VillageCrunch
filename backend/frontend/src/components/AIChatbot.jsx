@@ -276,16 +276,15 @@ const AIChatbot = () => {
     if (msg.includes('price') || msg.includes('cost') || msg.includes('offer') || msg.includes('discount') || msg.includes('deal')) {
       setQuickActions([
         { label: '🌰 Makhana ₹199', value: 'makhana price' },
-        { label: '🍪 Thekua ₹199', value: 'thekua price' },
+        { label: '🍪 Thekua ₹299', value: 'thekua price' },
         { label: '🥜 Dry Fruits ₹249', value: 'dry fruits price' }
       ]);
       return '💰 **Best Prices!**\n\n' +
         '🌰 Makhana: ₹199-299\n' +
-        '🍪 Thekua: ₹299 (200 g) · ₹499 (400 g) · ₹949 (800 g) · ₹1,299 (pack of 3)\n' +
+        '🍪 Thekua 400 g: Shuddh Desi Ghee ₹499 · Regular ₹299\n' +
         '\n' +
         '🎉 **Offers:**\n' +
-        '✅ Free shipping from ₹499\n' +
-        '✅ First order: 20% off + free delivery on ₹399+, so 400 g is just ₹399\n' +
+        '✅ First order: free delivery, plus 20% off from ₹399 (Shuddh 400 g is just ₹399)\n' +
         '✅ Corporate gifting rates for 25+ boxes';
     }
 
@@ -295,12 +294,14 @@ const AIChatbot = () => {
         { label: '📦 Track Order', value: 'track order' },
         { label: '🚚 Shipping Charges', value: 'shipping charges' }
       ]);
-      return '🚚 **Fast Delivery!**\n\n' +
-        '📍 Metro Cities: 2-3 days\n' +
-        '📍 Other Cities: 3-5 days\n\n' +
-        '✅ FREE from ₹499\n' +
-        '✅ Real-time tracking\n' +
-        '✅ Same-day dispatch';
+      return '🚚 **Delivery across India (Delhivery)**\n\n' +
+        '🍳 Made fresh, dispatched in 1–3 working days from Munger\n' +
+        '📍 Bihar/Jharkhand: ~2–4 days after dispatch\n' +
+        '📍 Kolkata/East: ~4–6 days · Delhi/North: ~5–7 days\n' +
+        '📍 Mumbai, Pune, Hyderabad, Bangalore: ~7–10 days\n\n' +
+        '✅ First order ships free\n' +
+        '✅ Tracking on WhatsApp/SMS\n' +
+        'Enter your PIN on any product page for exact dates.';
     }
 
     // Quality - Brief
@@ -339,13 +340,12 @@ const AIChatbot = () => {
         { label: '🔄 Start Return', value: 'agent' },
         { label: '📋 Policy Details', value: 'return policy details' }
       ]);
-      return '🔄 **Easy Returns**\n\n' +
-        '✅ 7-day return\n' +
-        '✅ Free pickup\n' +
-        '✅ Instant refund\n' +
-        '✅ No questions asked\n\n' +
-        '**Process:**\n' +
-        'Contact us → We pickup → Refund in 3-5 days';
+      return '🔄 **7-day guarantee**\n\n' +
+        'Damaged, wrong, missing or a quality problem? Send a photo within 7 days of delivery on WhatsApp +91 62030 09518.\n\n' +
+        '✅ Fresh pack or full refund, your choice\n' +
+        '✅ No need to send the product back\n' +
+        '✅ Cancel free before it ships\n\n' +
+        'Opened packs can\'t be returned for taste preference (it\'s food made to order).';
     }
 
     // Health benefits - Focused
