@@ -8,7 +8,7 @@ import { formatINR } from '../utils/format';
 import toast from 'react-hot-toast';
 import { imgSrc, imgProps } from '../utils/img';
 import { trackBeginCheckout, trackPurchase } from '../utils/analytics';
-import { tryAutoFirst } from '../utils/autoPromo';
+import { tryAutoFirst, promoLabel, OFFER_CODES } from '../utils/autoPromo';
 import FreeDeliveryNudge from '../components/FreeDeliveryNudge';
 
 // Utility function to wait for Razorpay to load
@@ -765,7 +765,7 @@ const Checkout = () => {
           <div className="flex justify-between"><dt className="text-ink-soft">COD charges</dt><dd className="tabular-nums">{formatINR(codCharges)}</dd></div>
         )}
         {appliedPromocode && (
-          <div className="flex justify-between text-leaf"><dt>Promocode ({appliedPromocode.code})</dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
+          <div className="flex justify-between text-leaf"><dt>{promoLabel(appliedPromocode.code)}{OFFER_CODES.includes(appliedPromocode.code) ? ' ✓' : ''}</dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
         )}
       </dl>
       <div className="border-t border-line mt-4 pt-4 flex justify-between items-baseline">
@@ -777,7 +777,7 @@ const Checkout = () => {
       )}
       {cartItems.some((i) => ['thekua', 'gifts'].includes(i.category)) && (
         <p className="mt-3 rounded-md bg-action-tint px-3 py-2 text-sm text-ink-soft">
-          Thekua is made fresh after you order and ships in 1–2 days.
+          Thekua is made fresh after you order and ships in 1–3 working days.
         </p>
       )}
     </>

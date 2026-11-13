@@ -97,3 +97,9 @@ export async function firstOrderMinimum(cartItems = [], userId) {
     return null;
   } catch (_) { return null; }
 }
+
+// Friendly name for an applied code in order summaries, so buyers don't go hunting for a code.
+export const promoLabel = (code) => ({
+  WELCOME15: 'First-order 20% off',
+  FIRST: 'First-order free delivery',
+}[code] || `Promo (${code})`);
