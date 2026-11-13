@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 import useStoreSettings from '../hooks/useStoreSettings';
 import { formatINR } from '../utils/format';
 import { imgSrc } from '../utils/img';
-import SattuAddon from './SattuAddon';
+import AddOnStrip from './AddOnStrip';
 
 export const CART_ADDED_EVENT = 'vc:cart-added';
 
@@ -80,7 +80,7 @@ const AddedToCartSheet = () => {
             : <>Free delivery on this order</>}
         </p>
 
-        {p.category === 'thekua' && <SattuAddon compact />}
+        {p.category === 'thekua' && <AddOnStrip compact title="Add to your box" className="mt-3" />}
 
         <div className="mt-3 grid grid-cols-[1fr_1.4fr] gap-2">
           <button onClick={() => go('/cart')} className="btn-secondary h-12">View cart</button>

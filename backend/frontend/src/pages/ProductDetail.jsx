@@ -17,6 +17,7 @@ import { trackViewItem } from '../utils/analytics';
 import ImageLightbox from '../components/ImageLightbox';
 import ThekuaStory from '../components/ThekuaStory';
 import DeliveryEstimate, { shipDate } from '../components/DeliveryEstimate';
+import AddOnStrip from '../components/AddOnStrip';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -802,6 +803,10 @@ const ProductDetail = () => {
                 <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current text-berry' : ''}`} />
                 {isInWishlist ? 'Saved to wishlist' : 'Save to wishlist'}
               </button>
+            )}
+
+            {['thekua', 'gifts'].includes(product.category) && (
+              <AddOnStrip title="Goes well with" excludeId={product._id} includeBundles className="mt-6" />
             )}
 
             {/* Trust strip */}

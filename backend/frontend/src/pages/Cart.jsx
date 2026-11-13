@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import SattuAddon from '../components/SattuAddon';
+import AddOnStrip from '../components/AddOnStrip';
 import { Plus, Minus, ShoppingBag, Tag, CheckCircle, XCircle, Lock, X } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import { useCart } from '../context/CartContext';
@@ -354,7 +354,7 @@ const Cart = () => {
               ))}
             </ul>
 
-            <SattuAddon />
+            <AddOnStrip title="Add to your box" className="mt-2" />
 
             {/* Promocode */}
             <div className="panel">
