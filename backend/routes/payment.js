@@ -94,6 +94,7 @@ router.post('/create-order', protect, paymentRateLimit, securityMonitor, async (
           taxPrice: pricing.tax,
           totalPrice: pricing.total,
           promocodeDiscount: pricing.discount,
+          comboDiscount: pricing.comboDiscount || 0,
         },
         shippingAddress,
         giftMessage: giftMessage || undefined,

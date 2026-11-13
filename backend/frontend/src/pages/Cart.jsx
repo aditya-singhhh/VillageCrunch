@@ -430,6 +430,9 @@ const Cart = () => {
               <h2 className="font-display text-xl font-semibold mb-4">Order summary</h2>
               <dl className="space-y-2.5 text-[15px]">
                 <div className="flex justify-between"><dt className="text-ink-soft">Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</dt><dd className="tabular-nums">{formatINR(subtotal)}</dd></div>
+                {orderTotals?.combo?.amount > 0 && (
+                  <div className="flex justify-between text-leaf"><dt className="min-w-0 truncate">{orderTotals.combo.label} ✓</dt><dd className="tabular-nums">-{formatINR(orderTotals.combo.amount)}</dd></div>
+                )}
                 {appliedPromocode && promocodeDiscount > 0 && (
                   <div className="flex justify-between text-leaf"><dt className="flex items-center gap-1 min-w-0"><Tag className="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true" /><span className="truncate">{promoLabel(appliedPromocode.code)}</span></dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
                 )}
@@ -442,10 +445,10 @@ const Cart = () => {
                 <span className="text-lg font-semibold">Total</span>
                 <span className="text-xl font-semibold tabular-nums">{formatINR(total)}</span>
               </div>
-              {appliedPromocode && promocodeDiscount > 0 && (
-                <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount)}</p>
+              {(promocodeDiscount + (orderTotals?.combo?.amount || 0)) > 0 && (
+                <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount + (orderTotals?.combo?.amount || 0))}</p>
               )}
-              {appliedPromocode && OFFER_CODES.includes(appliedPromocode.code) && (
+              {appliedPromocode && OFFER_CODES.includes(appliedPromocode.code) && promocodeDiscount > 0 && (
                 <p className="mt-3 flex items-start gap-2 rounded-md bg-leaf-tint px-3 py-2 text-sm text-leaf">
                   <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
                   <span><b>First-order discount applied automatically.</b> No code needed.</span>

@@ -18,6 +18,7 @@ import ImageLightbox from '../components/ImageLightbox';
 import ThekuaStory from '../components/ThekuaStory';
 import DeliveryEstimate, { shipDate } from '../components/DeliveryEstimate';
 import AddOnStrip from '../components/AddOnStrip';
+import FrequentlyBought from '../components/FrequentlyBought';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -804,6 +805,8 @@ const ProductDetail = () => {
                 {isInWishlist ? 'Saved to wishlist' : 'Save to wishlist'}
               </button>
             )}
+
+            <FrequentlyBought product={product} />
 
             {['thekua', 'gifts'].includes(product.category) && (
               <AddOnStrip title="Goes well with" excludeId={product._id} includeBundles className="mt-6" />

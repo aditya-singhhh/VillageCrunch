@@ -113,6 +113,7 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
       taxPrice: pricing.tax,
       totalPrice: pricing.total,
       promocodeDiscount: pricing.discount,
+      comboDiscount: pricing.comboDiscount || 0,
     };
     let lines = pricing.lines;
 
@@ -133,6 +134,7 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
         taxPrice: liveOrder.priceBreakdown.taxPrice,
         totalPrice: liveOrder.amount,
         promocodeDiscount: liveOrder.priceBreakdown.promocodeDiscount || 0,
+        comboDiscount: liveOrder.priceBreakdown.comboDiscount || 0,
       };
       const paidPrice = new Map(liveOrder.cartItems.map((c) => [c.productId.toString(), c.price]));
       lines = pricing.lines.map((l) => ({ ...l, price: paidPrice.get(l.product.toString()) ?? l.price }));
@@ -178,6 +180,7 @@ router.post('/', protect, orderRateLimit, securityMonitor, async (req, res) => {
         ? { code: pricing.promo.code, discount: amounts.promocodeDiscount, description: pricing.promo.description }
         : undefined,
       promocodeDiscount: round2(amounts.promocodeDiscount),
+      comboDiscount: round2(amounts.comboDiscount || 0),
       status: 'confirmed',
       tracking: (() => {
         const t = require('../services/metaCapi').trackingFrom(req);

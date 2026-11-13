@@ -44,6 +44,7 @@ const liveOrderSchema = new mongoose.Schema({
     taxPrice: Number,
     totalPrice: Number,
     promocodeDiscount: { type: Number, default: 0 },
+    comboDiscount: { type: Number, default: 0 },
   },
   status: {
     type: String,

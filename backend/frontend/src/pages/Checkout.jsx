@@ -764,7 +764,10 @@ const Checkout = () => {
         {paymentMethod === 'cod' && codCharges > 0 && (
           <div className="flex justify-between"><dt className="text-ink-soft">COD charges</dt><dd className="tabular-nums">{formatINR(codCharges)}</dd></div>
         )}
-        {appliedPromocode && (
+        {orderTotals?.combo?.amount > 0 && (
+          <div className="flex justify-between text-leaf"><dt>{orderTotals.combo.label} ✓</dt><dd className="tabular-nums">-{formatINR(orderTotals.combo.amount)}</dd></div>
+        )}
+        {appliedPromocode && promocodeDiscount > 0 && (
           <div className="flex justify-between text-leaf"><dt>{promoLabel(appliedPromocode.code)}{OFFER_CODES.includes(appliedPromocode.code) ? ' ✓' : ''}</dt><dd className="tabular-nums">-{formatINR(promocodeDiscount)}</dd></div>
         )}
       </dl>
@@ -772,8 +775,8 @@ const Checkout = () => {
         <span className="text-lg font-semibold">Total</span>
         <span className="text-xl font-semibold tabular-nums">{formatINR(total)}</span>
       </div>
-      {appliedPromocode && promocodeDiscount > 0 && (
-        <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount)}</p>
+      {(promocodeDiscount + (orderTotals?.combo?.amount || 0)) > 0 && (
+        <p className="text-sm text-leaf mt-1 text-right">You saved {formatINR(promocodeDiscount + (orderTotals?.combo?.amount || 0))}</p>
       )}
       {cartItems.some((i) => ['thekua', 'gifts'].includes(i.category)) && (
         <p className="mt-3 rounded-md bg-action-tint px-3 py-2 text-sm text-ink-soft">

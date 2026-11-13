@@ -15,7 +15,7 @@ import { formatINR } from '../utils/format';
 export const ADDON_CATEGORIES = ['sattu', 'nimki', 'makhana'];
 
 let cached = null; // one product lookup per page load
-const loadAddOns = () => {
+export const loadAddOns = () => {
   if (!cached) {
     cached = getProducts()
       .then((res) => (Array.isArray(res) ? res : res?.products || [])
