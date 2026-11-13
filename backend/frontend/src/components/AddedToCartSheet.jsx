@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import useStoreSettings from '../hooks/useStoreSettings';
 import { formatINR } from '../utils/format';
 import { imgSrc } from '../utils/img';
+import SattuAddon from './SattuAddon';
 
 export const CART_ADDED_EVENT = 'vc:cart-added';
 
@@ -78,6 +79,8 @@ const AddedToCartSheet = () => {
             ? <>First order? <b className="text-ink">Free delivery</b>, applied at checkout</>
             : <>Free delivery on this order</>}
         </p>
+
+        {p.category === 'thekua' && <SattuAddon compact />}
 
         <div className="mt-3 grid grid-cols-[1fr_1.4fr] gap-2">
           <button onClick={() => go('/cart')} className="btn-secondary h-12">View cart</button>
