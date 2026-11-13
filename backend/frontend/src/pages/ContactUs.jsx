@@ -68,7 +68,7 @@ const ContactUs = () => {
     <div className="bg-paper py-12">
       <SEOHead 
         title="Contact VillageCrunch - Get in Touch for Orders & Support"
-        description="Contact VillageCrunch for any queries about our premium dry fruits, makhana, and traditional snacks. Get support, ask questions, or share feedback. We're here to help!"
+        description="Contact VillageCrunch about your thekua, sattu or makhana order: delivery, damage, bulk or gifting. WhatsApp or call +91 62030 09518."
         keywords="contact VillageCrunch, customer support, dry fruits help, makhana queries, product questions, customer service"
         url="/contact"
         breadcrumbs={[
@@ -140,15 +140,15 @@ const ContactUs = () => {
               <div className="space-y-3">
                 <details className="bg-white p-4 rounded-lg border">
                   <summary className="font-medium cursor-pointer">How long does shipping take?</summary>
-                  <p className="mt-2 text-ink-soft">Standard delivery: 3-5 business days. Express delivery: 1-2 business days.</p>
+                  <p className="mt-2 text-ink-soft">Thekua is made fresh and dispatched in 1–3 working days from Munger by Delhivery. Delivery then takes about 2–10 days depending on your city; enter your PIN on a product page for exact dates.</p>
                 </details>
                 <details className="bg-white p-4 rounded-lg border">
                   <summary className="font-medium cursor-pointer">What's your return policy?</summary>
-                  <p className="mt-2 text-ink-soft">30-day hassle-free returns for unopened products with full refund.</p>
+                  <p className="mt-2 text-ink-soft">Since our thekua is food made for your order, opened packs can't be returned. But if your order arrives damaged, wrong, missing or with a quality problem, send us a photo within 7 days of delivery and we'll send a fresh pack or refund you in full. You can cancel free before it ships.</p>
                 </details>
                 <details className="bg-white p-4 rounded-lg border">
                   <summary className="font-medium cursor-pointer">Do you offer bulk discounts?</summary>
-                  <p className="mt-2 text-ink-soft">Yes! Special pricing for bulk orders above ₹5000. Contact us for quotes.</p>
+                  <p className="mt-2 text-ink-soft">Yes. For weddings, festivals or office gifting, WhatsApp us at +91 62030 09518 with the quantity and date, and we'll share a price.</p>
                 </details>
               </div>
             </div>

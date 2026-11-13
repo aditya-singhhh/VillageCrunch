@@ -120,8 +120,8 @@ const Products = () => {
       };
     } else {
       return {
-        title: 'All Products - Premium Dry Fruits, Makhana & Traditional Snacks',
-        description: 'Browse our complete collection of premium dry fruits, roasted makhana, thekua, and authentic Bihari snacks. Quality guaranteed with fast delivery.',
+        title: 'Shop Bihari Thekua, Sattu & Makhana Online',
+        description: 'Shop authentic Bihari thekua (desi ghee and regular, gud or cheeni), roasted chana sattu and makhana, made in Munger, Bihar and delivered across India.',
         keywords: 'all products, dry fruits collection, makhana varieties, thekua types, premium snacks',
         url: '/products',
         canonical: '/products',
