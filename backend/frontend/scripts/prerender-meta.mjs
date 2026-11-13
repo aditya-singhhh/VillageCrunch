@@ -15,12 +15,15 @@ const seedFile = [path.join(here, '..', '..', 'scripts', 'seedProducts.json')].f
 // Prefer the live catalogue (fresh names, prices and photos); fall back to the seed file.
 let products = [];
 let live = false;
-try {
-  const ctrl = AbortSignal.timeout(8000);
-  const live = await fetch(`${SITE}/api/products`, { signal: ctrl }).then((r) => (r.ok ? r.json() : null));
-  const list = Array.isArray(live) ? live : live?.products;
-  if (Array.isArray(list) && list.length) { products = list.filter((p) => p.isActive !== false); live = true; console.log(`prerender-meta: ${products.length} live products`); }
-} catch { /* offline build */ }
+for (const origin of ['https://villagecrunch.web.app', SITE]) {
+  try {
+    const res = await fetch(`${origin}/api/products`, { signal: AbortSignal.timeout(10000), headers: { 'User-Agent': 'villagecrunch-build', Accept: 'application/json' } });
+    const data = res.ok ? await res.json() : null;
+    const list = Array.isArray(data) ? data : data?.products;
+    if (Array.isArray(list) && list.length) { products = list.filter((p) => p.isActive !== false); live = true; console.log(`prerender-meta: ${products.length} live products from ${origin}`); break; }
+    console.log(`prerender-meta: ${origin} answered ${res.status}`);
+  } catch (e) { console.log(`prerender-meta: ${origin} unreachable (${e.message})`); }
+}
 if (!products.length && seedFile) products = JSON.parse(fs.readFileSync(seedFile, 'utf8')).filter((p) => p.isActive !== false);
 if (!products.length) console.log('prerender-meta: product list not found, writing key pages only');
 
