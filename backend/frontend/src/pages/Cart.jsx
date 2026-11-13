@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import SattuAddon from '../components/SattuAddon';
 import { Plus, Minus, ShoppingBag, Tag, CheckCircle, XCircle, Lock, X } from 'lucide-react';
 import { formatINR } from '../utils/format';
 import { useCart } from '../context/CartContext';
@@ -344,6 +345,8 @@ const Cart = () => {
                 </li>
               ))}
             </ul>
+
+            <SattuAddon />
 
             {/* Promocode */}
             <div className="panel">
