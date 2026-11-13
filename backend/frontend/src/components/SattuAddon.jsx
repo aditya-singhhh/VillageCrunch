@@ -51,7 +51,7 @@ const SattuAddon = ({ compact = false }) => {
         className="w-12 h-12 rounded-md object-cover bg-white flex-shrink-0"
       />
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-ink">Add Bihari sattu for litti</p>
+        <p className="text-sm font-semibold text-ink">Add Bihari Sattu</p>
         <p className="text-xs text-ink-mute">{sattu.weight || '500 g'} roasted chana sattu · goes in the same parcel</p>
       </div>
       <button
