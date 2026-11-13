@@ -68,8 +68,8 @@ const Shell = () => {
       {!isAdmin && <AnnouncementBar />}
       {!isAdmin && <WelcomePopup />}
       <Navbar />
-      <main id="main" className="flex-grow bg-paper min-h-[60vh]">
-        <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" />}>
+      <main id="main" className="flex-grow bg-paper min-h-[100svh]">
+        <Suspense fallback={<div className="min-h-[100svh]" aria-busy="true" />}>
         <Routes>
                 <Route path="/admin" element={<ProtectedRoute adminOnly={true}>
                   <Admin />

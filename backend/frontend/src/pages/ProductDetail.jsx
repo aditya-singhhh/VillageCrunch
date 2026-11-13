@@ -18,7 +18,15 @@ import ImageLightbox from '../components/ImageLightbox';
 import ThekuaStory from '../components/ThekuaStory';
 import DeliveryEstimate, { shipDate } from '../components/DeliveryEstimate';
 import AddOnStrip from '../components/AddOnStrip';
-import FrequentlyBought from '../components/FrequentlyBought';
+
+// Prerendered product pages carry a snapshot of the product so the page paints before the API answers.
+const readSnapshot = (id) => {
+  try {
+    const el = document.getElementById('vc-product');
+    const p = el && JSON.parse(el.textContent);
+    return p && p._id === id ? p : null;
+  } catch { return null; }
+};
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -55,8 +63,9 @@ const ProductDetail = () => {
 
   useEffect(() => {
     // Switching size/type/sweetener: show the product we already have straight away, then refresh quietly
-    const cached = allProducts.find((p) => p._id === id);
+    const cached = allProducts.find((p) => p._id === id) || readSnapshot(id);
     if (cached) {
+      setLoading(false);
       setProduct((prev) => ({ ...cached, reviews: prev && prev._id === id ? prev.reviews : cached.reviews }));
       getProduct(id).then((fresh) => setProduct((cur) => (cur && cur._id === id ? fresh : cur))).catch(() => {});
     } else {
@@ -805,8 +814,6 @@ const ProductDetail = () => {
                 {isInWishlist ? 'Saved to wishlist' : 'Save to wishlist'}
               </button>
             )}
-
-            <FrequentlyBought product={product} />
 
             {['thekua', 'gifts'].includes(product.category) && (
               <AddOnStrip title="Goes well with" excludeId={product._id} includeBundles className="mt-6" />

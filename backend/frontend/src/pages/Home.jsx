@@ -52,9 +52,6 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const { settings, freeShippingThreshold } = useStoreSettings();
-  // Wait for settings (or give up after 2s) so slides are not inserted after first paint
-  const [settingsWait, setSettingsWait] = useState(true);
-  useEffect(() => { const t = setTimeout(() => setSettingsWait(false), 2000); return () => clearTimeout(t); }, []);
 
   useEffect(() => {
     let alive = true;
@@ -101,7 +98,7 @@ const Home = () => {
       />
       <h1 className="sr-only">VillageCrunch: buy Bihari thekua online, made in Munger</h1>
 
-      <HeroCarousel products={products} freeShippingThreshold={freeShippingThreshold} ready={loaded && (!!settings || !settingsWait)} />
+      <HeroCarousel products={products} freeShippingThreshold={freeShippingThreshold} ready />
 
       {/* Category circles */}
       <nav aria-label="Shop by category" className="bg-white border-b border-line">
