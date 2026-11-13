@@ -284,7 +284,7 @@ const AIChatbot = () => {
         '🍪 Thekua 400 g: Shuddh Desi Ghee ₹499 · Regular ₹299\n' +
         '\n' +
         '🎉 **Offers:**\n' +
-        '✅ First order: free delivery, plus 20% off from ₹399 (Shuddh 400 g is just ₹399)\n' +
+        '✅ First order: ₹100 off + free delivery on orders of ₹499+ (Shuddh 400 g is just ₹399)\n' +
         '✅ Corporate gifting rates for 25+ boxes';
     }
 

@@ -31,7 +31,7 @@ const AnnouncementBar = () => {
   return (
     <div className="bg-brand text-cream text-[13px] relative">
       <button type="button" onClick={go} className="block w-full text-center py-2 px-12">
-        First order: <strong className="font-semibold text-white">20% off + FREE delivery</strong> · Desi ghee
+        Welcome offer: <strong className="font-semibold text-white">₹100 off + FREE delivery</strong> on your first order
       </button>
       <button
         onClick={dismiss}

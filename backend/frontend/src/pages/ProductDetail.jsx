@@ -415,10 +415,10 @@ const ProductDetail = () => {
     : null;
   const showBetterValue = bestValue && bestValue._id !== product._id && !product.isBundle && sizeOptions.some((o) => o._id === product._id);
   const bundleOptions = packOptions.filter(p => p.isBundle);
-  // Show the price a first-time buyer actually pays (20% off from ₹399, applied at checkout) as the main price,
+  // Show the price a first-time buyer actually pays (₹100 off from ₹499, applied at checkout) as the main price,
   // and point to a cheaper recipe when there is one, so ad visitors see a price they're comfortable with up front.
-  const firstOrderPrice = product.stock !== 0 && ['thekua', 'gifts'].includes(product.category) && Number(product.price) >= 399
-    ? Math.round(product.price * 0.8) : 0;
+  const firstOrderPrice = product.stock !== 0 && ['thekua', 'gifts'].includes(product.category) && Number(product.price) >= 499
+    ? Number(product.price) - 100 : 0;
   const cheaperChoice = variantOptions
     .filter((v) => v.value !== product.variant && v.price && v.price < Number(product.price))
     .sort((a, b) => a.price - b.price)[0];
@@ -641,10 +641,10 @@ const ProductDetail = () => {
               {!outOfStock && ['thekua', 'gifts'].includes(product.category) && (
                 <>
                   <p className="mt-3 rounded-md bg-leaf-tint px-3 py-2 text-sm text-ink">
-                    {product.price >= 399 ? (
-                      <><span className="font-semibold text-leaf">20% off + free delivery</span> on your first order, applied automatically at checkout.</>
+                    {product.price >= 499 ? (
+                      <><span className="font-semibold text-leaf">₹100 off + free delivery</span> on your first order, applied automatically at checkout.</>
                     ) : (
-                      <><span className="font-semibold text-leaf">Free delivery on your first order</span>, applied automatically. 20% off from ₹399.</>
+                      <><span className="font-semibold text-leaf">Free delivery on your first order</span>, applied automatically. ₹100 off on first orders of ₹499+.</>
                     )}
                   </p>
                   <ul className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-ink-soft" aria-label="Why VillageCrunch">

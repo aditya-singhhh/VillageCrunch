@@ -11,8 +11,8 @@ import { formatINR } from '../utils/format';
  * saving shown up front. The real saving is calculated by the server at checkout (services/combos.js);
  * the numbers here only mirror it for display. Hidden until a nimki product is live.
  */
-const PAIR = { shuddh: 49, regular: 29 };
-const TRIO_EXTRA = 29;
+const PAIR = { shuddh: 20, regular: 20 };
+const TRIO_EXTRA = 10;
 
 const FrequentlyBought = ({ product }) => {
   const { cartItems, addToCart } = useCart();
@@ -95,7 +95,7 @@ const FrequentlyBought = ({ product }) => {
       >
         <Check className="w-4 h-4" aria-hidden="true" /> Add {chosen.length} items · {formatINR(full - saving)}
       </button>
-      <p className="mt-2 text-xs text-ink-mute">Combo saving or first-order discount, whichever is bigger, is applied at checkout.</p>
+      <p className="mt-2 text-xs text-ink-mute">Combo saving or the first-order ₹100 off, whichever is bigger, is applied at checkout.</p>
     </section>
   );
 };

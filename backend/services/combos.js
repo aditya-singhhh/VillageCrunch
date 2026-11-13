@@ -9,9 +9,9 @@
  */
 const COMBOS = {
   // per thekua + nimki pair
-  pair: { shuddh: 49, regular: 29 },
+  pair: { shuddh: 20, regular: 20 },
   // extra per thekua + nimki + sattu trio
-  trioExtra: 29,
+  trioExtra: 10,
 };
 
 const isThekua400 = (p) => p && p.category === 'thekua' && !p.isBundle && /^400\s?g/i.test(String(p.weight || ''));

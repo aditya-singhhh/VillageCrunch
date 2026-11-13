@@ -4,9 +4,9 @@ const OFF_KEY = 'vc-first-off';
 export const AUTO_CODE = 'FIRST';
 const WELCOME_KEY = 'vc-welcome-code';
 /** Offers shown in the cart, best first. The server decides who is eligible. */
-export const OFFER_CODES = ['WELCOME15', AUTO_CODE];
+export const OFFER_CODES = ['WELCOME20', AUTO_CODE];
 const OFFER_TEXT = {
-  WELCOME15: '20% off + free delivery on your first order',
+  WELCOME20: '₹100 off + free delivery on your first order of ₹499+',
   FIRST: 'Free delivery on your first order',
 };
 
@@ -100,6 +100,6 @@ export async function firstOrderMinimum(cartItems = [], userId) {
 
 // Friendly name for an applied code in order summaries, so buyers don't go hunting for a code.
 export const promoLabel = (code) => ({
-  WELCOME15: 'First-order 20% off',
+  WELCOME20: 'First-order ₹100 off',
   FIRST: 'First-order free delivery',
 }[code] || `Promo (${code})`);
