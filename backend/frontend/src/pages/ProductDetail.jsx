@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProduct, getProducts, createReview, getUserOrders, toggleWishlist, getWishlist } from '../utils/api';
 import { useCart } from '../context/CartContext';
@@ -28,6 +28,14 @@ const readSnapshot = (id) => {
   } catch { return null; }
 };
 
+const readCatalogue = () => {
+  try {
+    const el = document.getElementById('vc-catalogue');
+    const list = el && JSON.parse(el.textContent);
+    return Array.isArray(list) ? list : [];
+  } catch { return []; }
+};
+
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -42,7 +50,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [allProducts, setAllProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState(readCatalogue);
+  const catalogueFresh = useRef(false);
   const [userOrders, setUserOrders] = useState([]);
   const [canReview, setCanReview] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -71,7 +80,7 @@ const ProductDetail = () => {
     } else {
       fetchProduct();
     }
-    if (!allProducts.length) fetchAllProducts();
+    if (!catalogueFresh.current) { catalogueFresh.current = true; fetchAllProducts(); }
     setSelectedImage(0); // Reset image selection when product changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
