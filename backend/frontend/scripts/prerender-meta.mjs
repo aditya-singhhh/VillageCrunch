@@ -36,6 +36,9 @@ const preloadFor = (src) => {
   return `<link rel="preload" as="image" href="${b}-800.webp" imagesrcset="${b}-400.webp 400w, ${b}-800.webp 800w, ${b}-1200.webp 1200w" imagesizes="(min-width: 1024px) 50vw, 100vw" fetchpriority="high" />`;
 };
 
+const SLIM = ['_id', 'name', 'category', 'price', 'originalPrice', 'weight', 'image', 'images', 'stock', 'isActive', 'isBundle', 'packGroup', 'packOrder', 'variant', 'sweetener', 'oilFried', 'rating', 'numReviews'];
+const catalogue = live ? JSON.stringify(products.map((p) => Object.fromEntries(SLIM.filter((k) => p[k] !== undefined).map((k) => [k, p[k]])))).replace(/</g, '\\u003c') : null;
+
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const clip = (s, n = 158) => { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s; };
 const abs = (u) => (!u ? `${SITE}/images/villagecrunch-logo.png` : u.startsWith('http') ? u : `${SITE}${u}`);
@@ -45,6 +48,8 @@ const render = ({ urlPath, title, description, image, type = 'website', jsonLd, 
   if (preload) h = h.replace('</head>', `    ${preload}\n  </head>`);
   // Product snapshot: the page paints at once from this, then refreshes from the API.
   if (snapshot) h = h.replace('</head>', `    <script type="application/json" id="vc-product">${JSON.stringify(snapshot).replace(/</g, '\\u003c')}</script>\n  </head>`);
+  // The whole (slim) catalogue, so size/type/sweetener pickers and add-ons render with the page instead of popping in.
+  if (snapshot && catalogue) h = h.replace('</head>', `    <script type="application/json" id="vc-catalogue">${catalogue}</script>\n  </head>`);
   const set = (re, val) => { h = re.test(h) ? h.replace(re, val) : h.replace('</head>', `    ${val}\n  </head>`); };
   set(/<title>[\s\S]*?<\/title>/, `<title>${esc(title)}</title>`);
   set(/<meta name="description"[^>]*>/, `<meta name="description" content="${esc(description)}" />`);
