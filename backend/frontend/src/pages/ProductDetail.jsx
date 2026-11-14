@@ -656,6 +656,12 @@ const ProductDetail = () => {
                 {perUnit && <span> &middot; </span>}
                 <span>{settings?.pricing?.pricesIncludeTax === false && taxRate > 0 ? `+ ${taxRate}% GST at checkout` : 'Inclusive of all taxes'}</span>
               </p>
+              {/* Say the COD charge up front so the checkout total isn't a surprise. */}
+              {Number(settings?.pricing?.codCharges) > 0 && (
+                <p className="text-xs text-ink-mute mt-1">
+                  Cash on Delivery +₹{Number(settings.pricing.codCharges)} &middot; Pay online (UPI / card) to save ₹{Number(settings.pricing.codCharges)}
+                </p>
+              )}
               {!outOfStock && ['thekua', 'gifts'].includes(product.category) && (
                 <>
                   <p className="mt-3 rounded-md bg-leaf-tint px-3 py-2 text-sm text-ink">
