@@ -16,6 +16,9 @@
   html {
     scroll-padding-top: 72px;
     -webkit-text-size-adjust: 100%;
+    /* Never let anything wider than the screen widen the page (iOS Chrome then zooms the whole site out). */
+    overflow-x: hidden;
+    max-width: 100%;
   }
   body {
     @apply bg-paper text-ink font-sans antialiased;
