@@ -431,10 +431,27 @@ const Checkout = () => {
   const handlePayment = async (e) => {
     e.preventDefault();
     
-    // Validate form
-    if (!shippingInfo.name || !shippingInfo.phone || !shippingInfo.street || 
-        !shippingInfo.city || !shippingInfo.state || !shippingInfo.pincode) {
-      toast.error('Please fill all shipping details');
+    // Validate here, not with the browser's own bubbles: in the Facebook/Instagram in-app
+    // browsers the "Please fill out this field" bubble is easy to miss, and visitors tapped
+    // Pay again and again without knowing what was missing. Name the field and take them to it.
+    const missing = [
+      ['co-phone', 'mobile number', shippingInfo.phone],
+      ['co-name', 'full name', shippingInfo.name],
+      ['co-pin', 'PIN code', shippingInfo.pincode],
+      ['co-city', 'city', shippingInfo.city],
+      ['co-state', 'state', shippingInfo.state],
+      ['co-street', 'house / flat and street', shippingInfo.street],
+    ].find(([, , v]) => !String(v || '').trim());
+    if (missing) {
+      toast.error(`Please enter your ${missing[1]}`);
+      const el = document.getElementById(missing[0]);
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => el.focus(), 300); }
+      return;
+    }
+    if (!/^\d{6}$/.test(String(shippingInfo.pincode).trim())) {
+      toast.error('Please enter a 6-digit PIN code');
+      const el = document.getElementById('co-pin');
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => el.focus(), 300); }
       return;
     }
     if (!user && !phoneOk) {
@@ -815,7 +832,7 @@ const Checkout = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] [&>*]:min-w-0 gap-6 lg:gap-10 items-start">
-          <form id="checkout-form" onSubmit={handlePayment} className="space-y-5 max-w-xl lg:max-w-none">
+          <form id="checkout-form" noValidate onSubmit={handlePayment} className="space-y-5 max-w-xl lg:max-w-none">
             {/* 1. Contact */}
             <section className="panel" aria-labelledby="co-contact">
               <div id="co-contact">{sectionHead(1, 'Contact')}</div>
