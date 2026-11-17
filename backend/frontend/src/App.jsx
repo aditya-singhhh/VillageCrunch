@@ -26,6 +26,7 @@ const Orders = lazy(() => import('./pages/Orders'));
 const Profile = lazy(() => import('./pages/Profile'));
 const About = lazy(() => import('./pages/About'));
 const ContactUs = lazy(() => import('./pages/ContactUs'));
+const Feedback = lazy(() => import('./pages/Feedback'));
 const ShippingPolicy = lazy(() => import('./pages/ShippingPolicy'));
 const ReturnsPolicy = lazy(() => import('./pages/ReturnsPolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
@@ -96,6 +97,7 @@ const Shell = () => {
                 <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<ContactUs />} />
+                <Route path="/feedback" element={<Feedback />} />
                 <Route path="/shipping-policy" element={<ShippingPolicy />} />
                 <Route path="/returns-policy" element={<ReturnsPolicy />} />
                 <Route path="/refund-policy" element={<ReturnsPolicy />} />

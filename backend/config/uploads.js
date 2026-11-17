@@ -12,6 +12,7 @@ const dirs = {
   products: path.join(UPLOAD_ROOT, 'Product_Images'),
   reviews: path.join(UPLOAD_ROOT, 'Review_Images'),
   support: path.join(UPLOAD_ROOT, 'support-images'),
+  feedback: path.join(UPLOAD_ROOT, 'feedback-images'),
 };
 Object.values(dirs).forEach((d) => fs.mkdirSync(d, { recursive: true }));
 

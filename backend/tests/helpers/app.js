@@ -101,6 +101,7 @@ function buildApp() {
   mount('/api/ghar', '../../routes/ghar');
   mount('/api/pincode', '../../routes/pincode');
   mount('/api/leads', '../../routes/leads');
+  mount('/api/feedback', '../../routes/feedback');
   app.use((err, req, res, next) => res.status(err.status || 500).json({ message: err.message }));
   return app;
 }
@@ -131,7 +132,7 @@ async function start() {
     try { json = text ? JSON.parse(text) : null; } catch (_) { json = text; }
     return { status: res.status, body: json };
   };
-  return { api, raw, close: () => server.close() };
+  return { api, raw, base, close: () => server.close() };
 }
 
 let seq = 0;
