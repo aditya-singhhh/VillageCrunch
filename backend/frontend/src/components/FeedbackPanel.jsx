@@ -30,7 +30,7 @@ const FeedbackPanel = () => {
         ))}
       </div>
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm text-ink-soft">Send customers <span className="font-mono">villagecrunch.in/feedback?o=ORDER_NUMBER</span> after delivery.</p>
+        <p className="text-sm text-ink-soft">Send every customer the same link after delivery: <span className="font-mono">villagecrunch.in/feedback</span></p>
         <button onClick={load} className="h-10 px-3 inline-flex items-center gap-1 text-sm text-action"><RefreshCw className="w-4 h-4" /> Refresh</button>
       </div>
       {n === 0 ? <p className="text-ink-mute">No feedback yet.</p> : (
@@ -43,7 +43,7 @@ const FeedbackPanel = () => {
                 </span>
                 {r.condition && <span className="text-sm text-ink-soft">{LABEL[r.condition]}</span>}
                 {r.reorder && <span className="text-sm text-ink-soft">· {LABEL[r.reorder]}</span>}
-                <span className="text-xs text-ink-mute ml-auto">{when(r.createdAt)}{r.order ? ` · ${r.order}` : ''}{r.name ? ` · ${r.name}` : ''}</span>
+                <span className="text-xs text-ink-mute ml-auto">{when(r.createdAt)}{r.order ? ` · ${r.order}` : ''}{r.name ? ` · ${r.name}` : ''}{r.phone ? ` · +91 ${r.phone}` : ''}</span>
               </div>
               {r.comment && <p className="mt-2 text-ink">{r.comment}</p>}
               {r.status !== 'handled' && (

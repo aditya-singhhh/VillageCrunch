@@ -9,6 +9,7 @@ const feedbackSchema = new mongoose.Schema({
   reorder: String,                    // yes | maybe | no
   comment: String,
   name: String,
+  phone: String,                      // optional, used to find the order when there's no ?o= and no login
   status: { type: String, default: 'new' }, // new | handled
 }, { timestamps: true });
 

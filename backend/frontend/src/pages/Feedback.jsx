@@ -31,8 +31,9 @@ const Choice = ({ options, value, onChange, label }) => (
 
 /**
  * /feedback — three taps (stars, condition, would reorder) + an optional line.
- * No login needed. Link from WhatsApp as /feedback?o=<order number>; if the visitor is
- * logged in we fill in their name and latest order ourselves.
+ * One link for everyone (villagecrunch.in/feedback). Logged in: we pick their latest order.
+ * Otherwise an optional mobile number lets the server link the order placed with it.
+ * (?o=<order number> still works if a link carries it.)
  */
 const Feedback = () => {
   const { user } = useContext(AuthContext);
@@ -42,6 +43,7 @@ const Feedback = () => {
   const [condition, setCondition] = useState('');
   const [reorder, setReorder] = useState('');
   const [comment, setComment] = useState('');
+  const [phone, setPhone] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
@@ -60,7 +62,7 @@ const Feedback = () => {
     if (!rating) { setError('Please tap the stars first'); return; }
     setSending(true); setError('');
     try {
-      await sendFeedback({ rating, condition, reorder, comment, order, name: user?.name });
+      await sendFeedback({ rating, condition, reorder, comment, order, name: user?.name, phone: order ? undefined : phone });
       setDone(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
@@ -125,6 +127,15 @@ const Feedback = () => {
               <textarea id="fb-comment" rows="3" maxLength={600} value={comment} onChange={(e) => setComment(e.target.value)}
                 placeholder="Mithaas, crunch, packing… kuch bhi" className="input-field" />
             </div>
+
+            {!order && (
+              <div>
+                <label htmlFor="fb-phone" className="field-label">Mobile number used for the order <span className="text-ink-mute font-normal">(optional)</span></label>
+                <input id="fb-phone" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={14} value={phone}
+                  onChange={(e) => setPhone(e.target.value)} placeholder="98765 43210" className="input-field" />
+                <p className="text-xs text-ink-mute mt-1">So we know which order this is about.</p>
+              </div>
+            )}
 
             {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
             <button type="submit" disabled={sending} className="btn-primary w-full">{sending ? 'Sending…' : 'Send feedback'}</button>
