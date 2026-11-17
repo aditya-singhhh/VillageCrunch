@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import LeadsPanel from '../components/LeadsPanel';
+import FeedbackPanel from '../components/FeedbackPanel';
 import OrderAlertsCard from '../components/OrderAlertsCard';
 import PaymentRecoveryCard from '../components/PaymentRecoveryCard';
 import MetaCapiCard from '../components/MetaCapiCard';
@@ -1148,6 +1149,17 @@ const saveSettings = async (e) => {
               Abandoned checkouts
             </button>
             <button
+              onClick={() => setActiveTab('feedback')}
+              className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
+                activeTab === 'feedback'
+                  ? 'border-desi-gold text-desi-brown'
+                  : 'border-transparent text-ink-mute hover:text-ink-soft hover:border-[#CDBBA4]'
+              }`}
+            >
+              <MessageSquare className="w-5 h-5 inline-block mr-2" />
+              Feedback
+            </button>
+            <button
               onClick={() => setActiveTab('products')}
               className={`py-3 px-1 min-h-[44px] whitespace-nowrap snap-start border-b-2 font-medium text-sm ${
                 activeTab === 'products'
@@ -1184,6 +1196,7 @@ const saveSettings = async (e) => {
         </div>
 
         {activeTab === 'leads' && <LeadsPanel />}
+        {activeTab === 'feedback' && <FeedbackPanel />}
 
         {/* Orders Tab Content */}
         {activeTab === 'orders' && (

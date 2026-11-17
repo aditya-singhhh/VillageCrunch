@@ -101,6 +101,7 @@ function buildApp() {
   mount('/api/ghar', '../../routes/ghar');
   mount('/api/pincode', '../../routes/pincode');
   mount('/api/leads', '../../routes/leads');
+  mount('/api/feedback', '../../routes/feedback');
   app.use((err, req, res, next) => res.status(err.status || 500).json({ message: err.message }));
   return app;
 }

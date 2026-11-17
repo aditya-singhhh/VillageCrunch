@@ -652,6 +652,10 @@ export const getDeliveryEta = async (pin) => {
 // ✅ Checkout leads (admin)
 export const getLeads = async () => (await api.get('/leads')).data;
 export const updateLead = async (id, status) => (await api.put(`/leads/${id}`, { status })).data;
+// Post-delivery feedback
+export const sendFeedback = async (payload) => (await api.post('/feedback', payload)).data;
+export const getFeedback = async () => (await api.get('/feedback')).data;
+export const updateFeedback = async (id, status) => (await api.put(`/feedback/${id}`, { status })).data;
 export const getOrderAlerts = async () => (await api.get('/settings/alerts')).data;
 export const testOrderAlert = async () => (await api.post('/settings/alerts/test', {})).data;
 // Online payments: webhook set-up and recovery of paid payments that have no order
