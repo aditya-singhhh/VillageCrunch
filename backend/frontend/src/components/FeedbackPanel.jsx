@@ -46,6 +46,16 @@ const FeedbackPanel = () => {
                 <span className="text-xs text-ink-mute ml-auto">{when(r.createdAt)}{r.order ? ` · ${r.order}` : ''}{r.name ? ` · ${r.name}` : ''}{r.phone ? ` · +91 ${r.phone}` : ''}</span>
               </div>
               {r.comment && <p className="mt-2 text-ink">{r.comment}</p>}
+              {r.images?.length > 0 && (
+                <div className="mt-2 flex gap-2">
+                  {r.images.map((src) => (
+                    <a key={src} href={src} target="_blank" rel="noreferrer"><img src={src} alt="Customer photo" className="w-20 h-20 object-cover rounded border border-line" /></a>
+                  ))}
+                </div>
+              )}
+              {r.phone && r.status !== 'handled' && (
+                <a href={`https://wa.me/91${r.phone}`} target="_blank" rel="noreferrer" className="mt-2 mr-2 inline-flex btn-primary h-9 px-3 text-sm">WhatsApp</a>
+              )}
               {r.status !== 'handled' && (
                 <button onClick={() => updateFeedback(r._id, 'handled').then(load)} className="mt-2 btn-secondary h-9 px-3 text-sm"><Check className="w-4 h-4" /> Mark handled</button>
               )}

@@ -653,7 +653,8 @@ export const getDeliveryEta = async (pin) => {
 export const getLeads = async () => (await api.get('/leads')).data;
 export const updateLead = async (id, status) => (await api.put(`/leads/${id}`, { status })).data;
 // Post-delivery feedback
-export const sendFeedback = async (payload) => (await api.post('/feedback', payload)).data;
+// FormData (photos): override the instance's JSON content type so axios sends multipart with a boundary.
+export const sendFeedback = async (formData) => (await api.post('/feedback', formData, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
 export const getFeedback = async () => (await api.get('/feedback')).data;
 export const updateFeedback = async (id, status) => (await api.put(`/feedback/${id}`, { status })).data;
 export const getOrderAlerts = async () => (await api.get('/settings/alerts')).data;

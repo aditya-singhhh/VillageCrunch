@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Star } from 'lucide-react';
+import { Link, Navigate } from 'react-router-dom';
+import { Star, Camera, X } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import SEOHead from '../components/SEOHead';
 import { sendFeedback, getMyOrders } from '../utils/api';
@@ -15,6 +15,7 @@ const REORDER = [
   ['maybe', 'Maybe', 'Shayad'],
   ['no', 'No', 'Nahi'],
 ];
+const MAX_PHOTOS = 3;
 
 const Choice = ({ options, value, onChange, label }) => (
   <div role="radiogroup" aria-label={label} className="grid grid-cols-3 gap-2">
@@ -29,46 +30,81 @@ const Choice = ({ options, value, onChange, label }) => (
   </div>
 );
 
+/** Phone photos are 3–8 MB; shrink to ~1600 px JPEG before upload. */
+const shrink = (file) => new Promise((resolve) => {
+  const img = new Image();
+  const url = URL.createObjectURL(file);
+  img.onload = () => {
+    const s = Math.min(1, 1600 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    c.toBlob((b) => resolve(b ? new File([b], 'photo.jpg', { type: 'image/jpeg' }) : file), 'image/jpeg', 0.82);
+  };
+  img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+  img.src = url;
+});
+
 /**
- * /feedback — three taps (stars, condition, would reorder) + an optional line.
- * One link for everyone (villagecrunch.in/feedback). Logged in: we pick their latest order.
- * Otherwise an optional mobile number lets the server link the order placed with it.
- * (?o=<order number> still works if a link carries it.)
+ * /feedback — one link for every customer. They log in (phone OTP works for checkout
+ * guests) and we pick their latest order. Three taps + optional note and photos.
  */
 const Feedback = () => {
-  const { user } = useContext(AuthContext);
-  const [params] = useSearchParams();
-  const [order, setOrder] = useState(params.get('o') || '');
+  const { user, loading } = useContext(AuthContext);
+  const [orders, setOrders] = useState(null);
+  const [orderId, setOrderId] = useState('');
   const [rating, setRating] = useState(0);
   const [condition, setCondition] = useState('');
   const [reorder, setReorder] = useState('');
   const [comment, setComment] = useState('');
-  const [phone, setPhone] = useState('');
+  const [photos, setPhotos] = useState([]); // { file, url }
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!user || order) return;
+    if (!user) return;
     getMyOrders().then((list) => {
-      const arr = Array.isArray(list) ? list : list?.orders || [];
+      const arr = (Array.isArray(list) ? list : list?.orders || []).filter((o) => o.status !== 'cancelled');
+      setOrders(arr);
       const latest = arr.find((o) => ['delivered', 'shipped'].includes(o.status)) || arr[0];
-      if (latest?.orderNumber) setOrder(latest.orderNumber);
-    }).catch(() => {});
-  }, [user, order]);
+      if (latest) setOrderId(latest._id);
+    }).catch(() => setOrders([]));
+  }, [user]);
+  useEffect(() => () => photos.forEach((p) => URL.revokeObjectURL(p.url)), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (loading) return <div className="min-h-[70vh] bg-paper" aria-busy="true" />;
+  if (!user) return <Navigate to="/login?redirect=/feedback" replace />;
+
+  const addPhotos = async (e) => {
+    const files = [...(e.target.files || [])].filter((f) => f.type.startsWith('image/')).slice(0, MAX_PHOTOS - photos.length);
+    e.target.value = '';
+    const shrunk = await Promise.all(files.map(shrink));
+    setPhotos((p) => [...p, ...shrunk.map((file) => ({ file, url: URL.createObjectURL(file) }))].slice(0, MAX_PHOTOS));
+  };
 
   const submit = async (e) => {
     e.preventDefault();
     if (!rating) { setError('Please tap the stars first'); return; }
     setSending(true); setError('');
     try {
-      await sendFeedback({ rating, condition, reorder, comment, order, name: user?.name, phone: order ? undefined : phone });
+      const fd = new FormData();
+      fd.append('rating', String(rating));
+      if (condition) fd.append('condition', condition);
+      if (reorder) fd.append('reorder', reorder);
+      if (comment.trim()) fd.append('comment', comment.trim());
+      if (orderId) fd.append('orderId', orderId);
+      photos.forEach((p) => fd.append('images', p.file));
+      await sendFeedback(fd);
       setDone(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err.response?.data?.message || 'Could not send. Please try again.');
     } finally { setSending(false); }
   };
+
+  const order = orders?.find((o) => o._id === orderId);
 
   return (
     <div className="bg-paper min-h-[70vh] py-10">
@@ -85,11 +121,7 @@ const Feedback = () => {
                 <p className="text-ink-soft text-sm mt-1">Use code <span className="font-bold tracking-wide">WAPAS50</span> at checkout.</p>
               </div>
             ) : (
-              <p className="mt-5 text-sm text-ink-soft">
-                Sorry it wasn&apos;t perfect. Message us on{' '}
-                <a className="text-action underline" href={`https://wa.me/916203009518?text=${encodeURIComponent(`Hi VillageCrunch, about my order ${order || ''}: `)}`} target="_blank" rel="noreferrer">WhatsApp</a>{' '}
-                and we&apos;ll make it right.
-              </p>
+              <p className="mt-5 text-sm text-ink-soft">Sorry it wasn&apos;t perfect. We&apos;ll WhatsApp you to make it right.</p>
             )}
             <Link to="/thekua" className="btn-primary w-full mt-6">Order again</Link>
           </div>
@@ -99,6 +131,21 @@ const Feedback = () => {
               <h1 className="font-display text-2xl text-ink">Kaisa laga thekua?</h1>
               <p className="text-ink-soft text-sm mt-1">3 taps, 20 seconds. It helps a small Bihar kitchen a lot.</p>
             </div>
+
+            {orders && orders.length > 1 ? (
+              <div>
+                <label htmlFor="fb-order" className="field-label">Order</label>
+                <select id="fb-order" value={orderId} onChange={(e) => setOrderId(e.target.value)} className="input-field">
+                  {orders.map((o) => (
+                    <option key={o._id} value={o._id}>
+                      {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · {(o.items || []).map((i) => i.name).join(', ').slice(0, 48)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : order ? (
+              <p className="text-sm text-ink-soft">For your order of {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}: {(order.items || []).map((i) => i.name).join(', ')}</p>
+            ) : null}
 
             <fieldset>
               <legend className="field-label">1. Taste</legend>
@@ -128,18 +175,28 @@ const Feedback = () => {
                 placeholder="Mithaas, crunch, packing… kuch bhi" className="input-field" />
             </div>
 
-            {!order && (
-              <div>
-                <label htmlFor="fb-phone" className="field-label">Mobile number used for the order <span className="text-ink-mute font-normal">(optional)</span></label>
-                <input id="fb-phone" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={14} value={phone}
-                  onChange={(e) => setPhone(e.target.value)} placeholder="98765 43210" className="input-field" />
-                <p className="text-xs text-ink-mute mt-1">So we know which order this is about.</p>
+            <div>
+              <p className="field-label">Photos <span className="text-ink-mute font-normal">(optional, up to {MAX_PHOTOS})</span></p>
+              <div className="flex flex-wrap gap-2">
+                {photos.map((p, i) => (
+                  <div key={p.url} className="relative w-20 h-20">
+                    <img src={p.url} alt={`Photo ${i + 1}`} className="w-20 h-20 object-cover rounded-lg border border-line" />
+                    <button type="button" aria-label={`Remove photo ${i + 1}`}
+                      onClick={() => { URL.revokeObjectURL(p.url); setPhotos((all) => all.filter((x) => x !== p)); }}
+                      className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-ink text-white flex items-center justify-center"><X className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                {photos.length < MAX_PHOTOS && (
+                  <label className="w-20 h-20 rounded-lg border border-dashed border-ink-soft flex flex-col items-center justify-center text-xs text-ink-soft cursor-pointer">
+                    <Camera className="w-6 h-6 mb-1" /> Add photo
+                    <input type="file" accept="image/*" multiple onChange={addPhotos} className="sr-only" />
+                  </label>
+                )}
               </div>
-            )}
+            </div>
 
             {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
             <button type="submit" disabled={sending} className="btn-primary w-full">{sending ? 'Sending…' : 'Send feedback'}</button>
-            {order && <p className="text-xs text-ink-mute text-center">Order {order}</p>}
           </form>
         )}
       </div>
