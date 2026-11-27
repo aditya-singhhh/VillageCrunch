@@ -859,7 +859,7 @@ const ProductDetail = () => {
               {product.benefits?.length > 0 && (
                 <details className="group">
                   <summary className="flex items-center justify-between min-h-[52px] cursor-pointer list-none font-semibold text-ink [&::-webkit-details-marker]:hidden">
-                    Benefits <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" aria-hidden="true" />
+                    {product.isBundle ? "What's inside" : 'Benefits'} <ChevronDown className="w-5 h-5 transition-transform group-open:rotate-180" aria-hidden="true" />
                   </summary>
                   <ul className="pb-4 space-y-2">
                     {product.benefits.map((benefit, index) => (
@@ -892,7 +892,7 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {product.category === 'thekua' && <ThekuaStory />}
+        {(product.category === 'thekua' || product.category === 'gifts') && <ThekuaStory />}
 
         {/* Reviews */}
         <section id="reviews" className="mt-10 md:mt-14 scroll-mt-24" aria-label="Customer reviews">
