@@ -58,7 +58,7 @@ const FreeDeliveryNudge = ({ subtotal, shipping, freeThreshold, userId, compact 
     <div className={`rounded-lg border border-leaf/40 bg-leaf-tint/50 ${compact ? 'p-3' : 'p-4'}`}>
       <p className="flex items-center gap-2 text-sm text-ink">
         <Truck className="w-4 h-4 text-leaf flex-shrink-0" aria-hidden="true" />
-        <span>Add <strong>{formatINR(remaining)}</strong> more for <strong className="text-leaf">FREE delivery</strong>{firstMin && target === firstMin ? ' on your first order' : ''}</span>
+        <span>Add <strong>{formatINR(remaining)}</strong> more for <strong className="text-leaf">FREE delivery</strong>{firstMin && remaining <= Math.ceil(firstMin - subtotal) ? <> + <strong className="text-leaf">₹50 off</strong> your first order</> : ''}</span>
       </p>
       <div className="mt-2 h-2 rounded-full bg-white overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={target} aria-valuenow={Math.min(subtotal, target)} aria-label="Progress to free delivery">
         <div className="h-full bg-leaf" style={{ width: `${Math.min(100, (subtotal / target) * 100)}%` }} />

@@ -4,10 +4,9 @@ const OFF_KEY = 'vc-first-off';
 export const AUTO_CODE = 'FIRST';
 const WELCOME_KEY = 'vc-welcome-code';
 /** Offers shown in the cart, best first. The server decides who is eligible. */
-export const OFFER_CODES = ['WELCOME20', AUTO_CODE];
+export const OFFER_CODES = ['WELCOME20'];
 const OFFER_TEXT = {
-  WELCOME20: '₹100 off + free delivery on your first order of ₹499+',
-  FIRST: 'Free delivery on your first order',
+  WELCOME20: '₹50 off + free delivery on your first order of ₹499+',
 };
 
 const cartPayload = (cartItems = []) => ({
@@ -92,7 +91,7 @@ export async function firstOrderMinimum(cartItems = [], userId) {
     const subtotal = cartItems.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 1), 0);
     const products = cartItems.map((i) => ({ productId: i._id, quantity: i.quantity, price: i.price, category: i.category }));
     const cats = [...new Set(cartItems.map((i) => i.category))];
-    const v = await validatePromocode(AUTO_CODE, subtotal, products, cats, userId);
+    const v = await validatePromocode('WELCOME20', subtotal, products, cats, userId);
     if (!v?.valid && Number(v?.minOrderValue) > subtotal) return Number(v.minOrderValue);
     return null;
   } catch (_) { return null; }
@@ -100,6 +99,6 @@ export async function firstOrderMinimum(cartItems = [], userId) {
 
 // Friendly name for an applied code in order summaries, so buyers don't go hunting for a code.
 export const promoLabel = (code) => ({
-  WELCOME20: 'First-order ₹100 off',
+  WELCOME20: 'First-order ₹50 off',
   FIRST: 'First-order free delivery',
 }[code] || `Promo (${code})`);

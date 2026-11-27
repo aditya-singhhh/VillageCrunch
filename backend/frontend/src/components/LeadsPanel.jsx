@@ -13,7 +13,7 @@ const ago = (d) => {
 const waText = (lead) => {
   const first = (lead.name || '').split(' ')[0];
   const item = lead.items?.[0]?.name || 'thekua';
-  return `Namaste${first ? ` ${first}` : ''} 🙏 VillageCrunch se. Aapne ${item} cart mein rakha tha. Order aane pe hum taaza desi ghee mein banate hain, 1–2 din mein dispatch. Pehle order pe ₹100 off + free delivery (₹499+), apne aap lag jaata hai. Koi sawaal ho to yahin batayein! Order: https://villagecrunch.in/cart`;
+  return `Namaste${first ? ` ${first}` : ''} 🙏 VillageCrunch se. Aapne ${item} cart mein rakha tha. Order aane pe hum taaza desi ghee mein banate hain, 1–2 din mein dispatch. Pehle order pe ₹50 off + free delivery (₹499+), apne aap lag jaata hai. Koi sawaal ho to yahin batayein! Order: https://villagecrunch.in/cart`;
 };
 
 /** Admin: people who typed their phone at checkout. Open = no order yet. */
