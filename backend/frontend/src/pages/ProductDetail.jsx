@@ -672,7 +672,9 @@ const ProductDetail = () => {
                     )}
                   </p>
                   <ul className="mt-3 grid grid-cols-3 gap-2 text-center text-xs text-ink-soft" aria-label="Why VillageCrunch">
-                    {product.oilFried ? (
+                    {product.isBundle ? (
+                      <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">3 Bihar snacks</span>in one gift box</li>
+                    ) : product.oilFried ? (
                       <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Ghee + oil</span>ghee in dough, oil-fried</li>
                     ) : (
                       <li className="rounded-md border border-line bg-white px-1 py-2"><span className="block font-semibold text-ink">Pure desi ghee</span>fried in ghee, no oil</li>
